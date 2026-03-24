@@ -1476,126 +1476,149 @@ function TabProyectos({projects,horas,matMayor,matMenor}){const W=useW();const M
 // TAB ALMACÉN
 // ══════════════════════════════════════════════════════════════════════════════
 function TabAlmacen({stock,movimientos}){const W=useW();const M=W<768;
-  const [productos,setProductos]=useState([]);
-  const [modalOpen,setModalOpen]=useState(null);
-  const [loading,setLoading]=useState(true);
-  const [importing,setImporting]=useState(false);
-
-  const loadAlmacenData=async()=>{
-    try{
-      const{data,error}=await supabase.from("almacen_productos").select("*").order("ref");
-      if(error)throw error;
-      return data||[];
-    }catch(e){
-      console.error("Error loading almacen:",e);
-      return[];
-    }
-  };
-
-  const importAlmacenJSON=async()=>{
-    try{
-      console.log("📥 Cargando almacén-productos.json...");
-      const res=await fetch("/almacen-productos.json");
-      const productos=await res.json();
-      console.log(`📥 Obtenidos ${productos.length} productos`);
-      const batchSize=50;
-      let inserted=0;
-      for(let i=0;i<productos.length;i+=batchSize){
-        const batch=productos.slice(i,i+batchSize);
-        const{error}=await supabase.from("almacen_productos").insert(batch);
-        if(error)throw error;
-        inserted+=batch.length;
-        console.log(`✅ Insertados ${inserted}/${productos.length}`);
-      }
-      console.log("✅ Importación completada");
-      return await loadAlmacenData();
-    }catch(e){
-      console.error("Error importing almacen:",e);
-      alert("❌ Error: "+e.message);
-      return[];
-    }
-  };
-
-  useEffect(()=>{
-    (async()=>{
-      setLoading(true);
-      const data=await loadAlmacenData();
-      setProductos(data);
-      setLoading(false);
-    })();
-  },[]);
-
-  const handleImport=async()=>{
-    setImporting(true);
-    const data=await importAlmacenJSON();
-    setProductos(data);
-    setImporting(false);
-  };
-
+  const [vista,setVista]=useState("dashboard");
+  const [filtroInv,setFiltroInv]=useState("all");
+  const [filtroMov,setFiltroMov]=useState("all");
+  const [selItem,setSelItem]=useState(null);
+  const valorTotal=stock.reduce((s,i)=>s+i.qty*i.precioUnit,0);
+  const bajosMin=stock.filter(s=>s.qty<s.qtyMin);
+  const agotados=stock.filter(s=>s.qty===0);
+  const cats=[...new Set(stock.map(s=>s.categoria))].filter(Boolean);
+  const catColors=[C.teal2,C.green2,C.greenLeaf,C.yellow,"#a78bfa","#fb923c"];
+  const entradas=movimientos.filter(m=>m.tipo==="ENTRADA");
+  const salidas=movimientos.filter(m=>m.tipo==="SALIDA");
+  const devoluciones=movimientos.filter(m=>m.tipo==="DEVOLUCION");
+  const entradas30=entradas.filter(m=>m.fecha>="2025-02-01");
+  const salidas30=salidas.filter(m=>m.fecha>="2025-02-01");
+  const valorEntradas=entradas.reduce((s,m)=>{const it=stock.find(i=>i.ref===m.ref);return s+(it?it.precioUnit*m.qty:0);},0);
+  const valorSalidas=salidas.reduce((s,m)=>{const it=stock.find(i=>i.ref===m.ref);return s+(it?it.precioUnit*m.qty:0);},0);
+  const stockSorted=[...stock].sort((a,b)=>(b.qty*b.precioUnit)-(a.qty*a.precioUnit));
+  const totalVal=valorTotal||1;let cumul=0;
+  const stockABC=stockSorted.map(item=>{cumul+=item.qty*item.precioUnit;const pct=cumul/totalVal;return{...item,abc:pct<=0.7?"A":pct<=0.9?"B":"C"};});
+  const consumoMensual={};
+  salidas.forEach(m=>{consumoMensual[m.ref]=(consumoMensual[m.ref]||0)+m.qty;});
+  const forecastData=stock.map(item=>{const consumoMes=(consumoMensual[item.ref]||0)/2;const diasRestantes=consumoMes>0?Math.round((item.qty/consumoMes)*30):999;return{...item,consumoMes:Math.round(consumoMes*10)/10,diasRestantes,urgente:diasRestantes<30};}).filter(i=>i.consumoMes>0).sort((a,b)=>a.diasRestantes-b.diasRestantes);
+  const movFiltrados=filtroMov==="all"?movimientos:movimientos.filter(m=>m.tipo===filtroMov);
+  const historialRef=selItem?movimientos.filter(m=>m.ref===selItem.ref):[];
+  const naveA=stock.filter(s=>s.ubicacion.includes("Nave A"));
+  const naveB=stock.filter(s=>s.ubicacion.includes("Nave B"));
+  const vistas=[{id:"dashboard",l:"📊 Dashboard"},{id:"movimientos",l:"🔄 Movimientos"},{id:"inventario",l:"📋 Inventario"},{id:"forecast",l:"📅 Previsión"}];
   return(
     <div>
-      <div style={{display:"flex",gap:10,marginBottom:16,justifyContent:"space-between",alignItems:"center"}}>
-        <STitle icon="📦">Control de Almacén</STitle>
-        <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-          {productos.length===0&&!loading&&<button onClick={handleImport} disabled={importing} style={{background:importing?C.muted:C.yellow,color:importing?C.bg:C.bg,border:`1px solid ${importing?C.muted:C.yellow}`,padding:"8px 16px",borderRadius:8,cursor:importing?"not-allowed":"pointer",fontFamily:"monospace",fontSize:"0.75rem",fontWeight:700,textTransform:"uppercase",opacity:importing?0.6:1}}>⬇ {importing?"Importando...":"Importar"}</button>}
-          <button onClick={()=>setModalOpen("entrada")} style={{background:C.green3,color:C.green2,border:`1px solid ${C.green3}`,padding:"8px 16px",borderRadius:8,cursor:"pointer",fontFamily:"monospace",fontSize:"0.75rem",fontWeight:700,textTransform:"uppercase"}}>📥 + Entrada</button>
-          <button onClick={()=>setModalOpen("salida")} style={{background:C.teal3,color:C.teal2,border:`1px solid ${C.teal3}`,padding:"8px 16px",borderRadius:8,cursor:"pointer",fontFamily:"monospace",fontSize:"0.75rem",fontWeight:700,textTransform:"uppercase"}}>📤 + Salida</button>
-          <button onClick={()=>setModalOpen("devolucion")} style={{background:`${C.yellow}15`,color:C.yellow,border:`1px solid ${C.yellow}40`,padding:"8px 16px",borderRadius:8,cursor:"pointer",fontFamily:"monospace",fontSize:"0.75rem",fontWeight:700,textTransform:"uppercase"}}>↩ + Devolución</button>
+      {bajosMin.length>0&&<div style={{background:"rgba(245,197,24,0.08)",border:"1px solid rgba(245,197,24,0.3)",borderRadius:10,padding:"9px 14px",marginBottom:10,fontSize:"0.75rem"}}><span style={{color:C.yellow,fontWeight:700}}>📦 Bajo mínimo: </span><span style={{color:C.muted}}>{bajosMin.map(s=>`${s.ref}(${s.qty}/${s.qtyMin})`).join(" · ")}</span></div>}
+      {agotados.length>0&&<div style={{background:"rgba(232,80,80,0.08)",border:"1px solid rgba(232,80,80,0.3)",borderRadius:10,padding:"9px 14px",marginBottom:12,fontSize:"0.75rem"}}><span style={{color:C.red,fontWeight:700}}>🔴 Sin stock: </span><span style={{color:C.muted}}>{agotados.map(s=>s.ref).join(" · ")}</span></div>}
+      <div style={{display:"flex",gap:3,marginBottom:16,background:C.bg2,border:`1px solid ${C.border}`,borderRadius:9,padding:3,flexWrap:M?"wrap":"nowrap",width:"100%"}}>
+        {vistas.map(v=><button key={v.id} onClick={()=>setVista(v.id)} style={{background:vista===v.id?C.green3:"transparent",color:vista===v.id?C.green2:C.muted,border:`1px solid ${vista===v.id?C.green3:"transparent"}`,padding:"6px 14px",borderRadius:6,cursor:"pointer",fontFamily:"monospace",fontSize:"0.6rem",textTransform:"uppercase",transition:"all 0.2s"}}>{v.l}</button>)}
+      </div>
+
+      {vista==="dashboard"&&<>
+        <STitle icon="📦">KPIs de Almacén</STitle>
+        <div style={{display:"grid",gridTemplateColumns:M?"repeat(2,1fr)":"repeat(6,1fr)",gap:10,marginBottom:16}}>
+          <StatCard icon="📋" label="Referencias" value={stock.length} sub={`${cats.length} categorías`} color={C.teal2}/>
+          <StatCard icon="💶" label="Valor Total" value={fmt(valorTotal)} color={C.yellow}/>
+          <StatCard icon="⚠️" label="Bajo Mínimo" value={bajosMin.length} color={bajosMin.length>0?C.red:C.green2}/>
+          <StatCard icon="📥" label="Entradas (mes)" value={entradas30.reduce((s,m)=>s+m.qty,0)} sub={`${entradas30.length} ops.`} color={C.green2}/>
+          <StatCard icon="📤" label="Salidas (mes)" value={salidas30.reduce((s,m)=>s+m.qty,0)} sub={`${salidas30.length} ops.`} color={C.teal2}/>
+          <StatCard icon="🔄" label="Devoluciones" value={devoluciones.length} color={C.yellow}/>
         </div>
-      </div>
-
-      <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,overflowX:"auto"}}>
-        <table style={{width:"100%",minWidth:800,borderCollapse:"collapse"}}>
-          <thead>
-            <tr style={{background:C.bg3}}>
-              {["REF","DESCRIPCIÓN","UND","ZONA","ESTANCIA","NIVEL","INV.INICIAL","ENTRADAS","SALIDAS","DEVOLUCIONES","SALDO"].map(h=>
-                <th key={h} style={{fontFamily:"monospace",fontSize:"0.5rem",color:C.muted,textTransform:"uppercase",padding:"8px",textAlign:"left",borderBottom:`1px solid ${C.border}`}}>{h}</th>
-              )}
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr><td colSpan={11} style={{padding:"20px",textAlign:"center",color:C.muted}}>⏳ Cargando productos...</td></tr>
-            ) : productos.length === 0 ? (
-              <tr><td colSpan={11} style={{padding:"20px",textAlign:"center",color:C.muted}}>📦 Sin productos. Haz clic en "Importar" para cargar.</td></tr>
-            ) : (
-              productos.map((p,i)=>
-                <tr key={i} onMouseEnter={e=>e.currentTarget.style.background=`${C.green3}12`} onMouseLeave={e=>e.currentTarget.style.background=""}>
-                  <td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.62rem",color:C.muted}}>{p.ref}</td>
-                  <td style={{padding:"8px",fontSize:"0.75rem"}}>{p.descripcion}</td>
-                  <td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.62rem",color:C.muted}}>{p.und}</td>
-                  <td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.62rem",color:C.teal2,fontWeight:700}}>{p.zona}</td>
-                  <td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.62rem",color:C.muted}}>{p.estancia}</td>
-                  <td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.62rem",color:C.muted}}>{p.nivel}</td>
-                  <td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.75rem",color:C.yellow}}>{p.invInicial}</td>
-                  <td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.75rem",color:C.green2}}>+{p.entradas}</td>
-                  <td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.75rem",color:C.teal2}}>-{p.salidas}</td>
-                  <td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.75rem",color:C.yellow}}>+{p.devoluciones}</td>
-                  <td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.88rem",fontWeight:700,color:p.saldo>0?C.green2:C.red}}>{p.saldo}</td>
-                </tr>
-              )
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {modalOpen && (
-        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:1000}}>
-          <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,padding:24,maxWidth:500,width:"90%"}}>
-            <div style={{fontSize:"0.9rem",fontWeight:700,marginBottom:16}}>
-              {modalOpen==="entrada"?"📥 Registrar Entrada":modalOpen==="salida"?"📤 Registrar Salida":"↩ Registrar Devolución"}
-            </div>
-            <div style={{color:C.muted,fontSize:"0.85rem",marginBottom:16}}>Modal de {modalOpen} (por implementar en Paso 2)</div>
-            <button onClick={()=>setModalOpen(null)} style={{background:`${C.red}15`,color:C.red,border:`1px solid ${C.red}40`,padding:"8px 16px",borderRadius:6,cursor:"pointer",fontFamily:"monospace",fontSize:"0.75rem"}}>Cerrar</button>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:14,marginBottom:16}}>
+          <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,padding:18}}>
+            <div style={{fontWeight:700,fontSize:"0.85rem",marginBottom:12}}>🏭 Distribución por Nave</div>
+            {[{label:"Nave A",items:naveA,color:C.teal2},{label:"Nave B",items:naveB,color:C.greenLeaf}].map((nave,i)=>{const val=nave.items.reduce((s,it)=>s+it.qty*it.precioUnit,0);const pct=Math.round((val/valorTotal)*100)||0;return(<div key={i} style={{marginBottom:14}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}><div style={{display:"flex",alignItems:"center",gap:6}}><div style={{width:8,height:8,borderRadius:2,background:nave.color}}/><span style={{fontWeight:600,fontSize:"0.8rem"}}>{nave.label}</span></div><div style={{fontFamily:"monospace",fontSize:"0.68rem",color:C.muted}}>{nave.items.length} refs · {fmt(val)}</div></div><div style={{height:7,borderRadius:3,background:C.bg3,overflow:"hidden"}}><div style={{height:"100%",width:`${pct}%`,background:nave.color,borderRadius:3}}/></div><div style={{fontSize:"0.6rem",fontFamily:"monospace",color:nave.color,marginTop:2,textAlign:"right"}}>{pct}%</div><div style={{display:"flex",flexWrap:"wrap",gap:4,marginTop:6}}>{[...new Set(nave.items.map(it=>it.ubicacion.split("-").slice(1).join("-").trim()))].filter(Boolean).slice(0,4).map((zona,j)=><span key={j} style={{background:`${nave.color}18`,color:nave.color,border:`1px solid ${nave.color}30`,padding:"1px 6px",borderRadius:3,fontSize:"0.55rem",fontFamily:"monospace"}}>{zona}</span>)}</div></div>);})}
+          </div>
+          <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,padding:18}}>
+            <div style={{fontWeight:700,fontSize:"0.85rem",marginBottom:4}}>🏅 Análisis ABC</div>
+            <div style={{fontSize:"0.64rem",color:C.muted,marginBottom:10}}>A=70% valor · B=20% · C=10%</div>
+            {[{cls:"A",color:C.red,desc:"Alto valor"},{cls:"B",color:C.yellow,desc:"Valor medio"},{cls:"C",color:C.green2,desc:"Bajo valor"}].map(cls=>{const items=stockABC.filter(s=>s.abc===cls.cls);const val=items.reduce((s,it)=>s+it.qty*it.precioUnit,0);return(<div key={cls.cls} style={{marginBottom:10}}><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}><div style={{display:"flex",alignItems:"center",gap:7}}><div style={{width:20,height:20,borderRadius:4,background:`${cls.color}25`,border:`1px solid ${cls.color}50`,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,fontSize:"0.72rem",color:cls.color}}>{cls.cls}</div><div><div style={{fontSize:"0.73rem",fontWeight:600}}>{items.length} refs</div><div style={{fontSize:"0.58rem",color:C.muted}}>{cls.desc}</div></div></div><div style={{fontFamily:"monospace",fontSize:"0.68rem",color:cls.color,fontWeight:700}}>{fmt(val)}</div></div><div style={{height:4,borderRadius:2,background:C.bg3,overflow:"hidden"}}><div style={{height:"100%",width:`${Math.round((val/valorTotal)*100)}%`,background:cls.color,borderRadius:2}}/></div></div>);})}
+          </div>
+          <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,padding:18}}>
+            <div style={{fontWeight:700,fontSize:"0.85rem",marginBottom:4}}>📊 Stock vs Mínimos</div>
+            <div style={{fontSize:"0.64rem",color:C.muted,marginBottom:8}}>🟢OK · 🟡Bajo · 🔴Agotado</div>
+            {stock.map(item=>{const ratio=item.qtyMin>0?Math.min((item.qty/item.qtyMin)*100,200):100;const col=item.qty===0?C.red:item.qty<item.qtyMin?C.yellow:C.green2;return(<div key={item.id} style={{display:"grid",gridTemplateColumns:"72px 1fr 46px",alignItems:"center",gap:6,marginBottom:6}}><div style={{fontFamily:"monospace",fontSize:"0.56rem",color:C.muted,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{item.ref}</div><div style={{height:5,background:C.bg3,borderRadius:3,overflow:"hidden"}}><div style={{height:"100%",width:`${Math.min(ratio,100)}%`,background:col,borderRadius:3}}/></div><div style={{fontFamily:"monospace",fontSize:"0.58rem",color:col,textAlign:"right",fontWeight:700}}>{item.qty}</div></div>);})}
           </div>
         </div>
-      )}
+        <STitle icon="🔄">Últimos Movimientos</STitle>
+        <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,overflow:"hidden"}}>
+          <table style={{width:"100%",minWidth:480,borderCollapse:"collapse"}}>
+            <thead><tr style={{background:C.bg3}}>{["Fecha","Tipo","REF","Material","Cant.","Proyecto","Técnico","Motivo"].map(h=><th key={h} style={{fontFamily:"monospace",fontSize:"0.5rem",color:C.muted,textTransform:"uppercase",padding:"8px",textAlign:"left",borderBottom:`1px solid ${C.border}`}}>{h}</th>)}</tr></thead>
+            <tbody>{movimientos.slice(0,8).map(m=>{const tc=m.tipo==="ENTRADA"?C.green2:m.tipo==="DEVOLUCION"?C.yellow:C.teal2;return(<tr key={m.id} onMouseEnter={e=>e.currentTarget.style.background=`${C.green3}15`} onMouseLeave={e=>e.currentTarget.style.background=""}><td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.62rem",color:C.muted}}>{m.fecha}</td><td style={{padding:"8px"}}><span style={{background:`${tc}18`,color:tc,border:`1px solid ${tc}30`,padding:"1px 7px",borderRadius:4,fontFamily:"monospace",fontSize:"0.52rem",fontWeight:700}}>{m.tipo==="ENTRADA"?"📥":m.tipo==="DEVOLUCION"?"↩":"📤"} {m.tipo}</span></td><td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.62rem",color:C.muted}}>{m.ref}</td><td style={{padding:"8px",fontSize:"0.75rem",fontWeight:500}}>{m.nombre}</td><td style={{padding:"8px",fontFamily:"monospace",fontWeight:700,fontSize:"0.78rem",color:tc}}>{m.tipo==="SALIDA"?"-":"+"}{m.qty}</td><td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.62rem",color:C.muted}}>{m.proyecto}</td><td style={{padding:"8px",fontSize:"0.72rem"}}>{m.tecnico}</td><td style={{padding:"8px",fontSize:"0.7rem",color:C.muted}}>{m.motivo}</td></tr>);})}</tbody>
+          </table>
+        </div>
+      </>}
+
+      {vista==="movimientos"&&<>
+        <STitle icon="🔄">Registro de Movimientos</STitle>
+        <div style={{display:"grid",gridTemplateColumns:M?"repeat(2,1fr)":"repeat(4,1fr)",gap:10,marginBottom:16}}>
+          <StatCard icon="📥" label="Total Entradas" value={entradas.reduce((s,m)=>s+m.qty,0)} sub={`${entradas.length} ops. · ${fmt(valorEntradas)}`} color={C.green2}/>
+          <StatCard icon="📤" label="Total Salidas" value={salidas.reduce((s,m)=>s+m.qty,0)} sub={`${salidas.length} ops. · ${fmt(valorSalidas)}`} color={C.teal2}/>
+          <StatCard icon="↩" label="Devoluciones" value={devoluciones.reduce((s,m)=>s+m.qty,0)} sub={`${devoluciones.length} ops.`} color={C.yellow}/>
+          <StatCard icon="⚖️" label="Balance Neto" value={fmt(valorEntradas-valorSalidas)} sub="entradas - salidas" color={valorEntradas>valorSalidas?C.green2:C.red}/>
+        </div>
+        <div style={{display:"flex",gap:5,marginBottom:12}}>
+          {[{v:"all",l:"Todos"},{v:"ENTRADA",l:"📥 Entradas"},{v:"SALIDA",l:"📤 Salidas"},{v:"DEVOLUCION",l:"↩ Devoluciones"}].map(o=><button key={o.v} onClick={()=>setFiltroMov(o.v)} style={{background:filtroMov===o.v?C.green3:"transparent",color:filtroMov===o.v?C.green2:C.muted,border:`1px solid ${filtroMov===o.v?C.green3:C.border}`,padding:"5px 12px",borderRadius:6,cursor:"pointer",fontFamily:"monospace",fontSize:"0.6rem",textTransform:"uppercase"}}>{o.l} {filtroMov===o.v&&`(${movFiltrados.length})`}</button>)}
+        </div>
+        <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,overflow:"hidden"}}>
+          <table style={{width:"100%",minWidth:480,borderCollapse:"collapse"}}>
+            <thead><tr style={{background:C.bg3}}>{["Fecha","Tipo","REF","Material","Cant.","Valor","Proyecto","Técnico","Motivo"].map(h=><th key={h} style={{fontFamily:"monospace",fontSize:"0.5rem",color:C.muted,textTransform:"uppercase",padding:"8px",textAlign:"left",borderBottom:`1px solid ${C.border}`}}>{h}</th>)}</tr></thead>
+            <tbody>{movFiltrados.map(m=>{const tc=m.tipo==="ENTRADA"?C.green2:m.tipo==="DEVOLUCION"?C.yellow:C.teal2;const it=stock.find(i=>i.ref===m.ref);const val=it?it.precioUnit*m.qty:0;return(<tr key={m.id} onMouseEnter={e=>e.currentTarget.style.background=`${C.green3}15`} onMouseLeave={e=>e.currentTarget.style.background=""}><td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.62rem",color:C.muted}}>{m.fecha}</td><td style={{padding:"8px"}}><span style={{background:`${tc}18`,color:tc,border:`1px solid ${tc}30`,padding:"1px 7px",borderRadius:4,fontFamily:"monospace",fontSize:"0.52px",fontWeight:700}}>{m.tipo==="ENTRADA"?"📥":m.tipo==="DEVOLUCION"?"↩":"📤"} {m.tipo}</span></td><td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.62rem",color:C.muted}}>{m.ref}</td><td style={{padding:"8px",fontSize:"0.75rem",fontWeight:500}}>{m.nombre}</td><td style={{padding:"8px",fontFamily:"monospace",fontWeight:700,fontSize:"0.8rem",color:tc}}>{m.tipo==="SALIDA"?"-":"+"}{m.qty}</td><td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.72rem",color:C.yellow}}>{fmt(val)}</td><td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.62rem",color:C.muted}}>{m.proyecto}</td><td style={{padding:"8px",fontSize:"0.72rem"}}>{m.tecnico}</td><td style={{padding:"8px",fontSize:"0.7rem",color:C.muted}}>{m.motivo}</td></tr>);})}
+            </tbody>
+            <tfoot><tr style={{background:C.bg3}}><td colSpan={5} style={{padding:"9px",fontFamily:"monospace",fontSize:"0.58rem",color:C.muted,textAlign:"right",textTransform:"uppercase"}}>Valor total →</td><td style={{padding:"9px",fontFamily:"monospace",fontWeight:800,fontSize:"0.88rem",color:C.yellow}}>{fmt(movFiltrados.reduce((s,m)=>{const it=stock.find(i=>i.ref===m.ref);return s+(it?it.precioUnit*m.qty:0);},0))}</td><td colSpan={3}/></tr></tfoot>
+          </table>
+        </div>
+      </>}
+
+      {vista==="inventario"&&<>
+        <STitle icon="📋">Inventario Completo con Historial</STitle>
+        <div style={{display:"flex",gap:5,marginBottom:12,flexWrap:"wrap"}}>
+          {[{v:"all",l:"Todo"},{v:"alerta",l:`⚠ Alertas(${bajosMin.length})`},...cats.map(c=>({v:c,l:c}))].map(o=><button key={o.v} onClick={()=>setFiltroInv(o.v)} style={{background:filtroInv===o.v?C.green3:"transparent",color:filtroInv===o.v?C.green2:C.muted,border:`1px solid ${filtroInv===o.v?C.green3:C.border}`,padding:"5px 12px",borderRadius:6,cursor:"pointer",fontFamily:"monospace",fontSize:"0.6rem",textTransform:"uppercase"}}>{o.l}</button>)}
+        </div>
+        <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,overflowX:"auto",marginBottom:14}}>
+          <table style={{width:"100%",minWidth:480,borderCollapse:"collapse"}}>
+            <thead><tr style={{background:C.bg3}}>{["REF","Descripción","Cat.","Stock","Mín.","Estado","ABC","Precio","Valor","Movs.","Ubicación"].map(h=><th key={h} style={{fontFamily:"monospace",fontSize:"0.5rem",color:C.muted,textTransform:"uppercase",padding:"8px",textAlign:"left",borderBottom:`1px solid ${C.border}`}}>{h}</th>)}</tr></thead>
+            <tbody>{(filtroInv==="all"?stockABC:filtroInv==="alerta"?stockABC.filter(s=>s.qty<s.qtyMin):stockABC.filter(s=>s.categoria===filtroInv)).map(item=>{const est=item.qty===0?"AGOTADO":item.qty<item.qtyMin?"BAJO":"OK";const ec={OK:C.green2,BAJO:C.yellow,AGOTADO:C.red}[est];const abcC={A:C.red,B:C.yellow,C:C.green2}[item.abc];const nMovs=movimientos.filter(m=>m.ref===item.ref).length;return(<tr key={item.id} onClick={()=>setSelItem(selItem?.ref===item.ref?null:item)} style={{cursor:"pointer",background:selItem?.ref===item.ref?`${C.green3}22`:""}} onMouseEnter={e=>{if(selItem?.ref!==item.ref)e.currentTarget.style.background=`${C.green3}14`;}} onMouseLeave={e=>{e.currentTarget.style.background=selItem?.ref===item.ref?`${C.green3}22`:"";}}>
+              <td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.6rem",color:C.muted}}>{item.ref}</td><td style={{padding:"8px"}}><div style={{fontSize:"0.77rem",fontWeight:500}}>{item.nombre}</div><div style={{fontSize:"0.61rem",color:C.muted}}>{item.marca}</div></td><td style={{padding:"8px",fontSize:"0.68rem",color:C.muted}}>{item.categoria}</td><td style={{padding:"8px",fontFamily:"monospace",fontWeight:700,fontSize:"0.8rem"}}>{fnum(item.qty)}<span style={{fontSize:"0.58rem",color:C.muted}}> {item.unidad}</span></td><td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.68rem",color:C.muted}}>{item.qtyMin}</td><td style={{padding:"8px"}}><span style={{background:`${ec}18`,color:ec,border:`1px solid ${ec}30`,padding:"1px 5px",borderRadius:3,fontFamily:"monospace",fontSize:"0.5rem"}}>{est}</span></td><td style={{padding:"8px"}}><span style={{background:`${abcC}18`,color:abcC,border:`1px solid ${abcC}40`,padding:"1px 7px",borderRadius:3,fontFamily:"monospace",fontSize:"0.58rem",fontWeight:800}}>{item.abc}</span></td><td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.68rem"}}>{fmt(item.precioUnit)}</td><td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.75rem",color:C.yellow,fontWeight:700}}>{fmt(item.qty*item.precioUnit)}</td><td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.68rem",color:nMovs>0?C.teal2:C.muted}}>{nMovs}</td><td style={{padding:"8px",fontSize:"0.67rem",color:C.muted}}>{item.ubicacion}</td>
+            </tr>);})}</tbody>
+            <tfoot><tr style={{background:C.bg3}}><td colSpan={8} style={{padding:"9px",fontFamily:"monospace",fontSize:"0.58rem",color:C.muted,textAlign:"right",textTransform:"uppercase"}}>Valor total →</td><td style={{padding:"9px",fontFamily:"monospace",fontWeight:800,fontSize:"0.88rem",color:C.yellow}}>{fmt(valorTotal)}</td><td colSpan={2}/></tr></tfoot>
+          </table>
+        </div>
+        {selItem&&<div style={{background:C.card,border:`1px solid ${C.green3}`,borderRadius:12,padding:18}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:14}}><div><div style={{fontFamily:"monospace",fontSize:"0.58rem",color:C.teal,marginBottom:3}}>{selItem.ref} · HISTORIAL</div><div style={{fontWeight:700,fontSize:"1rem"}}>{selItem.nombre}</div><div style={{fontSize:"0.7rem",color:C.muted,marginTop:2}}>{selItem.marca} · {selItem.categoria} · {selItem.ubicacion}</div></div><button onClick={()=>setSelItem(null)} style={{background:"transparent",border:"none",color:C.muted,cursor:"pointer",fontSize:"1.2rem"}}>✕</button></div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:9,marginBottom:14}}>
+            {[{l:"Stock Actual",v:`${selItem.qty} ${selItem.unidad}`,c:selItem.qty<selItem.qtyMin?C.yellow:C.green2},{l:"Valor en Stock",v:fmt(selItem.qty*selItem.precioUnit),c:C.yellow},{l:"Precio Unit.",v:fmt(selItem.precioUnit),c:C.teal2},{l:"Movimientos",v:historialRef.length,c:C.teal}].map((d,i)=><div key={i} style={{background:C.bg3,borderRadius:8,padding:"9px",textAlign:"center"}}><div style={{fontSize:"0.55rem",fontFamily:"monospace",color:C.muted,marginBottom:4,textTransform:"uppercase"}}>{d.l}</div><div style={{fontSize:"1.1rem",fontWeight:800,color:d.c}}>{d.v}</div></div>)}
+          </div>
+          {historialRef.length>0?<table style={{width:"100%",minWidth:480,borderCollapse:"collapse"}}><thead><tr>{["Fecha","Tipo","Cantidad","Proyecto","Técnico","Motivo"].map(h=><th key={h} style={{fontFamily:"monospace",fontSize:"0.5rem",color:C.muted,textTransform:"uppercase",padding:"5px 8px",textAlign:"left",borderBottom:`1px solid ${C.border}`}}>{h}</th>)}</tr></thead><tbody>{historialRef.map(m=>{const tc=m.tipo==="ENTRADA"?C.green2:m.tipo==="DEVOLUCION"?C.yellow:C.teal2;return(<tr key={m.id}><td style={{padding:"6px 8px",fontFamily:"monospace",fontSize:"0.63rem",color:C.muted}}>{m.fecha}</td><td style={{padding:"6px 8px"}}><span style={{background:`${tc}18`,color:tc,padding:"1px 6px",borderRadius:3,fontFamily:"monospace",fontSize:"0.52rem"}}>{m.tipo}</span></td><td style={{padding:"6px 8px",fontFamily:"monospace",fontWeight:700,color:tc}}>{m.tipo==="SALIDA"?"-":"+"}{m.qty}</td><td style={{padding:"6px 8px",fontFamily:"monospace",fontSize:"0.63rem",color:C.muted}}>{m.proyecto}</td><td style={{padding:"6px 8px",fontSize:"0.72rem"}}>{m.tecnico}</td><td style={{padding:"6px 8px",fontSize:"0.7rem",color:C.muted}}>{m.motivo}</td></tr>);})}</tbody></table>:<div style={{textAlign:"center",padding:"14px",color:C.muted,fontSize:"0.75rem"}}>Sin movimientos registrados</div>}
+        </div>}
+      </>}
+
+      {vista==="forecast"&&<>
+        <STitle icon="📅">Previsión de Reposición</STitle>
+        <div style={{background:`linear-gradient(135deg,${C.teal3}30,${C.bg3})`,border:`1px solid ${C.teal3}`,borderRadius:11,padding:"12px 16px",marginBottom:16,fontSize:"0.75rem",color:C.muted}}>
+          <span style={{color:C.teal2,fontWeight:700}}>💡 Basado en consumo de los últimos 2 meses. </span>
+          <span style={{color:C.red}}>🔴 Urgente &lt;30d </span>· <span style={{color:C.yellow}}>🟡 Próximo &lt;60d </span>· <span style={{color:C.green2}}>🟢 OK &gt;60d</span>
+        </div>
+        <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,overflowX:"auto",marginBottom:14}}>
+          <table style={{width:"100%",minWidth:480,borderCollapse:"collapse"}}>
+            <thead><tr style={{background:C.bg3}}>{["REF","Material","Stock","Consumo/mes","Días Cobertura","Reposición Necesaria","Alerta"].map(h=><th key={h} style={{fontFamily:"monospace",fontSize:"0.5rem",color:C.muted,textTransform:"uppercase",padding:"9px",textAlign:"left",borderBottom:`1px solid ${C.border}`}}>{h}</th>)}</tr></thead>
+            <tbody>{forecastData.map(item=>{const col=item.diasRestantes<30?C.red:item.diasRestantes<60?C.yellow:C.green2;const necesidad=Math.max(item.qtyMin*2-item.qty,0);return(<tr key={item.id} onMouseEnter={e=>e.currentTarget.style.background=`${C.green3}14`} onMouseLeave={e=>e.currentTarget.style.background=""}><td style={{padding:"9px",fontFamily:"monospace",fontSize:"0.62rem",color:C.muted}}>{item.ref}</td><td style={{padding:"9px"}}><div style={{fontSize:"0.77rem",fontWeight:500}}>{item.nombre}</div><div style={{fontSize:"0.62rem",color:C.muted}}>{item.categoria}</div></td><td style={{padding:"9px",fontFamily:"monospace",fontWeight:700,fontSize:"0.8rem"}}>{item.qty} {item.unidad}</td><td style={{padding:"9px",fontFamily:"monospace",fontSize:"0.75rem",color:C.teal2}}>{item.consumoMes} {item.unidad}/mes</td><td style={{padding:"9px"}}><div style={{display:"flex",alignItems:"center",gap:8}}><div style={{height:6,width:80,background:C.bg3,borderRadius:3,overflow:"hidden"}}><div style={{height:"100%",width:`${Math.min(item.diasRestantes/90*100,100)}%`,background:col,borderRadius:3}}/></div><span style={{fontFamily:"monospace",fontWeight:800,fontSize:"0.78rem",color:col}}>{item.diasRestantes===999?"∞":item.diasRestantes+"d"}</span></div></td><td style={{padding:"9px",fontFamily:"monospace",fontSize:"0.75rem",color:necesidad>0?C.red:C.green2,fontWeight:700}}>{necesidad>0?`+${necesidad} ${item.unidad}`:"OK"}</td><td style={{padding:"9px"}}><span style={{background:`${col}18`,color:col,border:`1px solid ${col}30`,padding:"2px 7px",borderRadius:4,fontFamily:"monospace",fontSize:"0.52rem"}}>{item.diasRestantes<30?"⚠ URGENTE":item.diasRestantes<60?"PRÓXIMO":"OK"}</span></td></tr>);})}
+            {stock.filter(s=>!consumoMensual[s.ref]).slice(0,2).map(item=><tr key={item.id} style={{opacity:0.45}}><td style={{padding:"9px",fontFamily:"monospace",fontSize:"0.62rem",color:C.muted}}>{item.ref}</td><td style={{padding:"9px",fontSize:"0.75rem",color:C.muted}}>{item.nombre}</td><td style={{padding:"9px",fontFamily:"monospace",fontSize:"0.75rem",color:C.muted}}>{item.qty}</td><td colSpan={4} style={{padding:"9px",fontFamily:"monospace",fontSize:"0.65rem",color:C.muted}}>Sin datos de consumo suficientes</td></tr>)}</tbody>
+          </table>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:M?"1fr":"repeat(3,1fr)",gap:12}}>
+          {[{label:"🔴 Urgente < 30 días",items:forecastData.filter(f=>f.diasRestantes<30),color:C.red},{label:"🟡 Próximo 30-60 días",items:forecastData.filter(f=>f.diasRestantes>=30&&f.diasRestantes<60),color:C.yellow},{label:"🟢 Sin urgencia > 60 días",items:forecastData.filter(f=>f.diasRestantes>=60),color:C.green2}].map((grupo,i)=>(
+            <div key={i} style={{background:C.card,border:`1px solid ${grupo.color}30`,borderRadius:11,padding:16}}>
+              <div style={{fontWeight:700,color:grupo.color,fontSize:"0.8rem",marginBottom:8}}>{grupo.label}</div>
+              <div style={{fontSize:"2rem",fontWeight:800,color:grupo.color,marginBottom:6}}>{grupo.items.length}</div>
+              {grupo.items.slice(0,3).map(it=><div key={it.ref} style={{display:"flex",justifyContent:"space-between",fontSize:"0.68rem",marginBottom:2}}><span style={{color:C.muted}}>{it.ref}</span><span style={{fontFamily:"monospace",color:grupo.color,fontWeight:700}}>{it.diasRestantes===999?"∞":it.diasRestantes+"d"}</span></div>)}
+            </div>
+          ))}
+        </div>
+      </>}
     </div>
   );
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// TAB IMPORTAR DATOS - Importación de Excel
+// TAB IMPORTAR DATOS
 // ══════════════════════════════════════════════════════════════════════════════
 import ImportData from "./components/ImportData";
 
@@ -1615,7 +1638,7 @@ function TabImportar({onImportComplete}){
 // APP PRINCIPAL
 // ══════════════════════════════════════════════════════════════════════════════
 export default function App(){
-  const [tab,setTab]=useState("almacen");
+  const [tab,setTab]=useState("dashboard");
   const [stock,setStock]=useState(INIT_STOCK);
   const [projects,setProjects]=useState(INIT_PROJECTS);
   const [horas,setHoras]=useState(INIT_HORAS);
