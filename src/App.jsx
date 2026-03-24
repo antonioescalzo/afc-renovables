@@ -1475,15 +1475,69 @@ function TabProyectos({projects,horas,matMayor,matMenor}){const W=useW();const M
 // ══════════════════════════════════════════════════════════════════════════════
 // TAB ALMACÉN
 // ══════════════════════════════════════════════════════════════════════════════
+async function loadAlmacenData(){
+  try{
+    const{data,error}=await supabase.from("almacen_productos").select("*").order("ref");
+    if(error)throw error;
+    return data||[];
+  }catch(e){
+    console.error("Error loading almacen:",e);
+    return[];
+  }
+}
+
+async function importAlmacenJSON(){
+  try{
+    console.log("📥 Cargando almacén-productos.json...");
+    const res=await fetch("/almacen-productos.json");
+    const productos=await res.json();
+    console.log(`📥 Obtenidos ${productos.length} productos`);
+    const batchSize=50;
+    let inserted=0;
+    for(let i=0;i<productos.length;i+=batchSize){
+      const batch=productos.slice(i,i+batchSize);
+      const{error}=await supabase.from("almacen_productos").insert(batch);
+      if(error)throw error;
+      inserted+=batch.length;
+      console.log(`✅ Insertados ${inserted}/${productos.length}`);
+    }
+    console.log("✅ Importación completada");
+    return await loadAlmacenData();
+  }catch(e){
+    console.error("Error importing almacen:",e);
+    alert("❌ Error: "+e.message);
+    return[];
+  }
+}
+
 function TabAlmacen({stock,movimientos}){const W=useW();const M=W<768;
   const [productos,setProductos]=useState([]);
   const [modalOpen,setModalOpen]=useState(null);
+  const [loading,setLoading]=useState(true);
+  const [importing,setImporting]=useState(false);
+
+  useEffect(()=>{
+    (async()=>{
+      setLoading(true);
+      const data=await loadAlmacenData();
+      setProductos(data);
+      setLoading(false);
+    })();
+  },[]);
+
+  const handleImport=async()=>{
+    setImporting(true);
+    const data=await importAlmacenJSON();
+    setProductos(data);
+    setImporting(false);
+  };
 
   return(
     <div>
       <div style={{display:"flex",gap:10,marginBottom:16,justifyContent:"space-between",alignItems:"center"}}>
         <STitle icon="📦">Control de Almacén</STitle>
-        <div style={{display:"flex",gap:8}}>
+        <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+          {productos.length===0&&!loading&&<button onClick={handleImport} disabled={importing} style={{background:importing?C.muted:C.yellow,color:importing?C.bg:C.bg,border:`1px solid ${importing?C.muted:C.yellow}`,padding:"8px 16px",borderRadius:8,cursor:importing?"not-allowed":"pointer",fontFamily:"monospace",fontSize:"0.75rem",fontWeight:700,textTransform:"uppercase",opacity:importing?0.6:1}}>⬇ {importing?"Importando...":"Importar"}</button>}
           <button onClick={()=>setModalOpen("entrada")} style={{background:C.green3,color:C.green2,border:`1px solid ${C.green3}`,padding:"8px 16px",borderRadius:8,cursor:"pointer",fontFamily:"monospace",fontSize:"0.75rem",fontWeight:700,textTransform:"uppercase"}}>📥 + Entrada</button>
           <button onClick={()=>setModalOpen("salida")} style={{background:C.teal3,color:C.teal2,border:`1px solid ${C.teal3}`,padding:"8px 16px",borderRadius:8,cursor:"pointer",fontFamily:"monospace",fontSize:"0.75rem",fontWeight:700,textTransform:"uppercase"}}>📤 + Salida</button>
           <button onClick={()=>setModalOpen("devolucion")} style={{background:`${C.yellow}15`,color:C.yellow,border:`1px solid ${C.yellow}40`,padding:"8px 16px",borderRadius:8,cursor:"pointer",fontFamily:"monospace",fontSize:"0.75rem",fontWeight:700,textTransform:"uppercase"}}>↩ + Devolución</button>
@@ -1500,8 +1554,10 @@ function TabAlmacen({stock,movimientos}){const W=useW();const M=W<768;
             </tr>
           </thead>
           <tbody>
-            {productos.length === 0 ? (
-              <tr><td colSpan={11} style={{padding:"20px",textAlign:"center",color:C.muted}}>Cargando productos...</td></tr>
+            {loading ? (
+              <tr><td colSpan={11} style={{padding:"20px",textAlign:"center",color:C.muted}}>⏳ Cargando productos...</td></tr>
+            ) : productos.length === 0 ? (
+              <tr><td colSpan={11} style={{padding:"20px",textAlign:"center",color:C.muted}}>📦 Sin productos. Haz clic en "Importar" para cargar.</td></tr>
             ) : (
               productos.map((p,i)=>
                 <tr key={i} onMouseEnter={e=>e.currentTarget.style.background=`${C.green3}12`} onMouseLeave={e=>e.currentTarget.style.background=""}>
