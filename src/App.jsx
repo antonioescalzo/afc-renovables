@@ -1476,42 +1476,70 @@ function TabProyectos({projects,horas,matMayor,matMenor}){const W=useW();const M
 // TAB ALMACÉN
 // ══════════════════════════════════════════════════════════════════════════════
 function TabAlmacen({stock,movimientos}){const W=useW();const M=W<768;
-  const [vista,setVista]=useState("dashboard");
-  const [filtroInv,setFiltroInv]=useState("all");
-  const [filtroMov,setFiltroMov]=useState("all");
-  const [selItem,setSelItem]=useState(null);
-  const valorTotal=stock.reduce((s,i)=>s+i.qty*i.precioUnit,0);
-  const bajosMin=stock.filter(s=>s.qty<s.qtyMin);
-  const agotados=stock.filter(s=>s.qty===0);
-  const cats=[...new Set(stock.map(s=>s.categoria))].filter(Boolean);
-  const catColors=[C.teal2,C.green2,C.greenLeaf,C.yellow,"#a78bfa","#fb923c"];
-  const entradas=movimientos.filter(m=>m.tipo==="ENTRADA");
-  const salidas=movimientos.filter(m=>m.tipo==="SALIDA");
-  const devoluciones=movimientos.filter(m=>m.tipo==="DEVOLUCION");
-  const entradas30=entradas.filter(m=>m.fecha>="2025-02-01");
-  const salidas30=salidas.filter(m=>m.fecha>="2025-02-01");
-  const valorEntradas=entradas.reduce((s,m)=>{const it=stock.find(i=>i.ref===m.ref);return s+(it?it.precioUnit*m.qty:0);},0);
-  const valorSalidas=salidas.reduce((s,m)=>{const it=stock.find(i=>i.ref===m.ref);return s+(it?it.precioUnit*m.qty:0);},0);
-  const stockSorted=[...stock].sort((a,b)=>(b.qty*b.precioUnit)-(a.qty*a.precioUnit));
-  const totalVal=valorTotal||1;let cumul=0;
-  const stockABC=stockSorted.map(item=>{cumul+=item.qty*item.precioUnit;const pct=cumul/totalVal;return{...item,abc:pct<=0.7?"A":pct<=0.9?"B":"C"};});
-  const consumoMensual={};
-  salidas.forEach(m=>{consumoMensual[m.ref]=(consumoMensual[m.ref]||0)+m.qty;});
-  const forecastData=stock.map(item=>{const consumoMes=(consumoMensual[item.ref]||0)/2;const diasRestantes=consumoMes>0?Math.round((item.qty/consumoMes)*30):999;return{...item,consumoMes:Math.round(consumoMes*10)/10,diasRestantes,urgente:diasRestantes<30};}).filter(i=>i.consumoMes>0).sort((a,b)=>a.diasRestantes-b.diasRestantes);
-  const movFiltrados=filtroMov==="all"?movimientos:movimientos.filter(m=>m.tipo===filtroMov);
-  const historialRef=selItem?movimientos.filter(m=>m.ref===selItem.ref):[];
-  const naveA=stock.filter(s=>s.ubicacion.includes("Nave A"));
-  const naveB=stock.filter(s=>s.ubicacion.includes("Nave B"));
-  const vistas=[{id:"dashboard",l:"📊 Dashboard"},{id:"movimientos",l:"🔄 Movimientos"},{id:"inventario",l:"📋 Inventario"},{id:"forecast",l:"📅 Previsión"}];
+  const [productos,setProductos]=useState([]);
+  const [modalOpen,setModalOpen]=useState(null);
+
   return(
     <div>
-      {bajosMin.length>0&&<div style={{background:"rgba(245,197,24,0.08)",border:"1px solid rgba(245,197,24,0.3)",borderRadius:10,padding:"9px 14px",marginBottom:10,fontSize:"0.75rem"}}><span style={{color:C.yellow,fontWeight:700}}>📦 Bajo mínimo: </span><span style={{color:C.muted}}>{bajosMin.map(s=>`${s.ref}(${s.qty}/${s.qtyMin})`).join(" · ")}</span></div>}
-      {agotados.length>0&&<div style={{background:"rgba(232,80,80,0.08)",border:"1px solid rgba(232,80,80,0.3)",borderRadius:10,padding:"9px 14px",marginBottom:12,fontSize:"0.75rem"}}><span style={{color:C.red,fontWeight:700}}>🔴 Sin stock: </span><span style={{color:C.muted}}>{agotados.map(s=>s.ref).join(" · ")}</span></div>}
-      <div style={{display:"flex",gap:3,marginBottom:16,background:C.bg2,border:`1px solid ${C.border}`,borderRadius:9,padding:3,flexWrap:M?"wrap":"nowrap",width:"100%"}}>
-        {vistas.map(v=><button key={v.id} onClick={()=>setVista(v.id)} style={{background:vista===v.id?C.green3:"transparent",color:vista===v.id?C.green2:C.muted,border:`1px solid ${vista===v.id?C.green3:"transparent"}`,padding:"6px 14px",borderRadius:6,cursor:"pointer",fontFamily:"monospace",fontSize:"0.6rem",textTransform:"uppercase",transition:"all 0.2s"}}>{v.l}</button>)}
+      <div style={{display:"flex",gap:10,marginBottom:16,justifyContent:"space-between",alignItems:"center"}}>
+        <STitle icon="📦">Control de Almacén</STitle>
+        <div style={{display:"flex",gap:8}}>
+          <button onClick={()=>setModalOpen("entrada")} style={{background:C.green3,color:C.green2,border:`1px solid ${C.green3}`,padding:"8px 16px",borderRadius:8,cursor:"pointer",fontFamily:"monospace",fontSize:"0.75rem",fontWeight:700,textTransform:"uppercase"}}>📥 + Entrada</button>
+          <button onClick={()=>setModalOpen("salida")} style={{background:C.teal3,color:C.teal2,border:`1px solid ${C.teal3}`,padding:"8px 16px",borderRadius:8,cursor:"pointer",fontFamily:"monospace",fontSize:"0.75rem",fontWeight:700,textTransform:"uppercase"}}>📤 + Salida</button>
+          <button onClick={()=>setModalOpen("devolucion")} style={{background:`${C.yellow}15`,color:C.yellow,border:`1px solid ${C.yellow}40`,padding:"8px 16px",borderRadius:8,cursor:"pointer",fontFamily:"monospace",fontSize:"0.75rem",fontWeight:700,textTransform:"uppercase"}}>↩ + Devolución</button>
+        </div>
       </div>
 
-      {vista==="dashboard"&&<>
+      <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,overflowX:"auto"}}>
+        <table style={{width:"100%",minWidth:800,borderCollapse:"collapse"}}>
+          <thead>
+            <tr style={{background:C.bg3}}>
+              {["REF","DESCRIPCIÓN","UND","ZONA","ESTANCIA","NIVEL","INV.INICIAL","ENTRADAS","SALIDAS","DEVOLUCIONES","SALDO"].map(h=>
+                <th key={h} style={{fontFamily:"monospace",fontSize:"0.5rem",color:C.muted,textTransform:"uppercase",padding:"8px",textAlign:"left",borderBottom:`1px solid ${C.border}`}}>{h}</th>
+              )}
+            </tr>
+          </thead>
+          <tbody>
+            {productos.length === 0 ? (
+              <tr><td colSpan={11} style={{padding:"20px",textAlign:"center",color:C.muted}}>Cargando productos...</td></tr>
+            ) : (
+              productos.map((p,i)=>
+                <tr key={i} onMouseEnter={e=>e.currentTarget.style.background=`${C.green3}12`} onMouseLeave={e=>e.currentTarget.style.background=""}>
+                  <td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.62rem",color:C.muted}}>{p.ref}</td>
+                  <td style={{padding:"8px",fontSize:"0.75rem"}}>{p.descripcion}</td>
+                  <td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.62rem",color:C.muted}}>{p.und}</td>
+                  <td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.62rem",color:C.teal2,fontWeight:700}}>{p.zona}</td>
+                  <td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.62rem",color:C.muted}}>{p.estancia}</td>
+                  <td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.62rem",color:C.muted}}>{p.nivel}</td>
+                  <td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.75rem",color:C.yellow}}>{p.invInicial}</td>
+                  <td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.75rem",color:C.green2}}>+{p.entradas}</td>
+                  <td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.75rem",color:C.teal2}}>-{p.salidas}</td>
+                  <td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.75rem",color:C.yellow}}>+{p.devoluciones}</td>
+                  <td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.88rem",fontWeight:700,color:p.saldo>0?C.green2:C.red}}>{p.saldo}</td>
+                </tr>
+              )
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {modalOpen && (
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.7)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:1000}}>
+          <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,padding:24,maxWidth:500,width:"90%"}}>
+            <div style={{fontSize:"0.9rem",fontWeight:700,marginBottom:16}}>
+              {modalOpen==="entrada"?"📥 Registrar Entrada":modalOpen==="salida"?"📤 Registrar Salida":"↩ Registrar Devolución"}
+            </div>
+            <div style={{color:C.muted,fontSize:"0.85rem",marginBottom:16}}>Modal de {modalOpen} (por implementar en Paso 2)</div>
+            <button onClick={()=>setModalOpen(null)} style={{background:`${C.red}15`,color:C.red,border:`1px solid ${C.red}40`,padding:"8px 16px",borderRadius:6,cursor:"pointer",fontFamily:"monospace",fontSize:"0.75rem"}}>Cerrar</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  /* VISTA ANTERIOR (comentada para referencia)
+  return(
+    <div>
         <STitle icon="📦">KPIs de Almacén</STitle>
         <div style={{display:"grid",gridTemplateColumns:M?"repeat(2,1fr)":"repeat(6,1fr)",gap:10,marginBottom:16}}>
           <StatCard icon="📋" label="Referencias" value={stock.length} sub={`${cats.length} categorías`} color={C.teal2}/>
@@ -1615,6 +1643,7 @@ function TabAlmacen({stock,movimientos}){const W=useW();const M=W<768;
       </>}
     </div>
   );
+  */
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
