@@ -28,7 +28,7 @@ headers = {
 }
 
 # URL del Excel en GitHub
-GITHUB_URL = "https://github.com/antonioescalzo/afc-renovables/raw/main/costes_general/INVENTARIO/FEBRERO/CONTROL%20INVENTARIO%20AFC%20MARZO%202026.xlsx"
+GITHUB_URL = "https://github.com/antonioescalzo/afc-renovables/raw/main/costes_general/INVENTARIO/CONTROL%20INVENTARIO%20AFC%20MARZO%202026.xlsx"
 
 print("📥 Descargando Excel desde GitHub...")
 try:
