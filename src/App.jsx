@@ -1475,46 +1475,46 @@ function TabProyectos({projects,horas,matMayor,matMenor}){const W=useW();const M
 // ══════════════════════════════════════════════════════════════════════════════
 // TAB ALMACÉN
 // ══════════════════════════════════════════════════════════════════════════════
-async function loadAlmacenData(){
-  try{
-    const{data,error}=await supabase.from("almacen_productos").select("*").order("ref");
-    if(error)throw error;
-    return data||[];
-  }catch(e){
-    console.error("Error loading almacen:",e);
-    return[];
-  }
-}
-
-async function importAlmacenJSON(){
-  try{
-    console.log("📥 Cargando almacén-productos.json...");
-    const res=await fetch("/almacen-productos.json");
-    const productos=await res.json();
-    console.log(`📥 Obtenidos ${productos.length} productos`);
-    const batchSize=50;
-    let inserted=0;
-    for(let i=0;i<productos.length;i+=batchSize){
-      const batch=productos.slice(i,i+batchSize);
-      const{error}=await supabase.from("almacen_productos").insert(batch);
-      if(error)throw error;
-      inserted+=batch.length;
-      console.log(`✅ Insertados ${inserted}/${productos.length}`);
-    }
-    console.log("✅ Importación completada");
-    return await loadAlmacenData();
-  }catch(e){
-    console.error("Error importing almacen:",e);
-    alert("❌ Error: "+e.message);
-    return[];
-  }
-}
-
 function TabAlmacen({stock,movimientos}){const W=useW();const M=W<768;
   const [productos,setProductos]=useState([]);
   const [modalOpen,setModalOpen]=useState(null);
   const [loading,setLoading]=useState(true);
   const [importing,setImporting]=useState(false);
+
+  const loadAlmacenData=async()=>{
+    try{
+      const{data,error}=await supabase.from("almacen_productos").select("*").order("ref");
+      if(error)throw error;
+      return data||[];
+    }catch(e){
+      console.error("Error loading almacen:",e);
+      return[];
+    }
+  };
+
+  const importAlmacenJSON=async()=>{
+    try{
+      console.log("📥 Cargando almacén-productos.json...");
+      const res=await fetch("/almacen-productos.json");
+      const productos=await res.json();
+      console.log(`📥 Obtenidos ${productos.length} productos`);
+      const batchSize=50;
+      let inserted=0;
+      for(let i=0;i<productos.length;i+=batchSize){
+        const batch=productos.slice(i,i+batchSize);
+        const{error}=await supabase.from("almacen_productos").insert(batch);
+        if(error)throw error;
+        inserted+=batch.length;
+        console.log(`✅ Insertados ${inserted}/${productos.length}`);
+      }
+      console.log("✅ Importación completada");
+      return await loadAlmacenData();
+    }catch(e){
+      console.error("Error importing almacen:",e);
+      alert("❌ Error: "+e.message);
+      return[];
+    }
+  };
 
   useEffect(()=>{
     (async()=>{
