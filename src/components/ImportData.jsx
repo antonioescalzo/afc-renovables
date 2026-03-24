@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
-import XLSX from 'xlsx'
+import * as XLSX from 'xlsx'
 
 const supabase = createClient(
   'https://xhzzfpsszsdqoiavqgis.supabase.co',
