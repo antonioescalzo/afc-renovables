@@ -1616,7 +1616,7 @@ function TabImportar({onImportComplete}){
 // APP PRINCIPAL
 // ══════════════════════════════════════════════════════════════════════════════
 export default function App(){
-  const [tab,setTab]=useState("dashboard");
+  const [tab,setTab]=useState("almacen");
   const [stock,setStock]=useState(INIT_STOCK);
   const [projects,setProjects]=useState(INIT_PROJECTS);
   const [horas,setHoras]=useState(INIT_HORAS);
