@@ -1,12 +1,50 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react"
+import { createClient } from "@supabase/supabase-js"
+import "./App.css"
+
+// Inicializar Supabase
+const supabase = createClient(
+  "https://xhzzfpsszsdqoiavqgis.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoenpmcHNzenNkcW9pYXZxZ2lzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzMzg4MDksImV4cCI6MjA4OTkxNDgwOX0.JhZ4K1mzo2NOTW7RQ8w_vC2s7ggzJJiwn-hTsw-vyWU"
+)
+
+// Hook para ancho de ventana
 function useW(){const [w,setW]=useState(typeof window!=="undefined"?window.innerWidth:1200);useEffect(()=>{const h=()=>setW(window.innerWidth);window.addEventListener("resize",h);return()=>window.removeEventListener("resize",h);},[]);return w;}
 
-const SHEET_ID = "1UL6PVdrioA2meWvXuw13FuRCgBoNRvDw";
-const TABS = { stock:"📊 Stock Actual", productos:"📦 Maestro Productos", proyectos:"📋 Proyectos", horas:"⏱️ Horas MO" };
-async function fetchSheet(tab) {
-  const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tab)}`;
-  const res=await fetch(url); if(!res.ok)throw new Error(`Error: ${tab}`);
-  return parseCSVSheet(await res.text());
+// ═══════════════════════════════════════════════════════════════════════════
+// FUNCIONES DE SUPABASE - Reemplazo de Google Sheets
+// ═══════════════════════════════════════════════════════════════════════════
+
+async function fetchStock() {
+  const { data, error } = await supabase.from("articulos").select("*").order("id");
+  if (error) console.error("Error cargando stock:", error);
+  return data || [];
+}
+
+async function fetchProductos() {
+  const { data, error } = await supabase.from("articulos").select("*").order("categoria");
+  if (error) console.error("Error cargando productos:", error);
+  return data || [];
+}
+
+async function fetchProyectos() {
+  const { data, error } = await supabase.from("proyectos").select("*").order("fecha_inicio", { ascending: false });
+  if (error) console.error("Error cargando proyectos:", error);
+  return data || [];
+}
+
+async function fetchHoras() {
+  const { data, error } = await supabase.from("horas_trabajo").select("*").order("fecha", { ascending: false });
+  if (error) console.error("Error cargando horas:", error);
+  return data || [];
+}
+
+const TABS = {
+  dashboard: "📊 Dashboard",
+  stock: "📦 Stock Actual",
+  productos: "📦 Maestro Productos",
+  proyectos: "📋 Proyectos",
+  horas: "⏱️ Horas MO"
 }
 function nk(h){return h.trim().toLowerCase().replace(/\n/g," ").replace(/\s+/g,"_").replace(/[áàä]/g,"a").replace(/[éèë]/g,"e").replace(/[íìï]/g,"i").replace(/[óòö]/g,"o").replace(/[úùü]/g,"u").replace(/ñ/g,"n").replace(/[^a-z0-9_]/g,"_").replace(/_+/g,"_").replace(/^_|_$/g,"");}
 const HK=["ref","descripcion","cliente","n_proyecto","stock","fecha","tecnico","categoria","nombre","tipo","posicion","n_mov"];
@@ -1513,20 +1551,19 @@ export default function App(){
   const [clientes]=useState(INIT_CLIENTES);
   const [ventasMensuales]=useState(VENTAS_MENSUALES);
   const [now,setNow]=useState(new Date());
-  const [syncStatus,setSyncStatus]=useState("demo");
+  const [syncStatus,setSyncStatus]=useState("loading");
   const [lastSync,setLastSync]=useState(null);
-  const [loading,setLoading]=useState(false);
+  const [loading,setLoading]=useState(true);
 
   const sync=async()=>{
     setLoading(true);setSyncStatus("loading");
     try{
-      const[stockRes,prodRes,projRes,horasRes]=await Promise.allSettled([fetchSheet(TABS.stock),fetchSheet(TABS.productos),fetchSheet(TABS.proyectos),fetchSheet(TABS.horas)]);
-      if(stockRes.status==="fulfilled"&&stockRes.value.length)setStock(stockRes.value.map(mapStock));
-      else if(prodRes.status==="fulfilled"&&prodRes.value.length)setStock(prodRes.value.map(mapStock));
-      if(projRes.status==="fulfilled"&&projRes.value.length){const m=projRes.value.map(mapProyecto).filter(Boolean);if(m.length)setProjects(m);}
-      if(horasRes.status==="fulfilled"&&horasRes.value.length){const m=horasRes.value.map(mapHoras).filter(Boolean);if(m.length)setHoras(m);}
+      const[stockRes,projRes,horasRes]=await Promise.allSettled([fetchStock(),fetchProyectos(),fetchHoras()]);
+      if(stockRes.status==="fulfilled"&&stockRes.value.length)setStock(stockRes.value);
+      if(projRes.status==="fulfilled"&&projRes.value.length)setProjects(projRes.value);
+      if(horasRes.status==="fulfilled"&&horasRes.value.length)setHoras(horasRes.value);
       setSyncStatus("ok");setLastSync(new Date());
-    }catch(e){setSyncStatus("error");}
+    }catch(e){console.error(e);setSyncStatus("error");}
     finally{setLoading(false);}
   };
   useEffect(()=>{const t=setInterval(()=>setNow(new Date()),1000);return()=>clearInterval(t);},[]);
@@ -1584,7 +1621,7 @@ export default function App(){
       </main>
       <footer style={{borderTop:`1px solid ${C.border}`,padding:"10px 22px",display:isMobile?"none":"flex",justifyContent:"space-between",alignItems:"center"}}>
         <div style={{display:"flex",alignItems:"center",gap:9}}><AFCLogo size={18} full/><span style={{fontFamily:"monospace",fontSize:"0.55rem",color:C.muted}}>Panel de Control · Uso Interno · Confidencial</span></div>
-        <span style={{fontFamily:"monospace",fontSize:"0.55rem",color:C.muted}}>Sync Google Sheets · {now.getFullYear()}</span>
+        <span style={{fontFamily:"monospace",fontSize:"0.55rem",color:C.muted}}>📡 Datos en Vivo desde Supabase · {now.getFullYear()}</span>
       </footer>
     </div>
   );
