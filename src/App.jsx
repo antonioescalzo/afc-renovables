@@ -16,27 +16,59 @@ function useW(){const [w,setW]=useState(typeof window!=="undefined"?window.inner
 // ═══════════════════════════════════════════════════════════════════════════
 
 async function fetchStock() {
-  const { data, error } = await supabase.from("articulos").select("*").order("id");
-  if (error) console.error("Error cargando stock:", error);
-  return data || [];
+  try {
+    const { data, error } = await supabase.from("articulos").select("*").order("id");
+    if (error) {
+      console.error("Error Supabase - Stock:", error);
+      return [];
+    }
+    console.log("✓ Stock cargado:", data?.length || 0, "items");
+    return data || [];
+  } catch (e) {
+    console.error("Error fetchStock:", e);
+    return [];
+  }
 }
 
 async function fetchProductos() {
-  const { data, error } = await supabase.from("articulos").select("*").order("categoria");
-  if (error) console.error("Error cargando productos:", error);
-  return data || [];
+  try {
+    const { data, error } = await supabase.from("articulos").select("*").order("categoria");
+    if (error) throw error;
+    return data || [];
+  } catch (e) {
+    console.error("Error fetchProductos:", e);
+    return [];
+  }
 }
 
 async function fetchProyectos() {
-  const { data, error } = await supabase.from("proyectos").select("*").order("fecha_inicio", { ascending: false });
-  if (error) console.error("Error cargando proyectos:", error);
-  return data || [];
+  try {
+    const { data, error } = await supabase.from("proyectos").select("*").order("fecha_inicio", { ascending: false });
+    if (error) {
+      console.error("Error Supabase - Proyectos:", error);
+      return [];
+    }
+    console.log("✓ Proyectos cargados:", data?.length || 0, "items");
+    return data || [];
+  } catch (e) {
+    console.error("Error fetchProyectos:", e);
+    return [];
+  }
 }
 
 async function fetchHoras() {
-  const { data, error } = await supabase.from("horas_trabajo").select("*").order("fecha", { ascending: false });
-  if (error) console.error("Error cargando horas:", error);
-  return data || [];
+  try {
+    const { data, error } = await supabase.from("horas_trabajo").select("*").order("fecha", { ascending: false });
+    if (error) {
+      console.error("Error Supabase - Horas:", error);
+      return [];
+    }
+    console.log("✓ Horas cargadas:", data?.length || 0, "items");
+    return data || [];
+  } catch (e) {
+    console.error("Error fetchHoras:", e);
+    return [];
+  }
 }
 
 const TABS = {
@@ -1559,11 +1591,36 @@ export default function App(){
     setLoading(true);setSyncStatus("loading");
     try{
       const[stockRes,projRes,horasRes]=await Promise.allSettled([fetchStock(),fetchProyectos(),fetchHoras()]);
-      if(stockRes.status==="fulfilled"&&stockRes.value.length)setStock(stockRes.value);
-      if(projRes.status==="fulfilled"&&projRes.value.length)setProjects(projRes.value);
-      if(horasRes.status==="fulfilled"&&horasRes.value.length)setHoras(horasRes.value);
+
+      if(stockRes.status==="fulfilled"){
+        if(stockRes.value.length){
+          setStock(stockRes.value);
+          console.log("✅ Stock desde Supabase");
+        }else{
+          console.warn("⚠ Stock vacío en Supabase, usando datos de demostración");
+        }
+      }
+
+      if(projRes.status==="fulfilled"){
+        if(projRes.value.length){
+          setProjects(projRes.value);
+          console.log("✅ Proyectos desde Supabase");
+        }else{
+          console.warn("⚠ Proyectos vacíos en Supabase, usando datos de demostración");
+        }
+      }
+
+      if(horasRes.status==="fulfilled"){
+        if(horasRes.value.length){
+          setHoras(horasRes.value);
+          console.log("✅ Horas desde Supabase");
+        }else{
+          console.warn("⚠ Horas vacías en Supabase");
+        }
+      }
+
       setSyncStatus("ok");setLastSync(new Date());
-    }catch(e){console.error(e);setSyncStatus("error");}
+    }catch(e){console.error("Error en sync:",e);setSyncStatus("error");}
     finally{setLoading(false);}
   };
   useEffect(()=>{const t=setInterval(()=>setNow(new Date()),1000);return()=>clearInterval(t);},[]);
