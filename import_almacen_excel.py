@@ -6,21 +6,26 @@ a la tabla de almacen_productos en Supabase
 
 import pandas as pd
 import requests
-from supabase import create_client
+import json
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
 # Configuración Supabase
-SUPABASE_URL = os.getenv('VITE_SUPABASE_URL')
+SUPABASE_URL = os.getenv('VITE_SUPABASE_URL', '').rstrip('/')
 SUPABASE_KEY = os.getenv('VITE_SUPABASE_ANON_KEY')
 
 if not SUPABASE_URL or not SUPABASE_KEY:
-    print("❌ Error: Faltan variables de entorno SUPABASE_URL y SUPABASE_ANON_KEY")
+    print("❌ Error: Faltan variables de entorno VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY")
     exit(1)
 
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+# Headers para Supabase API
+headers = {
+    'apikey': SUPABASE_KEY,
+    'Authorization': f'Bearer {SUPABASE_KEY}',
+    'Content-Type': 'application/json'
+}
 
 # URL del Excel en GitHub
 GITHUB_URL = "https://github.com/antonioescalzo/afc-renovables/raw/main/costes_general/INVENTARIO/FEBRERO/CONTROL%20INVENTARIO%20AFC%20MARZO%202026.xlsx"
@@ -130,24 +135,37 @@ try:
     if products:
         print("📤 Cargando en Supabase...")
 
+        # URL del endpoint de REST API
+        table_url = f"{SUPABASE_URL}/rest/v1/almacen_productos"
+
         # Limpiar tabla existente (opcional)
         try:
-            supabase.table("almacen_productos").delete().neq("id", 0).execute()
+            requests.delete(table_url, headers=headers)
             print("  🗑️ Tabla limpiada")
         except:
             pass
 
         # Insertar en lotes
         batch_size = 50
+        loaded = 0
         for i in range(0, len(products), batch_size):
             batch = products[i:i+batch_size]
             try:
-                result = supabase.table("almacen_productos").insert(batch).execute()
-                print(f"  ✅ Cargadas {len(batch)} filas ({i}/{len(products)})")
+                response = requests.post(
+                    table_url,
+                    headers=headers,
+                    json=batch
+                )
+                if response.status_code in [201, 200]:
+                    loaded += len(batch)
+                    print(f"  ✅ Cargadas {len(batch)} filas ({loaded}/{len(products)})")
+                else:
+                    print(f"  ⚠️  Lote {i//batch_size}: Status {response.status_code}")
+                    print(f"     Respuesta: {response.text[:200]}")
             except Exception as e:
                 print(f"  ❌ Error cargando lote {i//batch_size}: {e}")
 
-        print(f"\n✅ Carga completada: {len(products)} productos en Supabase")
+        print(f"\n✅ Carga completada: {loaded} productos en Supabase")
 
 except Exception as e:
     print(f"❌ Error procesando Excel: {e}")
