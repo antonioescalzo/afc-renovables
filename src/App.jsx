@@ -17,13 +17,37 @@ function useW(){const [w,setW]=useState(typeof window!=="undefined"?window.inner
 
 async function fetchStock() {
   try {
-    const { data, error } = await supabase.from("articulos").select("*").order("id").range(0, 9999);
-    if (error) {
-      console.error("Error Supabase - Stock:", error);
-      return [];
+    let allData = [];
+    let page = 0;
+    const pageSize = 1000;
+    let hasMore = true;
+
+    while (hasMore) {
+      const start = page * pageSize;
+      const end = start + pageSize - 1;
+
+      const { data, error } = await supabase
+        .from("articulos")
+        .select("*")
+        .order("id")
+        .range(start, end);
+
+      if (error) {
+        console.error("Error Supabase - Stock:", error);
+        break;
+      }
+
+      if (!data || data.length === 0) {
+        hasMore = false;
+      } else {
+        allData = [...allData, ...data];
+        hasMore = data.length === pageSize;
+        page++;
+      }
     }
-    console.log("✓ Stock cargado:", data?.length || 0, "items");
-    return data || [];
+
+    console.log("✓ Stock cargado:", allData.length, "items");
+    return allData;
   } catch (e) {
     console.error("Error fetchStock:", e);
     return [];
@@ -32,9 +56,33 @@ async function fetchStock() {
 
 async function fetchProductos() {
   try {
-    const { data, error } = await supabase.from("articulos").select("*").order("categoria").range(0, 9999);
-    if (error) throw error;
-    return data || [];
+    let allData = [];
+    let page = 0;
+    const pageSize = 1000;
+    let hasMore = true;
+
+    while (hasMore) {
+      const start = page * pageSize;
+      const end = start + pageSize - 1;
+
+      const { data, error } = await supabase
+        .from("articulos")
+        .select("*")
+        .order("categoria")
+        .range(start, end);
+
+      if (error) throw error;
+
+      if (!data || data.length === 0) {
+        hasMore = false;
+      } else {
+        allData = [...allData, ...data];
+        hasMore = data.length === pageSize;
+        page++;
+      }
+    }
+
+    return allData;
   } catch (e) {
     console.error("Error fetchProductos:", e);
     return [];

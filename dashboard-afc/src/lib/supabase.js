@@ -6,11 +6,34 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
 
 export const fetchArticulos = async () => {
-  const { data, error } = await supabase
-    .from('articulos')
-    .select('*')
-    .range(0, 9999)
-  return { data, error }
+  let allData = [];
+  let page = 0;
+  const pageSize = 1000;
+  let hasMore = true;
+
+  while (hasMore) {
+    const start = page * pageSize;
+    const end = start + pageSize - 1;
+
+    const { data, error } = await supabase
+      .from('articulos')
+      .select('*')
+      .range(start, end);
+
+    if (error) {
+      return { data: null, error };
+    }
+
+    if (!data || data.length === 0) {
+      hasMore = false;
+    } else {
+      allData = [...allData, ...data];
+      hasMore = data.length === pageSize;
+      page++;
+    }
+  }
+
+  return { data: allData, error: null };
 }
 
 export const fetchClientes = async () => {
