@@ -1544,7 +1544,8 @@ function TabProyectos({projects,horas,matMayor,matMenor}){const W=useW();const M
 // TAB ALMACÉN
 // ══════════════════════════════════════════════════════════════════════════════
 function TabAlmacen({stock,movimientos}){const W=useW();const M=W<768;
-  const [vista,setVista]=useState("dashboard");
+  if(!stock||stock.length===0)return<div style={{padding:20,color:C.muted}}>📦 Cargando almacén...</div>;
+  const [vista,setVista]=useState("inventario");
   const [filtroInv,setFiltroInv]=useState("all");
   const [filtroMov,setFiltroMov]=useState("all");
   const [selItem,setSelItem]=useState(null);
