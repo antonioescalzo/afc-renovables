@@ -1570,6 +1570,23 @@ function TabAlmacen({stock,movimientos}){const W=useW();const M=W<768;
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
+// TAB IMPORTAR DATOS
+// ══════════════════════════════════════════════════════════════════════════════
+import ImportData from "./components/ImportData";
+
+function TabImportar({onImportComplete}){
+  return(
+    <div>
+      <div style={{background:`linear-gradient(135deg,${C.teal3}30,${C.bg3})`,border:`1px solid ${C.teal3}`,borderRadius:11,padding:"14px 16px",marginBottom:16,fontSize:"0.75rem",color:C.muted}}>
+        <span style={{color:C.teal2,fontWeight:700}}>📥 Importar Datos </span>
+        <span>Carga masiva de productos desde Excel. Los datos se importarán automáticamente a Supabase.</span>
+      </div>
+      <ImportData onComplete={onImportComplete}/>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
 // APP PRINCIPAL
 // ══════════════════════════════════════════════════════════════════════════════
 export default function App(){
@@ -1629,7 +1646,7 @@ export default function App(){
   const ss={demo:{text:"DATOS DEMO",bg:`${C.muted}15`,c:C.muted,bo:C.border},loading:{text:"SYNC...",bg:`${C.yellow}10`,c:C.yellow,bo:`${C.yellow}40`},ok:{text:`✓ ${lastSync?lastSync.toLocaleTimeString("es-ES"):""}`,bg:`${C.green3}35`,c:C.green2,bo:C.green3},error:{text:"⚠ SHEET NO PÚBLICO",bg:`${C.red}10`,c:C.red,bo:`${C.red}40`}}[syncStatus];
   const ww=useW();
   const isMobile=ww<768;
-  const tabs=[{id:"dashboard",l:"Dashboard"},{id:"graficos",l:"📈 Gráficos"},{id:"clientes",l:"👤 Clientes"},{id:"proyectos",l:"Proyectos"},{id:"almacen",l:"Almacén"}];
+  const tabs=[{id:"dashboard",l:"Dashboard"},{id:"graficos",l:"📈 Gráficos"},{id:"clientes",l:"👤 Clientes"},{id:"proyectos",l:"Proyectos"},{id:"almacen",l:"Almacén"},{id:"importar",l:"📥 Importar"}];
 
   return(
     <div style={{background:C.bg,minHeight:"100vh",color:C.text,fontFamily:"system-ui,sans-serif"}}>
@@ -1662,7 +1679,7 @@ export default function App(){
       </header>}
       {/* ── BOTTOM NAV MÓVIL ── */}
       {isMobile&&<nav style={{position:"fixed",bottom:0,left:0,right:0,zIndex:200,background:"rgba(5,15,8,0.98)",borderTop:`1px solid ${C.border}`,display:"flex",alignItems:"stretch",paddingBottom:"env(safe-area-inset-bottom,0px)"}}>
-        {tabs.map(t=>{const icons={"dashboard":"🏠","graficos":"📈","clientes":"👤","proyectos":"🔨","almacen":"📦"};return(
+        {tabs.map(t=>{const icons={"dashboard":"🏠","graficos":"📈","clientes":"👤","proyectos":"🔨","almacen":"📦","importar":"📥"};return(
           <button key={t.id} onClick={()=>setTab(t.id)} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:2,padding:"8px 2px",background:tab===t.id?`${C.green3}50`:"transparent",border:"none",cursor:"pointer",borderTop:tab===t.id?`2px solid ${C.green2}`:"2px solid transparent",transition:"all 0.15s"}}>
             <span style={{fontSize:"1.15rem",lineHeight:1}}>{icons[t.id]}</span>
             <span style={{fontFamily:"monospace",fontSize:"0.48rem",color:tab===t.id?C.green2:C.muted,textTransform:"uppercase",letterSpacing:"0.05em",fontWeight:tab===t.id?700:400}}>{t.l.replace(/[📈👤🔨📦]/g,"").trim()}</span>
@@ -1675,6 +1692,7 @@ export default function App(){
         {tab==="clientes"&&<TabClientes clientes={clientes} projects={projects}/>}
         {tab==="proyectos"&&<TabProyectos projects={projects} horas={horas} matMayor={matMayor} matMenor={matMenor}/>}
         {tab==="almacen"&&<TabAlmacen stock={stock} movimientos={movimientos}/>}
+        {tab==="importar"&&<TabImportar onImportComplete={()=>sync()}/>}
       </main>
       <footer style={{borderTop:`1px solid ${C.border}`,padding:"10px 22px",display:isMobile?"none":"flex",justifyContent:"space-between",alignItems:"center"}}>
         <div style={{display:"flex",alignItems:"center",gap:9}}><AFCLogo size={18} full/><span style={{fontFamily:"monospace",fontSize:"0.55rem",color:C.muted}}>Panel de Control · Uso Interno · Confidencial</span></div>
