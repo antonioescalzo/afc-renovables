@@ -1593,7 +1593,6 @@ function TabAlmacen({stock,movimientos}){const W=useW();const M=W<768;
     </div>
   );
 }
-}
 
 // ══════════════════════════════════════════════════════════════════════════════
 // TAB IMPORTAR DATOS
