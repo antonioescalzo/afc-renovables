@@ -9,7 +9,7 @@ export const fetchArticulos = async () => {
   const { data, error } = await supabase
     .from('articulos')
     .select('*')
-    .limit(10000)
+    .range(0, 9999)
   return { data, error }
 }
 
