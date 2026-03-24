@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react"
 import { createClient } from "@supabase/supabase-js"
-import almacenProductosJSON from "../almacen-productos.json"
+import almacenProductosJSON from "./data/almacen-productos.json"
 import "./App.css"
 
 // Inicializar Supabase
