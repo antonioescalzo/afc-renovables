@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react"
 import { createClient } from "@supabase/supabase-js"
+import almacenProductosJSON from "../almacen-productos.json"
 import "./App.css"
 
 // Inicializar Supabase
@@ -50,6 +51,73 @@ async function fetchStock() {
     return allData;
   } catch (e) {
     console.error("Error fetchStock:", e);
+    return [];
+  }
+}
+
+async function fetchAlmacen() {
+  try {
+    let allData = [];
+    let page = 0;
+    const pageSize = 1000;
+    let hasMore = true;
+
+    // Intentar cargar desde Supabase
+    while (hasMore) {
+      const start = page * pageSize;
+      const end = start + pageSize - 1;
+
+      const { data, error } = await supabase
+        .from("almacen_productos")
+        .select("*")
+        .order("ref")
+        .range(start, end);
+
+      if (error) {
+        console.warn("⚠ Almacén no disponible en Supabase:", error.message);
+        break;
+      }
+
+      if (!data || data.length === 0) {
+        hasMore = false;
+      } else {
+        allData = [...allData, ...data];
+        hasMore = data.length === pageSize;
+        page++;
+      }
+    }
+
+    // Si hay datos de Supabase, usarlos
+    if (allData.length > 0) {
+      console.log("✅ Almacén cargado desde Supabase:", allData.length, "productos");
+      return allData;
+    }
+
+    // Fallback: usar JSON local
+    console.log("📦 Usando almacén desde JSON local:", almacenProductosJSON.length, "productos");
+    return almacenProductosJSON.map((item, i) => ({
+      id: i + 1,
+      ref: item.ref,
+      nombre: item.descripcion,
+      descripcion: item.descripcion,
+      marca: "",
+      categoria: "General",
+      qty: parseFloat(item.saldo || item.inv_inicial || 0),
+      qtyMin: 0,
+      unidad: item.und || "UND",
+      precioUnit: 0,
+      ubicacion: item.zona && item.estancia ? `Zona ${item.zona} - Est ${item.estancia}${item.nivel ? ` Nv${item.nivel}` : ""}` : "Sin ubicación",
+      inv_inicial: parseFloat(item.inv_inicial || 0),
+      entradas: parseFloat(item.entradas || 0),
+      salidas: parseFloat(item.salidas || 0),
+      devoluciones: parseFloat(item.devoluciones || 0),
+      saldo: parseFloat(item.saldo || 0),
+      zona: item.zona || "",
+      estancia: item.estancia || "",
+      nivel: item.nivel || ""
+    }));
+  } catch (e) {
+    console.error("Error fetchAlmacen:", e);
     return [];
   }
 }
@@ -1642,6 +1710,7 @@ export default function App(){
   const [stock,setStock]=useState(INIT_STOCK);
   const [projects,setProjects]=useState(INIT_PROJECTS);
   const [horas,setHoras]=useState(INIT_HORAS);
+  const [almacen,setAlmacen]=useState([]);
   const [movimientos]=useState(INIT_MOVIMIENTOS);
   const [matMayor]=useState(INIT_MAT_MAYOR);
   const [matMenor]=useState(INIT_MAT_MENOR);
@@ -1655,7 +1724,7 @@ export default function App(){
   const sync=async()=>{
     setLoading(true);setSyncStatus("loading");
     try{
-      const[stockRes,projRes,horasRes]=await Promise.allSettled([fetchStock(),fetchProyectos(),fetchHoras()]);
+      const[stockRes,projRes,horasRes,almacenRes]=await Promise.allSettled([fetchStock(),fetchProyectos(),fetchHoras(),fetchAlmacen()]);
 
       if(stockRes.status==="fulfilled"){
         if(stockRes.value.length){
@@ -1681,6 +1750,15 @@ export default function App(){
           console.log("✅ Horas desde Supabase");
         }else{
           console.warn("⚠ Horas vacías en Supabase");
+        }
+      }
+
+      if(almacenRes.status==="fulfilled"){
+        if(almacenRes.value.length){
+          setAlmacen(almacenRes.value);
+          console.log("✅ Almacén cargado:", almacenRes.value.length, "productos");
+        }else{
+          console.warn("⚠ Almacén vacío");
         }
       }
 
@@ -1739,7 +1817,7 @@ export default function App(){
         {tab==="graficos"&&<TabGraficos projects={projects} stock={stock} horas={horas} ventasMensuales={ventasMensuales}/>}
         {tab==="clientes"&&<TabClientes clientes={clientes} projects={projects}/>}
         {tab==="proyectos"&&<TabProyectos projects={projects} horas={horas} matMayor={matMayor} matMenor={matMenor}/>}
-        {tab==="almacen"&&<TabAlmacen stock={stock} movimientos={movimientos}/>}
+        {tab==="almacen"&&<TabAlmacen stock={almacen} movimientos={movimientos}/>}
         {tab==="importar"&&<TabImportar onImportComplete={()=>sync()}/>}
       </main>
       <footer style={{borderTop:`1px solid ${C.border}`,padding:"10px 22px",display:isMobile?"none":"flex",justifyContent:"space-between",alignItems:"center"}}>
