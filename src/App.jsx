@@ -1595,7 +1595,7 @@ function TabAlmacen({stock,movimientos}){const W=useW();const M=W<768;
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// TAB IMPORTAR DATOS
+// TAB IMPORTAR DATOS - Importación de Excel
 // ══════════════════════════════════════════════════════════════════════════════
 import ImportData from "./components/ImportData";
 
