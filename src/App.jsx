@@ -17,7 +17,7 @@ function useW(){const [w,setW]=useState(typeof window!=="undefined"?window.inner
 
 async function fetchStock() {
   try {
-    const { data, error } = await supabase.from("articulos").select("*").order("id");
+    const { data, error } = await supabase.from("articulos").select("*").order("id").limit(10000);
     if (error) {
       console.error("Error Supabase - Stock:", error);
       return [];
@@ -32,7 +32,7 @@ async function fetchStock() {
 
 async function fetchProductos() {
   try {
-    const { data, error } = await supabase.from("articulos").select("*").order("categoria");
+    const { data, error } = await supabase.from("articulos").select("*").order("categoria").limit(10000);
     if (error) throw error;
     return data || [];
   } catch (e) {
