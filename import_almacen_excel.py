@@ -58,32 +58,39 @@ try:
     products = []
 
     for idx, row in df.iterrows():
-        # Saltar filas de header
+        # Saltar filas de header (filas 0-2)
         if idx < 3:
             continue
 
         try:
-            # Extración de datos básicos
-            ref = str(row.iloc[6]).strip() if pd.notna(row.iloc[6]) else ""  # Columna G (item/ref)
-            descripcion = str(row.iloc[5]).strip() if pd.notna(row.iloc[5]) else ""  # Columna F
-            und = str(row.iloc[7]).strip() if pd.notna(row.iloc[7]) else "UND"  # Columna H o similar
+            # Extración de datos según mapeo de columnas:
+            # A:C - Línea, Grupo, Elemento
+            # D:G - Item, Clave única, Descripción, Unidad
+            # H:I - Fecha Inv.Inicial, Cantidad Inv.Inicial
+            # K:R - Corte 01-15 Marzo con fechas y movimientos
+            # AF:AH - Zona, Estantería, Nivel
 
-            # Inventario Inicial (Columna I)
-            inv_inicial = float(row.iloc[8]) if pd.notna(row.iloc[8]) else 0  # Columna I
+            ref = str(row.iloc[4]).strip() if pd.notna(row.iloc[4]) else ""  # Columna E (Clave única/REF)
+            descripcion = str(row.iloc[5]).strip() if pd.notna(row.iloc[5]) else ""  # Columna F (Descripción)
+            und = str(row.iloc[6]).strip() if pd.notna(row.iloc[6]) else "UND"  # Columna G (Unidad)
 
-            # Entradas y Salidas (Corte 01-15 Marzo)
+            # Inventario Inicial (Columna I = índice 8)
+            inv_inicial = float(row.iloc[8]) if pd.notna(row.iloc[8]) else 0
+
+            # Corte 01-15 Marzo (K:R)
+            # K:fecha, L:entrada_devolucion, M:fecha, N:entrada_albaran, O:fecha, P:salida, Q:fecha, R:saldo
             entrada_devolucion = float(row.iloc[11]) if pd.notna(row.iloc[11]) else 0  # Columna L
             entrada_albaran = float(row.iloc[13]) if pd.notna(row.iloc[13]) else 0  # Columna N
             salida = float(row.iloc[15]) if pd.notna(row.iloc[15]) else 0  # Columna P
             saldo_final = float(row.iloc[17]) if pd.notna(row.iloc[17]) else 0  # Columna R
 
-            # Ubicación (Columnas AF:AH = 31:34)
-            zona = str(row.iloc[31]).strip() if pd.notna(row.iloc[31]) else ""  # Columna AF
-            estancia = str(row.iloc[32]).strip() if pd.notna(row.iloc[32]) else ""  # Columna AG
-            nivel = str(row.iloc[33]).strip() if pd.notna(row.iloc[33]) else ""  # Columna AH
+            # Ubicación (AF:AH = índices 31:34)
+            zona = str(row.iloc[31]).strip() if pd.notna(row.iloc[31]) else ""  # Columna AF (Zona)
+            estancia = str(row.iloc[32]).strip() if pd.notna(row.iloc[32]) else ""  # Columna AG (Estantería)
+            nivel = str(row.iloc[33]).strip() if pd.notna(row.iloc[33]) else ""  # Columna AH (Nivel)
 
-            # Validar que tenga datos
-            if not ref or ref == "nan":
+            # Validar que tenga REF
+            if not ref or ref == "nan" or ref == "":
                 continue
 
             # Calcular totales de movimientos
