@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react"
 import { createClient } from "@supabase/supabase-js"
 import almacenProductosJSON from "./data/almacen-productos.json"
+import bbddStockJSON from "./data/bbdd_stock_almacen.json"
 import "./App.css"
 
 // Inicializar Supabase
@@ -1573,7 +1574,7 @@ function TabAlmacen({stock,movimientos}){const W=useW();const M=W<768;
   const historialRef=selItem?movimientos.filter(m=>m.ref===selItem.ref):[];
   const naveA=stock.filter(s=>s.ubicacion&&s.ubicacion.includes("Nave A"));
   const naveB=stock.filter(s=>s.ubicacion&&s.ubicacion.includes("Nave B"));
-  const vistas=[{id:"dashboard",l:"📊 Dashboard"},{id:"movimientos",l:"🔄 Movimientos"},{id:"inventario",l:"📋 Inventario"},{id:"forecast",l:"📅 Previsión"}];
+  const vistas=[{id:"inventario",l:"📋 Inventario"},{id:"historial",l:"📚 Historial BBDD"},{id:"movimientos",l:"🔄 Movimientos"},{id:"forecast",l:"📅 Previsión"}];
   return(
     <div>
       {bajosMin.length>0&&<div style={{background:"rgba(245,197,24,0.08)",border:"1px solid rgba(245,197,24,0.3)",borderRadius:10,padding:"9px 14px",marginBottom:10,fontSize:"0.75rem"}}><span style={{color:C.yellow,fontWeight:700}}>📦 Bajo mínimo: </span><span style={{color:C.muted}}>{bajosMin.map(s=>`${s.ref}(${s.qty}/${s.qtyMin})`).join(" · ")}</span></div>}
@@ -1682,6 +1683,23 @@ function TabAlmacen({stock,movimientos}){const W=useW();const M=W<768;
               {grupo.items.slice(0,3).map(it=><div key={it.ref} style={{display:"flex",justifyContent:"space-between",fontSize:"0.68rem",marginBottom:2}}><span style={{color:C.muted}}>{it.ref}</span><span style={{fontFamily:"monospace",color:grupo.color,fontWeight:700}}>{it.diasRestantes===999?"∞":it.diasRestantes+"d"}</span></div>)}
             </div>
           ))}
+        </div>
+      </>}
+
+      {vista==="historial"&&<>
+        <STitle icon="📚">Historial BBDD Stock Almacén</STitle>
+        <div style={{fontSize:"0.75rem",color:C.muted,marginBottom:12,background:C.bg3,padding:12,borderRadius:8}}>
+          📊 {bbddStockJSON.length} artículos de la BBDD histórica
+        </div>
+        <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,overflowX:"auto",marginBottom:14}}>
+          <table style={{width:"100%",minWidth:600,borderCollapse:"collapse"}}>
+            <thead><tr style={{background:C.bg3}}>{["Código","Referencia","Nombre","Familia","Marca","Stock Actual","Precio Compra","Disponible","Teórico"].map(h=><th key={h} style={{fontFamily:"monospace",fontSize:"0.5rem",color:C.muted,textTransform:"uppercase",padding:"8px",textAlign:"left",borderBottom:`1px solid ${C.border}`}}>{h}</th>)}</tr></thead>
+            <tbody>{bbddStockJSON.slice(0,100).map((item,i)=>{const stock=item["Exis. Uds."]||0;const disp=item["Dispon. Uds."]||0;const teo=item["Exis. Teórica Uds."]||0;const priceCompra=item["Precio Compra"]||0;return(<tr key={i} onMouseEnter={e=>e.currentTarget.style.background=`${C.green3}14`} onMouseLeave={e=>e.currentTarget.style.background=""}><td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.62rem",color:C.muted}}>{item.Código}</td><td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.62rem",color:C.muted}}>{item["N/ Referencia"]||"-"}</td><td style={{padding:"8px",fontSize:"0.75rem"}}>{item.Nombre}</td><td style={{padding:"8px",fontSize:"0.68rem",color:C.muted}}>{item.Familia||"-"}</td><td style={{padding:"8px",fontSize:"0.68rem",color:C.muted}}>{item["Fabricante / Marca"]||"-"}</td><td style={{padding:"8px",fontFamily:"monospace",fontWeight:700,fontSize:"0.75rem",color:stock>0?C.green2:C.red}}>{Math.round(stock)}</td><td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.68rem",color:C.yellow}}>{priceCompra>0?fmt(priceCompra):"-"}</td><td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.68rem",color:C.teal2}}>{Math.round(disp)}</td><td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.68rem",color:C.muted}}>{Math.round(teo)}</td></tr>);})}
+            </tbody>
+          </table>
+        </div>
+        <div style={{fontSize:"0.7rem",color:C.muted,textAlign:"center",padding:12}}>
+          Mostrando primeros 100 de {bbddStockJSON.length} registros
         </div>
       </>}
     </div>
