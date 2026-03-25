@@ -95,7 +95,9 @@ async function fetchAlmacen() {
 
     // Fallback: usar JSON local
     console.log("📦 Usando almacén desde JSON local:", almacenProductosJSON.length, "productos");
-    return almacenProductosJSON.map((item, i) => ({
+    return almacenProductosJSON
+      .filter(item => item.ref && item.ref !== "--" && item.ref.trim()) // Excluir items sin ref válido
+      .map((item, i) => ({
       id: i + 1,
       ref: item.ref,
       nombre: item.descripcion,
