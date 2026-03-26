@@ -120,17 +120,17 @@ for csv_file in csv_files:
                     print(f"   ✅ {filename}: €{csv_total:.2f} → {factura_num}")
                     break
 
-        if not factura_id:
-            # Fallback: usar la primera factura disponible
-            if fact_map:
+        if factura_id or fact_map:
+            if not factura_id and fact_map:
+                # Fallback: usar la primera factura disponible
                 factura_id = list(fact_map.values())[0]['id']
                 print(f"   ⚠️  {filename}: €{csv_total:.2f} (usando factura fallback)")
 
-        csv_data[filename] = {
-            'total': csv_total,
-            'df': df_csv,
-            'factura_id': factura_id
-        }
+            csv_data[filename] = {
+                'total': csv_total,
+                'df': df_csv,
+                'factura_id': factura_id
+            }
 
     except Exception as e:
         print(f"   ❌ {filename}: {e}")
