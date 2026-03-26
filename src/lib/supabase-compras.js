@@ -227,16 +227,21 @@ export const fetchAnalisisProveedores = async () => {
     const { data, error } = await supabase
       .from('facturas_compra')
       .select('proveedor_id, proveedores(nombre), total_factura, fecha')
+      // Solo facturas con proveedor vinculado
+      .not('proveedor_id', 'is', null)
       .order('total_factura', { ascending: false })
 
     if (error) throw error
+
+    // Filtrar facturas que tengan nombre de proveedor
+    const validData = data.filter(f => f.proveedores?.nombre)
 
     // Procesar datos para gráficos
     const porProveedor = {}
     const porMes = {}
 
-    data.forEach(f => {
-      const prov = f.proveedores?.nombre || 'Desconocido'
+    validData.forEach(f => {
+      const prov = f.proveedores.nombre
       const mes = f.fecha?.substring(0, 7) || 'N/A'
 
       if (!porProveedor[prov]) {
@@ -270,25 +275,28 @@ export const fetchKPIsProveedores = async () => {
     const { data, error } = await supabase
       .from('facturas_compra')
       .select('proveedor_id, proveedores(nombre), total_factura')
+      // Solo facturas con proveedor vinculado
+      .not('proveedor_id', 'is', null)
 
     if (error) throw error
+
+    // Filtrar facturas que tengan nombre de proveedor
+    const validData = data.filter(f => f.proveedores?.nombre)
 
     const stats = {}
     let totalGasto = 0
     let totalFacturas = 0
-    let facturasMayores = []
 
-    data.forEach(f => {
+    validData.forEach(f => {
       totalGasto += f.total_factura || 0
       totalFacturas += 1
-      const prov = f.proveedores?.nombre || 'Desconocido'
+      const prov = f.proveedores.nombre
       if (!stats[prov]) {
         stats[prov] = { total: 0, facturas: 0, precios: [] }
       }
       stats[prov].total += f.total_factura || 0
       stats[prov].facturas += 1
       stats[prov].precios.push(f.total_factura)
-      facturasMayores.push({ proveedor: prov, monto: f.total_factura })
     })
 
     const proveedores = Object.entries(stats).map(([nombre, datos]) => ({
@@ -300,13 +308,16 @@ export const fetchKPIsProveedores = async () => {
       menor: Math.min(...datos.precios)
     }))
 
+    const sortedByCosto = proveedores.sort((a, b) => b.total - a.total)
+    const sortedByFacturas = proveedores.sort((a, b) => b.facturas - a.facturas)
+
     return {
       data: {
         totalGasto,
         totalFacturas,
-        promediaFactura: totalGasto / totalFacturas,
-        proveedorMasCaro: proveedores.sort((a, b) => b.total - a.total)[0],
-        proveedorMasFacturas: proveedores.sort((a, b) => b.facturas - a.facturas)[0],
+        promediaFactura: totalFacturas > 0 ? totalGasto / totalFacturas : 0,
+        proveedorMasCaro: sortedByFacturas[0] || { nombre: 'N/A', total: 0 },
+        proveedorMasFacturas: sortedByFacturas[0] || { nombre: 'N/A', facturas: 0 },
         proveedores
       },
       error: null
