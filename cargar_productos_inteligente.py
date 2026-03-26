@@ -45,7 +45,8 @@ def parse_amount(val):
 
 print("\n1️⃣ Cargando proveedores.csv...")
 df_prov = pd.read_csv(PROVEEDORES_FILE, sep=';', encoding='latin1')
-df_prov['Total'] = df_prov['Total'].apply(parse_amount)
+# Usar 'Bases Con IVA' para matching (coincide mejor con importes de CSVs)
+df_prov['Bases Con IVA'] = df_prov['Bases Con IVA'].apply(parse_amount)
 print(f"   ✅ {len(df_prov)} facturas")
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -89,10 +90,13 @@ except Exception as e:
 print("\n3️⃣ Leyendo archivos CSV y haciendo matching...")
 
 csv_files = sorted(glob.glob(os.path.join(FACTURAS_DIR, "[0-9]*.csv")))
-print(f"   Encontrados {len(csv_files)} archivos\n")
+print(f"   Encontrados {len(csv_files)} archivos")
+print(f"   Usando columna 'Bases Con IVA' para matching\n")
 
 # Almacenar información de matching
 csv_data = {}  # {filename: {'total': X, 'df': df, 'factura_id': Y}}
+matches_found = 0
+matches_fallback = 0
 
 for csv_file in csv_files:
     filename = os.path.basename(csv_file)
@@ -108,23 +112,33 @@ for csv_file in csv_files:
         df_csv['Importe'] = df_csv['Importe'].apply(parse_amount)
         csv_total = df_csv['Importe'].sum()
 
-        # Buscar match exacto
+        # Buscar match exacto por 'Bases Con IVA'
         factura_id = None
+        matched_factura = None
         for _, prov_row in df_prov.iterrows():
-            prov_total = prov_row['Total']
-            # Tolerancia de 1% (por rounding errors, etc)
-            if abs(csv_total - prov_total) / abs(prov_total) < 0.01 and abs(csv_total - prov_total) < 50:
+            prov_base = prov_row['Bases Con IVA']
+            # Matching exacto (tolerancia de 0.01€ para rounding)
+            if abs(csv_total - prov_base) < 0.01:
                 factura_num = prov_row['Nº Factura/ Regis.']
+                matched_factura = factura_num
                 if factura_num in fact_map:
                     factura_id = fact_map[factura_num]['id']
                     print(f"   ✅ {filename}: €{csv_total:.2f} → {factura_num}")
-                    break
+                    matches_found += 1
+                else:
+                    # Match encontrado en CSV pero no en Supabase
+                    print(f"   ⚠️  {filename}: €{csv_total:.2f} → {factura_num} (no en Supabase)")
+                break
 
         if factura_id or fact_map:
             if not factura_id and fact_map:
                 # Fallback: usar la primera factura disponible
                 factura_id = list(fact_map.values())[0]['id']
-                print(f"   ⚠️  {filename}: €{csv_total:.2f} (usando factura fallback)")
+                if matched_factura:
+                    print(f"   ⚠️  {filename}: €{csv_total:.2f} → {matched_factura} (usando fallback)")
+                else:
+                    print(f"   ⚠️  {filename}: €{csv_total:.2f} (sin match, usando fallback)")
+                matches_fallback += 1
 
             csv_data[filename] = {
                 'total': csv_total,
@@ -138,6 +152,11 @@ for csv_file in csv_files:
 # ═══════════════════════════════════════════════════════════════════════════
 # PASO 4: PROCESAR PRODUCTOS
 # ═══════════════════════════════════════════════════════════════════════════
+
+print(f"\n📊 Resumen de matching:")
+print(f"   ✅ Matches exactos encontrados: {matches_found}/{len(csv_files)}")
+print(f"   ⚠️  Usando fallback: {matches_fallback}/{len(csv_files)}")
+print(f"   ℹ️  No procesados: {len(csv_files) - matches_found - matches_fallback}")
 
 print(f"\n4️⃣ Procesando productos...")
 
