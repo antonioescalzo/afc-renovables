@@ -1,0 +1,32 @@
+name: 📦 Cargar Productos por Proveedor
+
+on:
+  workflow_dispatch:  # Ejecutar manualmente desde GitHub
+
+jobs:
+  cargar-productos:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Clonar repositorio
+        uses: actions/checkout@v3
+
+      - name: 🐍 Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: 📦 Instalar pandas
+        run: |
+          pip install pandas
+
+      - name: 🚀 Ejecutar script de carga
+        run: |
+          cd /home/runner/work/afc-renovables/afc-renovables
+          python3 reconciliar_y_cargar_productos.py
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+
+      - name: ✅ Script completado
+        run: echo "Productos cargados exitosamente"
