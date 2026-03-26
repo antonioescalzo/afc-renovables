@@ -12,7 +12,7 @@ export default function ProveedoresTab() {
   const [top5, setTop5] = useState([])
   const [filtro, setFiltro] = useState('')
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState('ranking') // ranking, top5, estado
+  const [activeTab, setActiveTab] = useState('ranking')
   const [selectedProveedor, setSelectedProveedor] = useState(null)
 
   useEffect(() => {
@@ -22,10 +22,9 @@ export default function ProveedoresTab() {
   const loadData = async () => {
     setLoading(true)
     try {
-      const [rankingRes, top5Res, estadoRes] = await Promise.all([
+      const [rankingRes, top5Res] = await Promise.all([
         fetchProveedoresRanking(),
-        fetchTop5Proveedores(),
-        fetchProveedoresEstado()
+        fetchTop5Proveedores()
       ])
 
       if (rankingRes.data) setProveedores(rankingRes.data)
@@ -75,7 +74,6 @@ export default function ProveedoresTab() {
         </button>
       </div>
 
-      {/* KPIs Principales */}
       <div className="stats-grid">
         <div className="stat-card stat-blue">
           <div className="stat-icon">
@@ -124,7 +122,6 @@ export default function ProveedoresTab() {
         </div>
       </div>
 
-      {/* Búsqueda */}
       <div className="search-box">
         <Search size={20} />
         <input
@@ -135,7 +132,6 @@ export default function ProveedoresTab() {
         />
       </div>
 
-      {/* Tabs */}
       <div className="tab-buttons">
         <button
           className={`tab-btn ${activeTab === 'ranking' ? 'active' : ''}`}
@@ -151,7 +147,6 @@ export default function ProveedoresTab() {
         </button>
       </div>
 
-      {/* Contenido */}
       {loading ? (
         <div className="loading">Cargando datos...</div>
       ) : activeTab === 'top5' ? (
@@ -224,7 +219,6 @@ export default function ProveedoresTab() {
         </div>
       )}
 
-      {/* Modal de detalles */}
       {selectedProveedor && (
         <div className="modal-overlay" onClick={() => setSelectedProveedor(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -257,7 +251,6 @@ export default function ProveedoresTab() {
         </div>
       )}
 
-      {/* Pie */}
       <div className="tab-footer">
         <p>
           Mostrando <strong>{filtrados.length}</strong> de{' '}
