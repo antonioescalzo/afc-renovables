@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Package, Users, Truck, BarChart3, Settings, ShoppingCart } from 'lucide-react'
-import DashboardTab from './components/DashboardTab'
+import DashboardTab from './components/DashboardTabActualizado'
 import ArticulosTab from './components/ArticulosTab'
 import ClientesTab from './components/ClientesTab'
 import EquiposTab from './components/EquiposTab'

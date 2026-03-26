@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { fetchArticulos, fetchSalidas, fetchClientes, fetchEquipos } from '../lib/supabase'
-import { fetchKPIs, fetchTop5Proveedores } from '../lib/supabase-compras'
+import { fetchKPIs, fetchTop5Proveedores, fetchGastosPorMes } from '../lib/supabase-compras'
 import { TrendingUp, AlertTriangle, Package, DollarSign, Zap } from 'lucide-react'
 
 export default function DashboardTab() {
@@ -22,12 +22,13 @@ export default function DashboardTab() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    loadStats()
+    loadAllStats()
   }, [])
 
-  const loadStats = async () => {
+  const loadAllStats = async () => {
     setLoading(true)
     try {
+      // Datos de inventario
       const { data: articulos } = await fetchArticulos()
       const { data: salidas } = await fetchSalidas()
 
@@ -48,7 +49,7 @@ export default function DashboardTab() {
         salidasMes: salidas?.length || 0
       })
 
-      // Cargar datos de compras
+      // Datos de compras 2026
       const { data: kpis } = await fetchKPIs()
       const { data: top5 } = await fetchTop5Proveedores()
 
@@ -94,9 +95,9 @@ export default function DashboardTab() {
   return (
     <div className="tab-content">
       <div className="dashboard-header">
-        <h2>Resumen del Sistema</h2>
-        <button onClick={loadStats} className="btn btn-secondary">
-          🔄 Actualizar
+        <h2>📊 Resumen del Sistema</h2>
+        <button onClick={loadAllStats} className="btn btn-secondary" disabled={loading}>
+          🔄 {loading ? 'Actualizando...' : 'Actualizar'}
         </button>
       </div>
 
@@ -104,6 +105,7 @@ export default function DashboardTab() {
         <div className="loading">Cargando estadísticas...</div>
       ) : (
         <>
+          {/* SECCIÓN 1: INVENTARIO */}
           <div className="dashboard-section">
             <h3>📦 Inventario</h3>
             <div className="stats-grid">
@@ -124,7 +126,7 @@ export default function DashboardTab() {
               <StatCard
                 icon={DollarSign}
                 title="Valor Total"
-                value={formatCurrency(stats.valorTotal)}
+                value={`${formatCurrency(stats.valorTotal)}`}
                 subtitle="inventario valorizado"
                 color="green"
               />
@@ -138,6 +140,7 @@ export default function DashboardTab() {
             </div>
           </div>
 
+          {/* SECCIÓN 2: COMPRAS 2026 */}
           <div className="dashboard-section">
             <h3>💳 Compras 2026</h3>
             <div className="stats-grid">
@@ -172,6 +175,7 @@ export default function DashboardTab() {
             </div>
           </div>
 
+          {/* SECCIÓN 3: TOP 5 PROVEEDORES */}
           {top5Proveedores.length > 0 && (
             <div className="dashboard-section">
               <h3>🏆 Top 5 Proveedores por Gasto</h3>
@@ -200,6 +204,7 @@ export default function DashboardTab() {
             </div>
           )}
 
+          {/* SECCIÓN 4: ESTADO DEL SISTEMA */}
           <div className="dashboard-section">
             <h3>🟢 Estado del Sistema</h3>
             <div className="status-box">
@@ -222,6 +227,7 @@ export default function DashboardTab() {
             </div>
           </div>
 
+          {/* SECCIÓN 5: PRÓXIMAS ACCIONES */}
           <div className="dashboard-section">
             <h3>📋 Sistema</h3>
             <ul className="action-list">
