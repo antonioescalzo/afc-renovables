@@ -1,0 +1,26 @@
+name: 📦 Cargar Productos por Proveedor
+
+on:
+  workflow_dispatch:  # Ejecutar manualmente desde GitHub
+
+jobs:
+  cargar-productos:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Clonar repositorio
+        uses: actions/checkout@v3
+
+      - name: 🐍 Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: 📦 Instalar pandas
+        run: |\n          pip install pandas
+
+      - name: 🚀 Ejecutar script de carga inteligente
+        run: |\n          python3 cargar_productos_inteligente.py\n        working-directory: ${{ github.workspace }}
+
+      - name: ✅ Script completado
+        run: echo "Productos cargados exitosamente"
