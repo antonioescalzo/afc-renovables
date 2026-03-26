@@ -325,11 +325,14 @@ export default function ProveedoresTab() {
             }}
           >
             <option value="">-- Selecciona un proveedor --</option>
-            {proveedores.map(p => (
-              <option key={p.proveedor_id} value={p.proveedor_id}>
-                {p.proveedor}
-              </option>
-            ))}
+            {proveedores
+              .slice()
+              .sort((a, b) => (a.proveedor || '').localeCompare(b.proveedor || '', 'es'))
+              .map(p => (
+                <option key={p.proveedor_id} value={p.proveedor_id}>
+                  {p.proveedor}
+                </option>
+              ))}
           </select>
         </div>
 
