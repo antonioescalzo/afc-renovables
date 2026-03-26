@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react'
 import {
   fetchProveedoresRanking,
   fetchTop5Proveedores,
-  fetchKPIs
+  fetchKPIs,
+  fetchProductosPorProveedor
 } from '../lib/supabase-compras'
 
 // Colores AFC
@@ -52,7 +53,11 @@ export default function ProveedoresTab() {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('ranking')
   const [paginaActual, setPaginaActual] = useState(1)
+  const [productos, setProductos] = useState([])
+  const [proveedorSeleccionado, setProveedorSeleccionado] = useState(null)
+  const [productosLoading, setProductosLoading] = useState(false)
   const itemsPorPagina = 15
+  const itemsProductosPorPagina = 20
 
   useEffect(() => {
     loadData()
@@ -75,6 +80,23 @@ export default function ProveedoresTab() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const loadProductos = async (proveedorId) => {
+    setProductosLoading(true)
+    try {
+      const res = await fetchProductosPorProveedor(proveedorId)
+      if (res.data) setProductos(res.data)
+    } catch (error) {
+      console.error('Error loading productos:', error)
+    } finally {
+      setProductosLoading(false)
+    }
+  }
+
+  const handleSelectProveedor = (proveedorId) => {
+    setProveedorSeleccionado(proveedorId)
+    loadProductos(proveedorId)
   }
 
   const proveedoresFiltrados = proveedores.filter(p =>
@@ -277,6 +299,100 @@ export default function ProveedoresTab() {
           </button>
         </div>
       )}
+
+      {/* SECCIÓN PRODUCTOS POR PROVEEDOR */}
+      <div style={{ marginTop: 32 }}>
+        <h2 style={{ fontSize: '0.85rem', fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 16, fontFamily: 'monospace' }}>📦 PRODUCTOS POR PROVEEDOR</h2>
+
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ fontSize: '0.7rem', color: C.muted, fontFamily: 'monospace', textTransform: 'uppercase', marginBottom: 8, display: 'block' }}>Selecciona un proveedor para ver sus productos comprados:</label>
+          <select
+            value={proveedorSeleccionado || ''}
+            onChange={e => {
+              const proveedorId = parseInt(e.target.value);
+              handleSelectProveedor(proveedorId);
+            }}
+            style={{
+              width: '100%',
+              padding: '10px 12px',
+              background: C.bg2,
+              border: `1px solid ${C.border}`,
+              borderRadius: 6,
+              color: C.text,
+              fontSize: '0.75rem',
+              fontFamily: 'monospace',
+              cursor: 'pointer'
+            }}
+          >
+            <option value="">-- Selecciona un proveedor --</option>
+            {proveedores.map(p => (
+              <option key={p.proveedor_id} value={p.proveedor_id}>
+                {p.proveedor}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {proveedorSeleccionado && (
+          <div>
+            <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, overflowX: 'auto', marginBottom: 14 }}>
+              <table style={{ width: '100%', minWidth: 900, borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ background: C.bg3 }}>
+                    {['Referencia', 'Descripción', 'Cantidad', 'Precio Unit.', 'Importe', 'Descuento', 'Fecha Factura'].map(h => (
+                      <th key={h} style={{
+                        fontFamily: 'monospace',
+                        fontSize: '0.5rem',
+                        color: C.muted,
+                        textTransform: 'uppercase',
+                        padding: '9px',
+                        textAlign: 'left',
+                        borderBottom: `1px solid ${C.border}`
+                      }}>
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {productosLoading ? (
+                    <tr>
+                      <td colSpan="7" style={{ padding: '20px', textAlign: 'center', color: C.muted, fontSize: '0.75rem' }}>
+                        Cargando productos...
+                      </td>
+                    </tr>
+                  ) : productos.length === 0 ? (
+                    <tr>
+                      <td colSpan="7" style={{ padding: '20px', textAlign: 'center', color: C.muted, fontSize: '0.75rem' }}>
+                        Sin productos registrados para este proveedor
+                      </td>
+                    </tr>
+                  ) : (
+                    productos.slice(0, itemsProductosPorPagina).map((prod, idx) => (
+                      <tr key={idx}
+                        onMouseEnter={e => e.currentTarget.style.background = `${C.green3}14`}
+                        onMouseLeave={e => e.currentTarget.style.background = ''}>
+                        <td style={{ padding: '9px', fontFamily: 'monospace', fontSize: '0.65rem', color: C.teal2 }}>{prod.ref || '-'}</td>
+                        <td style={{ padding: '9px', fontSize: '0.72rem' }}>{prod.descripcion}</td>
+                        <td style={{ padding: '9px', fontFamily: 'monospace', fontSize: '0.75rem', color: C.muted, textAlign: 'right' }}>{prod.cantidad}</td>
+                        <td style={{ padding: '9px', fontFamily: 'monospace', fontSize: '0.75rem', color: C.yellow, textAlign: 'right', fontWeight: 700 }}>{fmt(prod.precio)}</td>
+                        <td style={{ padding: '9px', fontFamily: 'monospace', fontSize: '0.75rem', color: C.green2, textAlign: 'right', fontWeight: 700 }}>{fmt(prod.importe_total)}</td>
+                        <td style={{ padding: '9px', fontFamily: 'monospace', fontSize: '0.75rem', color: C.orange, textAlign: 'right' }}>{prod.descuento > 0 ? fmt(prod.descuento) : '-'}</td>
+                        <td style={{ padding: '9px', fontFamily: 'monospace', fontSize: '0.62rem', color: C.muted }}>{prod.fecha ? new Date(prod.fecha).toLocaleDateString('es-ES') : '-'}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+            {productos.length > itemsProductosPorPagina && (
+              <div style={{ fontSize: '0.7rem', color: C.muted, background: C.bg3, padding: '8px 12px', borderRadius: 6, textAlign: 'center' }}>
+                📊 Mostrando {itemsProductosPorPagina} de {productos.length} productos
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
