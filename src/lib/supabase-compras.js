@@ -217,3 +217,103 @@ export const fetchProductosComparativaPrecios = async () => {
   }
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// FUNCIONES PARA ANÁLISIS Y GRÁFICOS
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Obtener datos de gasto por proveedor con análisis
+export const fetchAnalisisProveedores = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('facturas_compra')
+      .select('proveedor_id, proveedores(nombre), total_factura, fecha')
+      .order('total_factura', { ascending: false })
+
+    if (error) throw error
+
+    // Procesar datos para gráficos
+    const porProveedor = {}
+    const porMes = {}
+
+    data.forEach(f => {
+      const prov = f.proveedores?.nombre || 'Desconocido'
+      const mes = f.fecha?.substring(0, 7) || 'N/A'
+
+      if (!porProveedor[prov]) {
+        porProveedor[prov] = { nombre: prov, total: 0, facturas: 0 }
+      }
+      porProveedor[prov].total += f.total_factura || 0
+      porProveedor[prov].facturas += 1
+
+      if (!porMes[mes]) {
+        porMes[mes] = { mes, total: 0 }
+      }
+      porMes[mes].total += f.total_factura || 0
+    })
+
+    return {
+      data: {
+        porProveedor: Object.values(porProveedor).sort((a, b) => b.total - a.total),
+        porMes: Object.values(porMes).sort((a, b) => a.mes.localeCompare(b.mes))
+      },
+      error: null
+    }
+  } catch (error) {
+    console.error('Error fetching analisis proveedores:', error)
+    return { data: null, error }
+  }
+}
+
+// Obtener KPIs de proveedores
+export const fetchKPIsProveedores = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('facturas_compra')
+      .select('proveedor_id, proveedores(nombre), total_factura')
+
+    if (error) throw error
+
+    const stats = {}
+    let totalGasto = 0
+    let totalFacturas = 0
+    let facturasMayores = []
+
+    data.forEach(f => {
+      totalGasto += f.total_factura || 0
+      totalFacturas += 1
+      const prov = f.proveedores?.nombre || 'Desconocido'
+      if (!stats[prov]) {
+        stats[prov] = { total: 0, facturas: 0, precios: [] }
+      }
+      stats[prov].total += f.total_factura || 0
+      stats[prov].facturas += 1
+      stats[prov].precios.push(f.total_factura)
+      facturasMayores.push({ proveedor: prov, monto: f.total_factura })
+    })
+
+    const proveedores = Object.entries(stats).map(([nombre, datos]) => ({
+      nombre,
+      total: datos.total,
+      facturas: datos.facturas,
+      promedio: datos.total / datos.facturas,
+      mayor: Math.max(...datos.precios),
+      menor: Math.min(...datos.precios)
+    }))
+
+    return {
+      data: {
+        totalGasto,
+        totalFacturas,
+        promediaFactura: totalGasto / totalFacturas,
+        proveedorMasCaro: proveedores.sort((a, b) => b.total - a.total)[0],
+        proveedorMasFacturas: proveedores.sort((a, b) => b.facturas - a.facturas)[0],
+        proveedores
+      },
+      error: null
+    }
+  } catch (error) {
+    console.error('Error fetching KPIs proveedores:', error)
+    return { data: null, error }
+  }
+}
+

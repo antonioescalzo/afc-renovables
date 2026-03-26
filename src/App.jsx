@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js"
 import almacenProductosJSON from "./data/almacen-productos.json"
 import bbddStockJSON from "./data/bbdd_stock_almacen.json"
 import ProveedoresTab from "./components/ProveedoresTab"
+import GraficosTab from "./components/GraficosTab"
 import "./App.css"
 
 // Inicializar Supabase
@@ -1850,7 +1851,7 @@ export default function App(){
       </nav>}
       <main style={{padding:isMobile?"12px 10px 80px 10px":"18px 22px",maxWidth:1600,margin:"0 auto"}}>
         {tab==="dashboard"&&<TabDashboard projects={projects} stock={stock} horas={horas} clientes={clientes} ventasMensuales={ventasMensuales}/>}
-        {tab==="graficos"&&<TabGraficos projects={projects} stock={stock} horas={horas} ventasMensuales={ventasMensuales}/>}
+        {tab==="graficos"&&<GraficosTab/>}
         {tab==="clientes"&&<TabClientes clientes={clientes} projects={projects}/>}
         {tab==="proveedores"&&<ProveedoresTab/>}
         {tab==="proyectos"&&<TabProyectos projects={projects} horas={horas} matMayor={matMayor} matMenor={matMenor}/>}
