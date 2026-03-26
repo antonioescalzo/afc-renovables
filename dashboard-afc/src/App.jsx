@@ -1,11 +1,10 @@
 import { useState } from 'react'
-import { Package, Users, Truck, BarChart3, Settings, ShoppingCart } from 'lucide-react'
+import { Package, Users, Truck, BarChart3, Settings } from 'lucide-react'
 import DashboardTab from './components/DashboardTab'
 import ArticulosTab from './components/ArticulosTab'
 import ClientesTab from './components/ClientesTab'
 import EquiposTab from './components/EquiposTab'
 import SalidasTab from './components/SalidasTab'
-import ProveedoresTab from './components/ProveedoresTab'
 import './App.css'
 
 export default function App() {
@@ -15,7 +14,6 @@ export default function App() {
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
     { id: 'articulos', label: 'Artículos', icon: Package },
     { id: 'clientes', label: 'Clientes', icon: Users },
-    { id: 'proveedores', label: 'Proveedores', icon: ShoppingCart },
     { id: 'equipos', label: 'Equipos', icon: Truck },
     { id: 'salidas', label: 'Salidas', icon: Settings }
   ]
@@ -49,7 +47,6 @@ export default function App() {
         {activeTab === 'dashboard' && <DashboardTab />}
         {activeTab === 'articulos' && <ArticulosTab />}
         {activeTab === 'clientes' && <ClientesTab />}
-        {activeTab === 'proveedores' && <ProveedoresTab />}
         {activeTab === 'equipos' && <EquiposTab />}
         {activeTab === 'salidas' && <SalidasTab />}
       </main>
