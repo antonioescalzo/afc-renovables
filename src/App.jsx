@@ -1579,7 +1579,7 @@ function TabAlmacen({stock,movimientos}){const W=useW();const M=W<768;
   const vistas=[{id:"inventario",l:"📋 Inventario"},{id:"historial",l:"📚 Historial BBDD"},{id:"movimientos",l:"🔄 Movimientos"},{id:"forecast",l:"📅 Previsión"}];
 
   // Lógica para Historial BBDD
-  const bbddFiltrado=busquedaHistorial.trim()?bbddStockJSON.filter(item=>{const q=busquedaHistorial.toLowerCase();return(item.Nombre||"").toLowerCase().includes(q)||(item["N/ Referencia"]||"").toLowerCase().includes(q)||(item.Familia||"").toLowerCase().includes(q)||(item["Fabricante / Marca"]||"").toLowerCase().includes(q);}):bbddStockJSON;
+  const bbddFiltrado=busquedaHistorial.trim()?bbddStockJSON.filter(item=>{const q=busquedaHistorial.toLowerCase();return String(item.Nombre||"").toLowerCase().includes(q)||String(item["N/ Referencia"]||"").toLowerCase().includes(q)||String(item.Familia||"").toLowerCase().includes(q)||String(item["Fabricante / Marca"]||"").toLowerCase().includes(q)||String(item.Código||"").toLowerCase().includes(q);}):bbddStockJSON;
   const totalPaginas=Math.ceil(bbddFiltrado.length/100);
   const inicioReg=(paginaHistorial-1)*100;
   const bbddPaginado=bbddFiltrado.slice(inicioReg,inicioReg+100);
