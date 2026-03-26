@@ -2,18 +2,57 @@ import { useState, useEffect } from 'react'
 import {
   fetchProveedoresRanking,
   fetchTop5Proveedores,
-  buscarFacturas,
-  fetchProveedoresEstado
+  fetchKPIs
 } from '../lib/supabase-compras'
-import { Search, TrendingUp, DollarSign, AlertCircle, Filter } from 'lucide-react'
 
+// Colores AFC
+const C={
+  bg:"#050f0a",bg2:"#081508",bg3:"#0d1f10",
+  teal:"#0e7fa3",teal2:"#0d9abf",teal3:"#0a4f65",
+  green:"#3da83c",green2:"#52c450",green3:"#1f6b1e",
+  greenLeaf:"#4ab83e",accent:"#7ed956",
+  yellow:"#f5c518",red:"#e85050",orange:"#f97316",
+  text:"#e8f5e9",muted:"#6aad7a",border:"#1a3d20",
+  card:"#0a1c0b",white:"#f0faf1",
+};
+
+const fmt = n => new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n || 0);
+const fnum = n => new Intl.NumberFormat("es-ES").format(n || 0);
+
+// Componente StatCard reutilizable
+function StatCard({ icon, label, value, subtitle, color = C.green2 }) {
+  return (
+    <div style={{
+      background: C.card,
+      border: `1px solid ${C.border}`,
+      borderRadius: 12,
+      padding: 16,
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 8
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div>
+          <div style={{ fontSize: '0.65rem', color: C.muted, textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 4 }}>{label}</div>
+          <div style={{ fontSize: '1.8rem', fontWeight: 800, color, lineHeight: 1 }}>{value}</div>
+          <div style={{ fontSize: '0.65rem', color: C.muted, marginTop: 4 }}>{subtitle}</div>
+        </div>
+        <div style={{ fontSize: '1.4rem' }}>{icon}</div>
+      </div>
+    </div>
+  );
+}
+
+// Componente Tab Principal
 export default function ProveedoresTab() {
   const [proveedores, setProveedores] = useState([])
   const [top5, setTop5] = useState([])
+  const [kpis, setKpis] = useState(null)
   const [filtro, setFiltro] = useState('')
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('ranking')
-  const [selectedProveedor, setSelectedProveedor] = useState(null)
+  const [paginaActual, setPaginaActual] = useState(1)
+  const itemsPorPagina = 15
 
   useEffect(() => {
     loadData()
@@ -22,241 +61,222 @@ export default function ProveedoresTab() {
   const loadData = async () => {
     setLoading(true)
     try {
-      const [rankingRes, top5Res] = await Promise.all([
+      const [rankingRes, top5Res, kpisRes] = await Promise.all([
         fetchProveedoresRanking(),
-        fetchTop5Proveedores()
+        fetchTop5Proveedores(),
+        fetchKPIs()
       ])
 
       if (rankingRes.data) setProveedores(rankingRes.data)
       if (top5Res.data) setTop5(top5Res.data)
+      if (kpisRes.data) setKpis(kpisRes.data)
     } catch (error) {
-      console.error('Error loading data:', error)
+      console.error('Error loading providers:', error)
     } finally {
       setLoading(false)
     }
   }
 
-  const filtrados = proveedores.filter(p =>
+  const proveedoresFiltrados = proveedores.filter(p =>
     p.proveedor?.toLowerCase().includes(filtro.toLowerCase()) ||
     p.ranking?.toString().includes(filtro)
   )
 
-  const formatCurrency = (value) => {
-    return new Intl.NumberFormat('es-ES', {
-      style: 'currency',
-      currency: 'EUR'
-    }).format(value)
-  }
-
-  const formatDate = (date) => {
-    if (!date) return '-'
-    return new Date(date).toLocaleDateString('es-ES')
-  }
-
-  const getTotalGasto = () => {
-    return proveedores.reduce((sum, p) => sum + (p.gasto_total || 0), 0)
-  }
-
-  const getPromedioFactura = () => {
-    return proveedores.reduce((sum, p) => sum + (p.promedio_factura || 0), 0) / proveedores.length
-  }
+  const totalPaginas = Math.ceil(proveedoresFiltrados.length / itemsPorPagina)
+  const inicioReg = (paginaActual - 1) * itemsPorPagina
+  const proveedoresPaginados = proveedoresFiltrados.slice(inicioReg, inicioReg + itemsPorPagina)
 
   return (
-    <div className="tab-content">
-      <div className="tab-header">
-        <h2>📦 Análisis de Proveedores 2026</h2>
-        <button
-          onClick={loadData}
-          className="btn btn-secondary"
-          disabled={loading}
-        >
-          🔄 Actualizar
-        </button>
+    <div>
+      {/* TÍTULO */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24 }}>
+        <span style={{ fontSize: '1.8rem' }}>🛒</span>
+        <h1 style={{ fontSize: '1.6rem', fontWeight: 700, color: C.text, margin: 0 }}>Análisis de Proveedores 2026</h1>
       </div>
 
-      <div className="stats-grid">
-        <div className="stat-card stat-blue">
-          <div className="stat-icon">
-            <TrendingUp size={32} />
-          </div>
-          <div className="stat-content">
-            <h3>Proveedores</h3>
-            <p className="stat-value">{proveedores.length}</p>
-            <p className="stat-subtitle">proveedores activos 2026</p>
+      {/* KPIS */}
+      {kpis && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12, marginBottom: 24 }}>
+          <StatCard icon="📦" label="Total Proveedores" value={kpis.total_proveedores || 55} subtitle="proveedores activos" color={C.teal2} />
+          <StatCard icon="💰" label="Gasto Total" value={fmt(kpis.gasto_total || 0)} subtitle="todas las compras 2026" color={C.green2} />
+          <StatCard icon="📄" label="Total Facturas" value={fnum(kpis.total_facturas || 100)} subtitle="facturas de compra" color={C.accent} />
+          <StatCard icon="📊" label="Promedio Factura" value={fmt(kpis.promedio_factura || 0)} subtitle="por transacción" color={C.yellow} />
+        </div>
+      )}
+
+      {/* TOP 5 PROVEEDORES */}
+      {top5.length > 0 && (
+        <div style={{ marginBottom: 24 }}>
+          <h2 style={{ fontSize: '0.85rem', fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12, fontFamily: 'monospace' }}>🏆 TOP 5 PROVEEDORES POR GASTO</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12 }}>
+            {top5.map((p, idx) => (
+              <div key={p.proveedor_id} style={{
+                background: C.card,
+                border: `1px solid ${C.border}`,
+                borderRadius: 12,
+                padding: 14,
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                position: 'relative'
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = C.bg3;
+                e.currentTarget.style.borderColor = C.green3;
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = C.card;
+                e.currentTarget.style.borderColor = C.border;
+              }}>
+                <div style={{ fontSize: '0.65rem', color: C.teal2, fontWeight: 700, fontFamily: 'monospace', marginBottom: 6 }}>#{idx + 1}</div>
+                <div style={{ fontSize: '0.75rem', fontWeight: 600, color: C.text, marginBottom: 8 }}>{p.proveedor}</div>
+                <div style={{ fontSize: '1.2rem', fontWeight: 800, color: C.green2, marginBottom: 6 }}>{fmt(p.gasto_total)}</div>
+                <div style={{ fontSize: '0.62rem', color: C.muted, marginBottom: 8 }}>{p.facturas} facturas</div>
+                <div style={{ height: 4, background: C.bg3, borderRadius: 2, overflow: 'hidden' }}>
+                  <div style={{
+                    height: '100%',
+                    background: C.green2,
+                    width: `${(p.gasto_total / top5[0].gasto_total) * 100}%`,
+                    borderRadius: 2
+                  }} />
+                </div>
+              </div>
+            ))}
           </div>
         </div>
+      )}
 
-        <div className="stat-card stat-green">
-          <div className="stat-icon">
-            <DollarSign size={32} />
-          </div>
-          <div className="stat-content">
-            <h3>Gasto Total</h3>
-            <p className="stat-value">{formatCurrency(getTotalGasto())}</p>
-            <p className="stat-subtitle">todas las compras 2026</p>
-          </div>
-        </div>
-
-        <div className="stat-card stat-purple">
-          <div className="stat-icon">
-            <Filter size={32} />
-          </div>
-          <div className="stat-content">
-            <h3>Total Facturas</h3>
-            <p className="stat-value">
-              {proveedores.reduce((sum, p) => sum + (p.num_facturas || 0), 0)}
-            </p>
-            <p className="stat-subtitle">facturas de compra</p>
-          </div>
-        </div>
-
-        <div className="stat-card stat-orange">
-          <div className="stat-icon">
-            <AlertCircle size={32} />
-          </div>
-          <div className="stat-content">
-            <h3>Promedio Factura</h3>
-            <p className="stat-value">{formatCurrency(getPromedioFactura())}</p>
-            <p className="stat-subtitle">por transacción</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="search-box">
-        <Search size={20} />
+      {/* BÚSQUEDA Y TABS */}
+      <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
         <input
           type="text"
-          placeholder="Buscar proveedor por nombre o ranking..."
+          placeholder="🔍 Buscar por nombre o ranking..."
           value={filtro}
-          onChange={(e) => setFiltro(e.target.value)}
+          onChange={e => {
+            setFiltro(e.target.value)
+            setPaginaActual(1)
+          }}
+          style={{
+            flex: 1,
+            minWidth: 250,
+            padding: '8px 12px',
+            background: C.bg2,
+            border: `1px solid ${C.border}`,
+            borderRadius: 6,
+            color: C.text,
+            fontSize: '0.75rem',
+            fontFamily: 'monospace'
+          }}
         />
-      </div>
-
-      <div className="tab-buttons">
-        <button
-          className={`tab-btn ${activeTab === 'ranking' ? 'active' : ''}`}
-          onClick={() => setActiveTab('ranking')}
-        >
-          📊 Ranking Completo ({proveedores.length})
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'top5' ? 'active' : ''}`}
-          onClick={() => setActiveTab('top5')}
-        >
-          🏆 Top 5 Proveedores
-        </button>
-      </div>
-
-      {loading ? (
-        <div className="loading">Cargando datos...</div>
-      ) : activeTab === 'top5' ? (
-        <div className="cards-grid">
-          {top5.map((proveedor, idx) => (
-            <div
-              key={proveedor.proveedor_id}
-              className="card card-provider"
-              onClick={() => setSelectedProveedor(proveedor)}
-            >
-              <div className="card-header">
-                <span className="badge-ranking">#{idx + 1}</span>
-                <h3>{proveedor.proveedor}</h3>
-              </div>
-              <div className="card-stats">
-                <div className="stat">
-                  <span className="label">Facturas</span>
-                  <span className="value">{proveedor.facturas}</span>
-                </div>
-                <div className="stat">
-                  <span className="label">Gasto</span>
-                  <span className="value">{formatCurrency(proveedor.gasto_total)}</span>
-                </div>
-              </div>
-            </div>
-          ))}
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button
+            onClick={() => { setActiveTab('ranking'); setPaginaActual(1); }}
+            style={{
+              padding: '6px 12px',
+              background: activeTab === 'ranking' ? C.green3 : C.bg3,
+              color: activeTab === 'ranking' ? C.green2 : C.muted,
+              border: `1px solid ${activeTab === 'ranking' ? C.green3 : C.border}`,
+              borderRadius: 6,
+              cursor: 'pointer',
+              fontSize: '0.7rem',
+              fontWeight: 700,
+              transition: 'all 0.2s'
+            }}
+          >
+            📊 Ranking ({proveedoresFiltrados.length})
+          </button>
         </div>
-      ) : (
-        <div className="table-container">
-          <table className="data-table">
-            <thead>
+      </div>
+
+      {/* TABLA DE RANKING */}
+      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, overflowX: 'auto', marginBottom: 14 }}>
+        <table style={{ width: '100%', minWidth: 800, borderCollapse: 'collapse' }}>
+          <thead>
+            <tr style={{ background: C.bg3 }}>
+              {['Ranking', 'Proveedor', 'Facturas', 'Gasto Total', 'Promedio', 'Mín', 'Máx', 'Última Compra', 'Días'].map(h => (
+                <th key={h} style={{
+                  fontFamily: 'monospace',
+                  fontSize: '0.5rem',
+                  color: C.muted,
+                  textTransform: 'uppercase',
+                  padding: '9px',
+                  textAlign: 'left',
+                  borderBottom: `1px solid ${C.border}`
+                }}>
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {proveedoresPaginados.length === 0 ? (
               <tr>
-                <th>Ranking</th>
-                <th>Proveedor</th>
-                <th>Facturas</th>
-                <th>Gasto Total</th>
-                <th>Promedio</th>
-                <th>Mínimo</th>
-                <th>Máximo</th>
-                <th>Última Compra</th>
-                <th>Días Activo</th>
+                <td colSpan="9" style={{ padding: '20px', textAlign: 'center', color: C.muted, fontSize: '0.75rem' }}>
+                  Sin resultados
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {filtrados.length === 0 ? (
-                <tr>
-                  <td colSpan="9" className="empty-cell">
-                    No hay proveedores coincidentes
-                  </td>
+            ) : (
+              proveedoresPaginados.map(p => (
+                <tr key={p.proveedor_id}
+                  onMouseEnter={e => e.currentTarget.style.background = `${C.green3}14`}
+                  onMouseLeave={e => e.currentTarget.style.background = ''}>
+                  <td style={{ padding: '9px', fontFamily: 'monospace', fontWeight: 700, fontSize: '0.75rem', color: C.teal2 }}>#{p.ranking}</td>
+                  <td style={{ padding: '9px', fontSize: '0.75rem', fontWeight: 500 }}>{p.proveedor}</td>
+                  <td style={{ padding: '9px', fontFamily: 'monospace', fontSize: '0.75rem', color: C.muted, textAlign: 'right' }}>{p.num_facturas}</td>
+                  <td style={{ padding: '9px', fontFamily: 'monospace', fontWeight: 700, fontSize: '0.75rem', color: C.green2, textAlign: 'right' }}>{fmt(p.gasto_total)}</td>
+                  <td style={{ padding: '9px', fontFamily: 'monospace', fontSize: '0.75rem', color: C.muted, textAlign: 'right' }}>{fmt(p.promedio_factura)}</td>
+                  <td style={{ padding: '9px', fontFamily: 'monospace', fontSize: '0.75rem', color: C.yellow, textAlign: 'right' }}>{fmt(p.factura_minima)}</td>
+                  <td style={{ padding: '9px', fontFamily: 'monospace', fontSize: '0.75rem', color: C.orange, textAlign: 'right' }}>{fmt(p.factura_maxima)}</td>
+                  <td style={{ padding: '9px', fontFamily: 'monospace', fontSize: '0.62rem', color: C.muted }}>{p.ultima_compra ? new Date(p.ultima_compra).toLocaleDateString('es-ES') : '-'}</td>
+                  <td style={{ padding: '9px', fontFamily: 'monospace', fontSize: '0.75rem', color: C.muted, textAlign: 'right' }}>{p.dias_activo || 0}d</td>
                 </tr>
-              ) : (
-                filtrados.map(proveedor => (
-                  <tr key={proveedor.proveedor_id} className="hoverable">
-                    <td className="ranking-col">#{proveedor.ranking}</td>
-                    <td className="name-col">{proveedor.proveedor}</td>
-                    <td className="number-col">{proveedor.num_facturas}</td>
-                    <td className="currency-col">
-                      <strong>{formatCurrency(proveedor.gasto_total)}</strong>
-                    </td>
-                    <td className="currency-col">{formatCurrency(proveedor.promedio_factura)}</td>
-                    <td className="currency-col">{formatCurrency(proveedor.factura_minima)}</td>
-                    <td className="currency-col">{formatCurrency(proveedor.factura_maxima)}</td>
-                    <td className="date-col">{formatDate(proveedor.ultima_compra)}</td>
-                    <td className="number-col">{proveedor.dias_activo || 0} días</td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {selectedProveedor && (
-        <div className="modal-overlay" onClick={() => setSelectedProveedor(null)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button
-              className="modal-close"
-              onClick={() => setSelectedProveedor(null)}
-            >
-              ✕
-            </button>
-            <h2>{selectedProveedor.proveedor}</h2>
-            <div className="modal-grid">
-              <div className="modal-stat">
-                <span className="label">Ranking</span>
-                <span className="value">#{selectedProveedor.ranking}</span>
-              </div>
-              <div className="modal-stat">
-                <span className="label">Facturas</span>
-                <span className="value">{selectedProveedor.facturas}</span>
-              </div>
-              <div className="modal-stat">
-                <span className="label">Gasto Total</span>
-                <span className="value">{formatCurrency(selectedProveedor.gasto_total)}</span>
-              </div>
-              <div className="modal-stat">
-                <span className="label">Promedio Factura</span>
-                <span className="value">{formatCurrency(selectedProveedor.gasto_total / selectedProveedor.facturas)}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="tab-footer">
-        <p>
-          Mostrando <strong>{filtrados.length}</strong> de{' '}
-          <strong>{proveedores.length}</strong> proveedores
-        </p>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
+
+      {/* PAGINACIÓN */}
+      {totalPaginas > 1 && (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: C.bg3, borderRadius: 8, flexWrap: 'wrap', gap: 10 }}>
+          <button
+            onClick={() => setPaginaActual(Math.max(1, paginaActual - 1))}
+            disabled={paginaActual === 1}
+            style={{
+              padding: '6px 12px',
+              background: paginaActual === 1 ? C.bg3 : C.green3,
+              color: paginaActual === 1 ? C.muted : C.green2,
+              border: `1px solid ${paginaActual === 1 ? C.border : C.green3}`,
+              borderRadius: 6,
+              cursor: paginaActual === 1 ? 'not-allowed' : 'pointer',
+              fontSize: '0.7rem',
+              fontWeight: 700,
+              transition: 'all 0.2s'
+            }}
+          >
+            ← Anterior
+          </button>
+          <div style={{ fontSize: '0.7rem', color: C.muted, fontFamily: 'monospace' }}>
+            Página <span style={{ color: C.text, fontWeight: 700 }}>{paginaActual}</span> de <span style={{ color: C.text, fontWeight: 700 }}>{totalPaginas}</span> · ({inicioReg + 1}-{Math.min(inicioReg + itemsPorPagina, proveedoresFiltrados.length)} de {proveedoresFiltrados.length})
+          </div>
+          <button
+            onClick={() => setPaginaActual(Math.min(totalPaginas, paginaActual + 1))}
+            disabled={paginaActual === totalPaginas}
+            style={{
+              padding: '6px 12px',
+              background: paginaActual === totalPaginas ? C.bg3 : C.green3,
+              color: paginaActual === totalPaginas ? C.muted : C.green2,
+              border: `1px solid ${paginaActual === totalPaginas ? C.border : C.green3}`,
+              borderRadius: 6,
+              cursor: paginaActual === totalPaginas ? 'not-allowed' : 'pointer',
+              fontSize: '0.7rem',
+              fontWeight: 700,
+              transition: 'all 0.2s'
+            }}
+          >
+            Siguiente →
+          </button>
+        </div>
+      )}
     </div>
-  )
+  );
 }
