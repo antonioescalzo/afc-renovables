@@ -20,9 +20,9 @@ jobs:
         run: |
           pip install pandas
 
-      - name: 🚀 Ejecutar script de carga
+      - name: 🚀 Ejecutar script de diagnóstico
         run: |
-          python3 cargar_productos_simple.py
+          python3 cargar_productos_v2.py
         working-directory: ${{ github.workspace }}
 
       - name: ✅ Script completado
