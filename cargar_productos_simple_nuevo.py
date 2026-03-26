@@ -62,7 +62,8 @@ for csv_file in csv_files:
             try:
                 # Obtener datos del producto
                 ref = str(row.get('N/Referencia', '')).strip() or str(row.get('Refª.Prov.', '')).strip()
-                descripcion = str(row.get('Descripción Ampliada', '')).strip() or str(row.get('Artículo', '')).strip()
+                # Usar 'Artículo' como descripción principal
+                descripcion = str(row.get('Artículo', '')).strip() or str(row.get('Descripción Ampliada', '')).strip()
 
                 # Si no tenemos referencia ni descripción, saltar
                 if not ref and not descripcion:

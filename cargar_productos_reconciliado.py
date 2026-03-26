@@ -200,7 +200,8 @@ for csv_file in csv_files:
             try:
                 # Mapear columnas (usar nombres reales del CSV)
                 ref = str(row.get('N/Referencia', '')).strip()
-                descripcion = str(row.get('Descripción Ampliada', '')).strip()
+                # Usar 'Artículo' como descripción principal
+                descripcion = str(row.get('Artículo', '')).strip() or str(row.get('Descripción Ampliada', '')).strip()
                 cantidad = parse_amount(row.get('Cantidad', 0))
                 precio = parse_amount(row.get('Precio', 0))
                 descuento = parse_amount(row.get('% Dto.', 0))

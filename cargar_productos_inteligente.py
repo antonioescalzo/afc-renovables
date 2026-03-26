@@ -172,7 +172,8 @@ for filename, csv_info in sorted(csv_data.items()):
     for _, row in df_csv.iterrows():
         try:
             ref = str(row.get('N/Referencia', '')).strip() or str(row.get('Refª.Prov.', '')).strip()
-            descripcion = str(row.get('Descripción Ampliada', '')).strip() or str(row.get('Artículo', '')).strip()
+            # Usar 'Artículo' como descripción principal (más corta y clara)
+            descripcion = str(row.get('Artículo', '')).strip() or str(row.get('Descripción Ampliada', '')).strip()
 
             if not descripcion:
                 continue
