@@ -169,3 +169,54 @@ export const fetchProveedores = async () => {
     return { data: null, error }
   }
 }
+
+// Obtener productos por proveedor (todas las líneas de factura)
+export const fetchProductosPorProveedor = async (proveedorId) => {
+  try {
+    const { data, error } = await supabase
+      .from('v_productos_por_proveedor')
+      .select('*')
+      .eq('proveedor_id', proveedorId)
+      .order('fecha', { ascending: false })
+      .limit(1000)
+    if (error) throw error
+    console.log(`✅ Productos para proveedor ${proveedorId}:`, data?.length || 0)
+    return { data, error: null }
+  } catch (error) {
+    console.error('Error fetching productos por proveedor:', error)
+    return { data: null, error }
+  }
+}
+
+// Obtener resumen de precios de productos por proveedor
+export const fetchProductosPrecioProveedor = async (proveedorId) => {
+  try {
+    const { data, error } = await supabase
+      .from('v_productos_precio_proveedor')
+      .select('*')
+      .eq('proveedor_id', proveedorId)
+      .order('descripcion')
+      .limit(1000)
+    if (error) throw error
+    return { data, error: null }
+  } catch (error) {
+    console.error('Error fetching productos precio proveedor:', error)
+    return { data: null, error }
+  }
+}
+
+// Obtener todos los productos únicos y sus precios en todos los proveedores
+export const fetchProductosComparativaPrecios = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('v_comparativa_productos_proveedor')
+      .select('*')
+      .order('descripcion')
+      .limit(5000)
+    if (error) throw error
+    return { data, error: null }
+  } catch (error) {
+    console.error('Error fetching productos comparativa:', error)
+    return { data: null, error }
+  }
+}
