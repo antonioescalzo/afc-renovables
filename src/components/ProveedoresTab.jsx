@@ -56,8 +56,9 @@ export default function ProveedoresTab() {
   const [productos, setProductos] = useState([])
   const [proveedorSeleccionado, setProveedorSeleccionado] = useState(null)
   const [productosLoading, setProductosLoading] = useState(false)
+  const [paginaProductos, setPaginaProductos] = useState(1)
   const itemsPorPagina = 15
-  const itemsProductosPorPagina = 20
+  const itemsProductosPorPagina = 100
 
   useEffect(() => {
     loadData()
@@ -96,6 +97,7 @@ export default function ProveedoresTab() {
 
   const handleSelectProveedor = (proveedorId) => {
     setProveedorSeleccionado(proveedorId)
+    setPaginaProductos(1)  // Reset a página 1 cuando cambia proveedor
     loadProductos(proveedorId)
   }
 
@@ -371,7 +373,7 @@ export default function ProveedoresTab() {
                       </td>
                     </tr>
                   ) : (
-                    productos.slice(0, itemsProductosPorPagina).map((prod, idx) => (
+                    productos.slice((paginaProductos - 1) * itemsProductosPorPagina, paginaProductos * itemsProductosPorPagina).map((prod, idx) => (
                       <tr key={idx}
                         onMouseEnter={e => e.currentTarget.style.background = `${C.green3}14`}
                         onMouseLeave={e => e.currentTarget.style.background = ''}>
@@ -388,9 +390,26 @@ export default function ProveedoresTab() {
                 </tbody>
               </table>
             </div>
-            {productos.length > itemsProductosPorPagina && (
-              <div style={{ fontSize: '0.7rem', color: C.muted, background: C.bg3, padding: '8px 12px', borderRadius: 6, textAlign: 'center' }}>
-                📊 Mostrando {itemsProductosPorPagina} de {productos.length} productos
+            {productos.length > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.7rem', color: C.muted, background: C.bg3, padding: '8px 12px', borderRadius: 6, marginTop: 8 }}>
+                <span>📊 Mostrando {Math.min((paginaProductos - 1) * itemsProductosPorPagina + 1, productos.length)}-{Math.min(paginaProductos * itemsProductosPorPagina, productos.length)} de {productos.length} productos</span>
+                {Math.ceil(productos.length / itemsProductosPorPagina) > 1 && (
+                  <div style={{ display: 'flex', gap: 4 }}>
+                    <button
+                      onClick={() => setPaginaProductos(p => Math.max(1, p - 1))}
+                      disabled={paginaProductos === 1}
+                      style={{ padding: '4px 8px', background: paginaProductos === 1 ? C.muted + '30' : C.teal, color: 'white', border: 'none', borderRadius: 4, cursor: paginaProductos === 1 ? 'default' : 'pointer', fontSize: '0.65rem' }}>
+                      ← Anterior
+                    </button>
+                    <span style={{ padding: '4px 8px' }}>Página {paginaProductos} de {Math.ceil(productos.length / itemsProductosPorPagina)}</span>
+                    <button
+                      onClick={() => setPaginaProductos(p => Math.min(Math.ceil(productos.length / itemsProductosPorPagina), p + 1))}
+                      disabled={paginaProductos >= Math.ceil(productos.length / itemsProductosPorPagina)}
+                      style={{ padding: '4px 8px', background: paginaProductos >= Math.ceil(productos.length / itemsProductosPorPagina) ? C.muted + '30' : C.teal, color: 'white', border: 'none', borderRadius: 4, cursor: paginaProductos >= Math.ceil(productos.length / itemsProductosPorPagina) ? 'default' : 'pointer', fontSize: '0.65rem' }}>
+                      Siguiente →
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
