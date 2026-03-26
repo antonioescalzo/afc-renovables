@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react"
 import { createClient } from "@supabase/supabase-js"
 import almacenProductosJSON from "./data/almacen-productos.json"
 import bbddStockJSON from "./data/bbdd_stock_almacen.json"
+import ProveedoresTab from "./components/ProveedoresTab"
 import "./App.css"
 
 // Inicializar Supabase
@@ -1807,7 +1808,7 @@ export default function App(){
   const ss={demo:{text:"DATOS DEMO",bg:`${C.muted}15`,c:C.muted,bo:C.border},loading:{text:"SYNC...",bg:`${C.yellow}10`,c:C.yellow,bo:`${C.yellow}40`},ok:{text:`✓ ${lastSync?lastSync.toLocaleTimeString("es-ES"):""}`,bg:`${C.green3}35`,c:C.green2,bo:C.green3},error:{text:"⚠ SHEET NO PÚBLICO",bg:`${C.red}10`,c:C.red,bo:`${C.red}40`}}[syncStatus];
   const ww=useW();
   const isMobile=ww<768;
-  const tabs=[{id:"dashboard",l:"Dashboard"},{id:"graficos",l:"📈 Gráficos"},{id:"clientes",l:"👤 Clientes"},{id:"proyectos",l:"Proyectos"},{id:"almacen",l:"Almacén"},{id:"importar",l:"📥 Importar"}];
+  const tabs=[{id:"dashboard",l:"Dashboard"},{id:"graficos",l:"📈 Gráficos"},{id:"clientes",l:"👤 Clientes"},{id:"proveedores",l:"🛒 Proveedores"},{id:"proyectos",l:"Proyectos"},{id:"almacen",l:"Almacén"},{id:"importar",l:"📥 Importar"}];
 
   return(
     <div style={{background:C.bg,minHeight:"100vh",color:C.text,fontFamily:"system-ui,sans-serif"}}>
@@ -1851,6 +1852,7 @@ export default function App(){
         {tab==="dashboard"&&<TabDashboard projects={projects} stock={stock} horas={horas} clientes={clientes} ventasMensuales={ventasMensuales}/>}
         {tab==="graficos"&&<TabGraficos projects={projects} stock={stock} horas={horas} ventasMensuales={ventasMensuales}/>}
         {tab==="clientes"&&<TabClientes clientes={clientes} projects={projects}/>}
+        {tab==="proveedores"&&<ProveedoresTab/>}
         {tab==="proyectos"&&<TabProyectos projects={projects} horas={horas} matMayor={matMayor} matMenor={matMenor}/>}
         {tab==="almacen"&&<TabAlmacen stock={almacen} movimientos={movimientos}/>}
         {tab==="importar"&&<TabImportar onImportComplete={()=>sync()}/>}
