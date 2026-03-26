@@ -22,11 +22,8 @@ jobs:
 
       - name: 🚀 Ejecutar script de carga
         run: |
-          cd /home/runner/work/afc-renovables/afc-renovables
           python3 reconciliar_y_cargar_productos.py
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        working-directory: ${{ github.workspace }}
 
       - name: ✅ Script completado
         run: echo "Productos cargados exitosamente"

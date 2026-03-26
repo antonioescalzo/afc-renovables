@@ -16,8 +16,17 @@ import time
 # CONFIGURACIÓN
 # ═══════════════════════════════════════════════════════════════════════════
 
-FACTURAS_DIR = "/home/user/afc-renovables/costes_general/facturas_2026"
-PROVEEDORES_FILE = f"{FACTURAS_DIR}/proveedores.csv"
+import os
+import sys
+
+# Detectar ruta correctamente (funciona en local y GitHub Actions)
+if os.path.exists("/home/user/afc-renovables"):
+    BASE_DIR = "/home/user/afc-renovables"
+else:
+    BASE_DIR = os.getcwd()
+
+FACTURAS_DIR = os.path.join(BASE_DIR, "costes_general/facturas_2026")
+PROVEEDORES_FILE = os.path.join(FACTURAS_DIR, "proveedores.csv")
 SUPABASE_URL = "https://xhzzfpsszsdqoiavqgis.supabase.co"
 SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhoenpmcHNzenNkcW9pYXZxZ2lzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzMzg4MDksImV4cCI6MjA4OTkxNDgwOX0.JhZ4K1mzo2NOTW7RQ8w_vC2s7ggzJJiwn-hTsw-vyWU"
 
