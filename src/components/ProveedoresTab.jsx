@@ -16,7 +16,7 @@ const C={
   card:"#0a1c0b",white:"#f0faf1",
 };
 
-const fmt = n => new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n || 0);
+const fmt = n => new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n || 0);
 const fnum = n => new Intl.NumberFormat("es-ES").format(n || 0);
 
 // Componente StatCard reutilizable
