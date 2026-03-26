@@ -116,12 +116,11 @@ for csv_file in csv_files:
 
         factura_id = fact_info['id']
 
-        # Procesar líneas
+        # Procesar líneas (SIN proveedor_id - se obtiene del JOIN con facturas_compra)
         for _, row in df.iterrows():
             try:
                 linea = {
                     'factura_id': factura_id,
-                    'proveedor_id': proveedor_id,
                     'ref': str(row.get('Referencia', '')).strip(),
                     'descripcion': str(row.get('Descripción', '')).strip(),
                     'cantidad': float(row.get('Cantidad', 0)) if pd.notna(row.get('Cantidad')) else 0,
