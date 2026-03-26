@@ -1552,6 +1552,8 @@ function TabAlmacen({stock,movimientos}){const W=useW();const M=W<768;
   const [filtroInv,setFiltroInv]=useState("all");
   const [filtroMov,setFiltroMov]=useState("all");
   const [selItem,setSelItem]=useState(null);
+  const [paginaHistorial,setPaginaHistorial]=useState(1);
+  const [busquedaHistorial,setBusquedaHistorial]=useState("");
   const valorTotal=stock.reduce((s,i)=>s+i.qty*i.precioUnit,0);
   const bajosMin=stock.filter(s=>s.qty<s.qtyMin);
   const agotados=stock.filter(s=>s.qty===0);
@@ -1575,6 +1577,13 @@ function TabAlmacen({stock,movimientos}){const W=useW();const M=W<768;
   const naveA=stock.filter(s=>s.ubicacion&&s.ubicacion.includes("Nave A"));
   const naveB=stock.filter(s=>s.ubicacion&&s.ubicacion.includes("Nave B"));
   const vistas=[{id:"inventario",l:"📋 Inventario"},{id:"historial",l:"📚 Historial BBDD"},{id:"movimientos",l:"🔄 Movimientos"},{id:"forecast",l:"📅 Previsión"}];
+
+  // Lógica para Historial BBDD
+  const bbddFiltrado=busquedaHistorial.trim()?bbddStockJSON.filter(item=>{const q=busquedaHistorial.toLowerCase();return(item.Nombre||"").toLowerCase().includes(q)||(item["N/ Referencia"]||"").toLowerCase().includes(q)||(item.Familia||"").toLowerCase().includes(q)||(item["Fabricante / Marca"]||"").toLowerCase().includes(q);}):bbddStockJSON;
+  const totalPaginas=Math.ceil(bbddFiltrado.length/100);
+  const inicioReg=(paginaHistorial-1)*100;
+  const bbddPaginado=bbddFiltrado.slice(inicioReg,inicioReg+100);
+
   return(
     <div>
       {bajosMin.length>0&&<div style={{background:"rgba(245,197,24,0.08)",border:"1px solid rgba(245,197,24,0.3)",borderRadius:10,padding:"9px 14px",marginBottom:10,fontSize:"0.75rem"}}><span style={{color:C.yellow,fontWeight:700}}>📦 Bajo mínimo: </span><span style={{color:C.muted}}>{bajosMin.map(s=>`${s.ref}(${s.qty}/${s.qtyMin})`).join(" · ")}</span></div>}
@@ -1688,18 +1697,23 @@ function TabAlmacen({stock,movimientos}){const W=useW();const M=W<768;
 
       {vista==="historial"&&<>
         <STitle icon="📚">Historial BBDD Stock Almacén</STitle>
-        <div style={{fontSize:"0.75rem",color:C.muted,marginBottom:12,background:C.bg3,padding:12,borderRadius:8}}>
-          📊 {bbddStockJSON.length} artículos de la BBDD histórica
+        <div style={{display:"flex",gap:10,marginBottom:14,flexWrap:"wrap",alignItems:"center"}}>
+          <input type="text" placeholder="🔍 Buscar por nombre, ref, familia, marca..." value={busquedaHistorial} onChange={e=>setBusquedaHistorial(e.target.value)} style={{flex:1,minWidth:200,padding:"8px 12px",background:C.bg2,border:`1px solid ${C.border}`,borderRadius:6,color:C.text,fontSize:"0.75rem",fontFamily:"monospace"}}/>
+          <div style={{fontSize:"0.7rem",color:C.muted,background:C.bg3,padding:"6px 12px",borderRadius:6}}>
+            📊 {bbddFiltrado.length} de {bbddStockJSON.length} artículos
+          </div>
         </div>
         <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,overflowX:"auto",marginBottom:14}}>
           <table style={{width:"100%",minWidth:600,borderCollapse:"collapse"}}>
             <thead><tr style={{background:C.bg3}}>{["Código","Referencia","Nombre","Familia","Marca","Stock Actual","Precio Compra","Disponible","Teórico"].map(h=><th key={h} style={{fontFamily:"monospace",fontSize:"0.5rem",color:C.muted,textTransform:"uppercase",padding:"8px",textAlign:"left",borderBottom:`1px solid ${C.border}`}}>{h}</th>)}</tr></thead>
-            <tbody>{bbddStockJSON.slice(0,100).map((item,i)=>{const stock=item["Exis. Uds."]||0;const disp=item["Dispon. Uds."]||0;const teo=item["Exis. Teórica Uds."]||0;const priceCompra=item["Precio Compra"]||0;return(<tr key={i} onMouseEnter={e=>e.currentTarget.style.background=`${C.green3}14`} onMouseLeave={e=>e.currentTarget.style.background=""}><td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.62rem",color:C.muted}}>{item.Código}</td><td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.62rem",color:C.muted}}>{item["N/ Referencia"]||"-"}</td><td style={{padding:"8px",fontSize:"0.75rem"}}>{item.Nombre}</td><td style={{padding:"8px",fontSize:"0.68rem",color:C.muted}}>{item.Familia||"-"}</td><td style={{padding:"8px",fontSize:"0.68rem",color:C.muted}}>{item["Fabricante / Marca"]||"-"}</td><td style={{padding:"8px",fontFamily:"monospace",fontWeight:700,fontSize:"0.75rem",color:stock>0?C.green2:C.red}}>{Math.round(stock)}</td><td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.68rem",color:C.yellow}}>{priceCompra>0?fmt(priceCompra):"-"}</td><td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.68rem",color:C.teal2}}>{Math.round(disp)}</td><td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.68rem",color:C.muted}}>{Math.round(teo)}</td></tr>);})}
+            <tbody>{bbddPaginado.map((item,i)=>{const stock=item["Exis. Uds."]||0;const disp=item["Dispon. Uds."]||0;const teo=item["Exis. Teórica Uds."]||0;const priceCompra=item["Precio Compra"]||0;return(<tr key={i} onMouseEnter={e=>e.currentTarget.style.background=`${C.green3}14`} onMouseLeave={e=>e.currentTarget.style.background=""}><td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.62rem",color:C.muted}}>{item.Código}</td><td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.62rem",color:C.muted}}>{item["N/ Referencia"]||"-"}</td><td style={{padding:"8px",fontSize:"0.75rem"}}>{item.Nombre}</td><td style={{padding:"8px",fontSize:"0.68rem",color:C.muted}}>{item.Familia||"-"}</td><td style={{padding:"8px",fontSize:"0.68rem",color:C.muted}}>{item["Fabricante / Marca"]||"-"}</td><td style={{padding:"8px",fontFamily:"monospace",fontWeight:700,fontSize:"0.75rem",color:stock>0?C.green2:C.red}}>{Math.round(stock)}</td><td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.68rem",color:C.yellow}}>{priceCompra>0?fmt(priceCompra):"-"}</td><td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.68rem",color:C.teal2}}>{Math.round(disp)}</td><td style={{padding:"8px",fontFamily:"monospace",fontSize:"0.68rem",color:C.muted}}>{Math.round(teo)}</td></tr>);})}
             </tbody>
           </table>
         </div>
-        <div style={{fontSize:"0.7rem",color:C.muted,textAlign:"center",padding:12}}>
-          Mostrando primeros 100 de {bbddStockJSON.length} registros
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px",background:C.bg3,borderRadius:8,flexWrap:"wrap",gap:10}}>
+          <button onClick={()=>setPaginaHistorial(Math.max(1,paginaHistorial-1))} disabled={paginaHistorial===1} style={{padding:"6px 12px",background:paginaHistorial===1?C.bg3:C.green3,color:paginaHistorial===1?C.muted:C.green2,border:`1px solid ${paginaHistorial===1?C.border:C.green3}`,borderRadius:6,cursor:paginaHistorial===1?"not-allowed":"pointer",fontSize:"0.7rem",fontWeight:700,transition:"all 0.2s"}}>← Anterior</button>
+          <div style={{fontSize:"0.7rem",color:C.muted,fontFamily:"monospace"}}>Página <span style={{color:C.text,fontWeight:700}}>{paginaHistorial}</span> de <span style={{color:C.text,fontWeight:700}}>{totalPaginas}</span> · ({inicioReg+1}-{Math.min(inicioReg+100,bbddFiltrado.length)} de {bbddFiltrado.length})</div>
+          <button onClick={()=>setPaginaHistorial(Math.min(totalPaginas,paginaHistorial+1))} disabled={paginaHistorial===totalPaginas} style={{padding:"6px 12px",background:paginaHistorial===totalPaginas?C.bg3:C.green3,color:paginaHistorial===totalPaginas?C.muted:C.green2,border:`1px solid ${paginaHistorial===totalPaginas?C.border:C.green3}`,borderRadius:6,cursor:paginaHistorial===totalPaginas?"not-allowed":"pointer",fontSize:"0.7rem",fontWeight:700,transition:"all 0.2s"}}>Siguiente →</button>
         </div>
       </>}
     </div>
