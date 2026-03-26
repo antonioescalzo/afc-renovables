@@ -17,12 +17,10 @@ jobs:
           python-version: '3.9'
 
       - name: 📦 Instalar pandas
-        run: |
-          pip install pandas
+        run: pip install pandas
 
-      - name: 🚀 Ejecutar script de diagnóstico
-        run: |
-          python3 cargar_productos_v2.py
+      - name: 🚀 Ejecutar script de carga inteligente
+        run: python3 cargar_productos_inteligente.py
         working-directory: ${{ github.workspace }}
 
       - name: ✅ Script completado
