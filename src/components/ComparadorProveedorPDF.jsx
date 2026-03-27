@@ -93,29 +93,66 @@ export default function ComparadorProveedorPDF() {
   }
 
   const realizarAnalisisExhaustivo = (productosSupabase) => {
-    console.log('🔍 DEBUG: Productos en Supabase:', productosSupabase.length)
+    console.log('='*50)
+    console.log('🔍 DEBUG COMPARADOR PDF vs SUPABASE')
+    console.log('='*50)
+    console.log('📊 Productos en Supabase:', productosSupabase.length)
+
     if (productosSupabase.length > 0) {
-      console.log('🔍 Primeros 3 productos:', productosSupabase.slice(0, 3))
-      console.log('🔍 Campos disponibles:', Object.keys(productosSupabase[0]))
+      console.log('📋 Campos disponibles:', Object.keys(productosSupabase[0]))
+      console.log('📦 Primeros 3 productos completos:', productosSupabase.slice(0, 3))
+
+      // Mostrar qué referencias tiene Supabase
+      const refsSupabaseRaw = productosSupabase.map((p, i) => ({
+        index: i,
+        ref: p.ref,
+        referencia: p.referencia,
+        reference: p.reference,
+        codigo: p.codigo,
+        sku: p.sku,
+        producto_ref: p.producto_ref,
+        descripcion: p.descripcion || p.descripción || p.description,
+        precio: p.precio,
+        importe_total: p.importe_total
+      })).slice(0, 5)
+      console.table(refsSupabaseRaw)
     }
 
     const refsPDF = {}
     productosElectrostockPDF.forEach(p => {
       refsPDF[p.ref] = p
     })
+    console.log('📄 Referencias en PDF (total):', Object.keys(refsPDF))
+    console.log('📄 Primeros 3 del PDF:', productosElectrostockPDF.slice(0, 3))
 
     const refsSupabase = {}
+    const refsCandidatos = { ref: [], referencia: [], reference: [], codigo: [], sku: [], producto_ref: [] }
+
     productosSupabase.forEach(p => {
       // Intentar encontrar la referencia en diferentes campos
-      const ref = p.ref || p.referencia || p.reference || p.codigo || p.sku || p.producto_ref
-      const refClean = ref ? String(ref).trim().toUpperCase() : null
-      if (refClean) {
-        refsSupabase[refClean] = { ...p, refOriginal: ref }
-      }
+      if (p.ref) { refsCandidatos.ref.push(p.ref); const refClean = String(p.ref).trim().toUpperCase(); refsSupabase[refClean] = { ...p, refOriginal: p.ref } }
+      else if (p.referencia) { refsCandidatos.referencia.push(p.referencia); const refClean = String(p.referencia).trim().toUpperCase(); refsSupabase[refClean] = { ...p, refOriginal: p.referencia } }
+      else if (p.reference) { refsCandidatos.reference.push(p.reference); const refClean = String(p.reference).trim().toUpperCase(); refsSupabase[refClean] = { ...p, refOriginal: p.reference } }
+      else if (p.codigo) { refsCandidatos.codigo.push(p.codigo); const refClean = String(p.codigo).trim().toUpperCase(); refsSupabase[refClean] = { ...p, refOriginal: p.codigo } }
+      else if (p.sku) { refsCandidatos.sku.push(p.sku); const refClean = String(p.sku).trim().toUpperCase(); refsSupabase[refClean] = { ...p, refOriginal: p.sku } }
+      else if (p.producto_ref) { refsCandidatos.producto_ref.push(p.producto_ref); const refClean = String(p.producto_ref).trim().toUpperCase(); refsSupabase[refClean] = { ...p, refOriginal: p.producto_ref } }
     })
 
-    console.log('🔍 Referencias en PDF:', Object.keys(refsPDF).slice(0, 5))
-    console.log('🔍 Referencias en Supabase:', Object.keys(refsSupabase).slice(0, 5))
+    console.log('🔍 Referencias encontradas por campo:', refsCandidatos)
+    console.log('🔍 Referencias limpias en Supabase:', Object.keys(refsSupabase))
+    console.log('🔍 Referencias en PDF:', Object.keys(refsPDF))
+
+    // Intentar coincidencias
+    const intentosCoincidencia = []
+    Object.keys(refsPDF).slice(0, 3).forEach(refPdf => {
+      const refClean = refPdf.trim().toUpperCase()
+      intentosCoincidencia.push({
+        refPdf,
+        refClean,
+        encontrada: refsSupabase[refClean] ? '✓ SÍ' : '✗ NO'
+      })
+    })
+    console.table(intentosCoincidencia)
 
     const productosComparados = []
     const soloPDF = []
