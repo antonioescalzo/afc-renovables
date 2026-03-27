@@ -95,6 +95,10 @@ export default function ComparadorProveedorPDF() {
   const realizarAnalisisExhaustivo = (productosSupabase) => {
     console.log('==== BÚSQUEDA POR PALABRAS CLAVE (SIN REFERENCIAS) ====')
     console.log('📊 Productos en Supabase:', productosSupabase.length)
+    console.log('📋 TODOS LOS PRODUCTOS SUPABASE:')
+    productosSupabase.forEach((p, i) => {
+      console.log(`  ${i+1}. "${p.descripcion}" | Precio: ${p.precio} | Cantidad: ${p.cantidad}`)
+    })
 
     // Función de similitud basada en palabras clave
     const similitudPalabras = (s1, s2) => {
