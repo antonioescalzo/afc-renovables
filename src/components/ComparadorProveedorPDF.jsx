@@ -282,8 +282,8 @@ export default function ComparadorProveedorPDF() {
                     <td style={{padding: '6px', color: C.text, fontSize: '0.6rem'}}>{p.desc.substring(0, 25)}...</td>
                     <td style={{padding: '6px', textAlign: 'right', color: C.yellow}}>{fmt(parseFloat(p.pdfPrecio))}</td>
                     <td style={{padding: '6px', textAlign: 'right', color: C.green2}}>{fmt(parseFloat(p.supaPrecio))}</td>
-                    <td style={{padding: '6px', textAlign: 'right', color: C.green2, fontWeight: 'bold'}}-{fmt(parseFloat(p.ahorro))}</td>
-                    <td style={{padding: '6px', textAlign: 'right', color: C.green2, fontWeight: 'bold'}}>-{p.pctDiferencia}%</td>
+                    <td style={{padding: '6px', textAlign: 'right', color: C.green2, fontWeight: 'bold'}}>{`-${fmt(parseFloat(p.ahorro))}`}</td>
+                    <td style={{padding: '6px', textAlign: 'right', color: C.green2, fontWeight: 'bold'}}>{`-${p.pctDiferencia}%`}</td>
                   </tr>
                 ))}
               </tbody>
