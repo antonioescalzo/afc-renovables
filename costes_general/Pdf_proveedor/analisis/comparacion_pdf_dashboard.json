@@ -1,0 +1,8 @@
+{
+  "fecha": "2026-03-27T09:00:02.062610",
+  "estado": "error",
+  "total_pdf": 31,
+  "total_supabase": 0,
+  "error": "No connection to Supabase or no products found",
+  "sugerencia": "Verifica la conexión a internet o revisa si hay datos en Supabase"
+}
