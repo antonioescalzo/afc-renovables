@@ -230,7 +230,7 @@ export default function ProveedoresTab() {
 
       {/* TABLA DE RANKING */}
       {activeTab === 'ranking' && (
-      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, overflowX: 'auto', marginBottom: 14 }}>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, overflowX: 'auto', marginBottom: 14 }}>
         <table style={{ width: '100%', minWidth: 800, borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ background: C.bg3 }}>
@@ -275,7 +275,8 @@ export default function ProveedoresTab() {
             )}
           </tbody>
         </table>
-      </div>
+        </div>
+      )}
 
       {/* PAGINACIÓN */}
       {totalPaginas > 1 && activeTab === 'ranking' && (
@@ -319,11 +320,10 @@ export default function ProveedoresTab() {
           </button>
         </div>
       )}
-      )}
 
       {/* SECCIÓN PRODUCTOS POR PROVEEDOR */}
       {activeTab === 'ranking' && (
-      <div style={{ marginTop: 32 }}>
+        <div style={{ marginTop: 32 }}>
         <h2 style={{ fontSize: '0.85rem', fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 16, fontFamily: 'monospace' }}>📦 PRODUCTOS POR PROVEEDOR</h2>
 
         <div style={{ marginBottom: 16 }}>
