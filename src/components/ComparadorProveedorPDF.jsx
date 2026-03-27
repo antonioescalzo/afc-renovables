@@ -93,19 +93,20 @@ export default function ComparadorProveedorPDF() {
   }
 
   const realizarAnalisisExhaustivo = (productosSupabase) => {
-    console.log('==== BÚSQUEDA POR DESCRIPCIÓN (NO HAY REFERENCIAS) ====')
+    console.log('==== BÚSQUEDA POR PALABRAS CLAVE (SIN REFERENCIAS) ====')
     console.log('📊 Productos en Supabase:', productosSupabase.length)
 
-    // Función de similitud entre strings
-    const similitud = (s1, s2) => {
-      const a = (s1 || '').toUpperCase()
-      const b = (s2 || '').toUpperCase()
+    // Función de similitud basada en palabras clave
+    const similitudPalabras = (s1, s2) => {
+      const a = (s1 || '').toUpperCase().split(/\s+/).filter(w => w.length > 2)
+      const b = (s2 || '').toUpperCase().split(/\s+/).filter(w => w.length > 2)
+
       let matches = 0
-      const minLen = Math.min(a.length, b.length)
-      for (let i = 0; i < minLen; i++) {
-        if (a[i] === b[i]) matches++
-      }
-      return matches / Math.max(a.length, b.length)
+      a.forEach(pa => {
+        if (b.some(pb => pb.includes(pa) || pa.includes(pb))) matches++
+      })
+
+      return matches / Math.max(a.length, b.length, 1)
     }
 
     const refsPDF = {}
@@ -113,13 +114,12 @@ export default function ComparadorProveedorPDF() {
       refsPDF[p.ref] = p
     })
     console.log('📄 Productos en PDF:', Object.keys(refsPDF).length)
-    console.log('📄 Primeros 3 del PDF:', Object.keys(refsPDF).slice(0, 3).map(k => `${k} - ${refsPDF[k].desc.substring(0, 30)}`))
 
     const productosComparados = []
     const soloPDF = []
     const supabaseSinUsar = [...productosSupabase]
 
-    console.log('🔗 Buscando coincidencias por descripción...')
+    console.log('🔗 Buscando coincidencias por palabras clave...')
 
     // Buscar coincidencias por descripción
     Object.keys(refsPDF).forEach((refPdf, idx) => {
@@ -129,15 +129,16 @@ export default function ComparadorProveedorPDF() {
       let indexMejor = -1
 
       supabaseSinUsar.forEach((supaProd, supIdx) => {
-        const sim = similitud(pdfProd.desc, supaProd.descripcion)
-        if (sim > mejorSim && sim > 0.35) {
+        const sim = similitudPalabras(pdfProd.desc, supaProd.descripcion)
+        if (sim > mejorSim) {
           mejorSim = sim
           mejorMatch = supaProd
           indexMejor = supIdx
         }
       })
 
-      if (mejorMatch && mejorSim > 0.4) {
+      // Umbral más bajo (30%)
+      if (mejorMatch && mejorSim > 0.3) {
         const pdfPrecio = pdfProd.importe
         const supaPrecio = mejorMatch.precio || 0
         const diferencia = supaPrecio - pdfPrecio
@@ -158,8 +159,8 @@ export default function ComparadorProveedorPDF() {
         // Remover de la lista de Supabase sin usar
         supabaseSinUsar.splice(indexMejor, 1)
 
-        if (idx < 3) {
-          console.log(`  ✓ ${refPdf}: "${pdfProd.desc.substring(0, 35)}" => Supabase: "${mejorMatch.descripcion.substring(0, 35)}" (sim: ${(mejorSim * 100).toFixed(0)}%)`)
+        if (idx < 5) {
+          console.log(`  ✓ ${refPdf}: "${pdfProd.desc.substring(0, 30)}" => "${mejorMatch.descripcion.substring(0, 30)}" (${(mejorSim * 100).toFixed(0)}%)`)
         }
       } else {
         soloPDF.push({
@@ -167,8 +168,8 @@ export default function ComparadorProveedorPDF() {
           desc: pdfProd.desc,
           importe: pdfProd.importe
         })
-        if (idx < 3) {
-          console.log(`  ✗ ${refPdf}: No encontrado`)
+        if (idx < 5) {
+          console.log(`  ✗ ${refPdf}: ${mejorSim > 0 ? `mejor sim ${(mejorSim*100).toFixed(0)}% (bajo)` : 'no coincidencias'}`)
         }
       }
     })
