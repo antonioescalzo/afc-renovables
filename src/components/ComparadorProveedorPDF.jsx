@@ -93,78 +93,59 @@ export default function ComparadorProveedorPDF() {
   }
 
   const realizarAnalisisExhaustivo = (productosSupabase) => {
-    console.log('==================================================')
-    console.log('🔍 DEBUG COMPARADOR PDF vs SUPABASE')
-    console.log('==================================================')
+    console.log('==== BÚSQUEDA POR DESCRIPCIÓN (NO HAY REFERENCIAS) ====')
     console.log('📊 Productos en Supabase:', productosSupabase.length)
 
-    if (productosSupabase.length > 0) {
-      const campos = Object.keys(productosSupabase[0])
-      console.log('📋 CAMPOS DISPONIBLES:', campos.join(', '))
-
-      console.log('📦 PRIMEROS 3 PRODUCTOS SUPABASE (JSON):')
-      productosSupabase.slice(0, 3).forEach((p, i) => {
-        console.log(`  Producto ${i+1}:`, JSON.stringify(p, null, 2))
-      })
-
-      // Mostrar qué referencias tiene Supabase
-      console.log('📌 REFERENCIAS EN SUPABASE (primeros 10):')
-      const refsEnSupa = productosSupabase.slice(0, 10).map((p, i) => {
-        return `${i+1}. ref="${p.ref}", referencia="${p.referencia}", reference="${p.reference}", codigo="${p.codigo}", sku="${p.sku}", producto_ref="${p.producto_ref}", desc="${p.descripcion}"`
-      }).join('\n')
-      console.log(refsEnSupa)
+    // Función de similitud entre strings
+    const similitud = (s1, s2) => {
+      const a = (s1 || '').toUpperCase()
+      const b = (s2 || '').toUpperCase()
+      let matches = 0
+      const minLen = Math.min(a.length, b.length)
+      for (let i = 0; i < minLen; i++) {
+        if (a[i] === b[i]) matches++
+      }
+      return matches / Math.max(a.length, b.length)
     }
 
     const refsPDF = {}
     productosElectrostockPDF.forEach(p => {
       refsPDF[p.ref] = p
     })
-    console.log('📄 REFERENCIAS EN PDF (20 productos):')
-    Object.keys(refsPDF).forEach((ref, i) => {
-      console.log(`  ${i+1}. ${ref} - ${refsPDF[ref].desc}`)
-    })
-
-    // CONSTRUCCIÓN DE REFERENCIAS LIMPIAS
-    const refsSupabase = {}
-    productosSupabase.forEach(p => {
-      const ref = p.ref || p.referencia || p.reference || p.codigo || p.sku || p.producto_ref
-      const refClean = ref ? String(ref).trim().toUpperCase() : null
-      if (refClean) {
-        refsSupabase[refClean] = p
-      }
-    })
-
-    console.log('🔗 INTENTO DE COINCIDENCIAS:')
-    const coincidenciasEncontradas = []
-    Object.keys(refsPDF).forEach(refPdf => {
-      const refClean = refPdf.trim().toUpperCase()
-      const existe = refsSupabase[refClean] ? '✓ ENCONTRADA' : '✗ NO ENCONTRADA'
-      coincidenciasEncontradas.push(`${refPdf} => ${refClean} : ${existe}`)
-      if (coincidenciasEncontradas.length <= 10) {
-        console.log(`  ${refPdf} => ${refClean} : ${existe}`)
-      }
-    })
-    console.log(`...Total: ${coincidenciasEncontradas.filter(c => c.includes('ENCONTRADA')).length} coincidencias de ${Object.keys(refsPDF).length}`)
+    console.log('📄 Productos en PDF:', Object.keys(refsPDF).length)
+    console.log('📄 Primeros 3 del PDF:', Object.keys(refsPDF).slice(0, 3).map(k => `${k} - ${refsPDF[k].desc.substring(0, 30)}`))
 
     const productosComparados = []
     const soloPDF = []
-    const soloSupabase = []
+    const supabaseSinUsar = [...productosSupabase]
 
-    // Productos coincidentes con análisis de precios
-    Object.keys(refsPDF).forEach(ref => {
-      const refClean = ref.trim().toUpperCase()
-      if (refsSupabase[refClean]) {
-        const pdfProd = refsPDF[ref]
-        const supaProd = refsSupabase[refClean]
+    console.log('🔗 Buscando coincidencias por descripción...')
+
+    // Buscar coincidencias por descripción
+    Object.keys(refsPDF).forEach((refPdf, idx) => {
+      const pdfProd = refsPDF[refPdf]
+      let mejorMatch = null
+      let mejorSim = 0
+      let indexMejor = -1
+
+      supabaseSinUsar.forEach((supaProd, supIdx) => {
+        const sim = similitud(pdfProd.desc, supaProd.descripcion)
+        if (sim > mejorSim && sim > 0.35) {
+          mejorSim = sim
+          mejorMatch = supaProd
+          indexMejor = supIdx
+        }
+      })
+
+      if (mejorMatch && mejorSim > 0.4) {
         const pdfPrecio = pdfProd.importe
-        // Intentar diferentes campos de precio
-        const supaPrecio = supaProd.precio || supaProd.importe_total || supaProd.valor || supaProd.precio_unitario || 0
+        const supaPrecio = mejorMatch.precio || 0
         const diferencia = supaPrecio - pdfPrecio
         const pctDiferencia = pdfPrecio > 0 ? (diferencia / pdfPrecio * 100) : 0
-        const ahorro = pdfPrecio > supaPrecio ? diferencia * -1 : 0
+        const ahorro = pdfPrecio > supaPrecio ? Math.abs(diferencia) : 0
 
         productosComparados.push({
-          ref,
+          ref: refPdf,
           desc: pdfProd.desc,
           pdfPrecio,
           supaPrecio,
@@ -173,27 +154,32 @@ export default function ComparadorProveedorPDF() {
           ahorro: ahorro > 0 ? ahorro.toFixed(2) : 0,
           esAhorro: pdfPrecio > supaPrecio
         })
+
+        // Remover de la lista de Supabase sin usar
+        supabaseSinUsar.splice(indexMejor, 1)
+
+        if (idx < 3) {
+          console.log(`  ✓ ${refPdf}: "${pdfProd.desc.substring(0, 35)}" => Supabase: "${mejorMatch.descripcion.substring(0, 35)}" (sim: ${(mejorSim * 100).toFixed(0)}%)`)
+        }
       } else {
         soloPDF.push({
-          ref,
-          desc: productosElectrostockPDF.find(p => p.ref === ref)?.desc || '',
-          importe: refsPDF[ref].importe
+          ref: refPdf,
+          desc: pdfProd.desc,
+          importe: pdfProd.importe
         })
+        if (idx < 3) {
+          console.log(`  ✗ ${refPdf}: No encontrado`)
+        }
       }
     })
 
-    Object.keys(refsSupabase).forEach(ref => {
-      const refBuscada = Object.keys(refsPDF).find(k => k.trim().toUpperCase() === ref)
-      if (!refBuscada) {
-        soloSupabase.push({
-          ref,
-          desc: refsSupabase[ref].descripcion || '',
-          precio: refsSupabase[ref].precio || 0
-        })
-      }
-    })
+    const soloSupabase = supabaseSinUsar.map(p => ({
+      ref: p.descripcion || '',
+      desc: p.descripcion || '',
+      precio: p.precio || 0
+    }))
 
-    console.log('✅ Coincidencias encontradas:', productosComparados.length)
+    console.log(`✅ Coincidencias: ${productosComparados.length} | Solo PDF: ${soloPDF.length} | Solo Supabase: ${soloSupabase.length}`)
 
     // Cálculos de análisis
     const totalPDF = productosElectrostockPDF.reduce((sum, p) => sum + p.importe, 0)
