@@ -5,6 +5,7 @@ import {
   fetchKPIs,
   fetchProductosPorProveedor
 } from '../lib/supabase-compras'
+import ComparadorProveedorPDF from './ComparadorProveedorPDF'
 
 // Colores AFC
 const C={
@@ -208,10 +209,27 @@ export default function ProveedoresTab() {
           >
             📊 Ranking ({proveedoresFiltrados.length})
           </button>
+          <button
+            onClick={() => { setActiveTab('comparador'); }}
+            style={{
+              padding: '6px 12px',
+              background: activeTab === 'comparador' ? C.green3 : C.bg3,
+              color: activeTab === 'comparador' ? C.green2 : C.muted,
+              border: `1px solid ${activeTab === 'comparador' ? C.green3 : C.border}`,
+              borderRadius: 6,
+              cursor: 'pointer',
+              fontSize: '0.7rem',
+              fontWeight: 700,
+              transition: 'all 0.2s'
+            }}
+          >
+            📄 Comparador PDF
+          </button>
         </div>
       </div>
 
       {/* TABLA DE RANKING */}
+      {activeTab === 'ranking' && (
       <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, overflowX: 'auto', marginBottom: 14 }}>
         <table style={{ width: '100%', minWidth: 800, borderCollapse: 'collapse' }}>
           <thead>
@@ -260,7 +278,7 @@ export default function ProveedoresTab() {
       </div>
 
       {/* PAGINACIÓN */}
-      {totalPaginas > 1 && (
+      {totalPaginas > 1 && activeTab === 'ranking' && (
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: C.bg3, borderRadius: 8, flexWrap: 'wrap', gap: 10 }}>
           <button
             onClick={() => setPaginaActual(Math.max(1, paginaActual - 1))}
@@ -301,8 +319,10 @@ export default function ProveedoresTab() {
           </button>
         </div>
       )}
+      )}
 
       {/* SECCIÓN PRODUCTOS POR PROVEEDOR */}
+      {activeTab === 'ranking' && (
       <div style={{ marginTop: 32 }}>
         <h2 style={{ fontSize: '0.85rem', fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 16, fontFamily: 'monospace' }}>📦 PRODUCTOS POR PROVEEDOR</h2>
 
@@ -415,6 +435,12 @@ export default function ProveedoresTab() {
           </div>
         )}
       </div>
+      )}
+
+      {/* SECCIÓN COMPARADOR PDF */}
+      {activeTab === 'comparador' && (
+        <ComparadorProveedorPDF />
+      )}
     </div>
   );
 }
