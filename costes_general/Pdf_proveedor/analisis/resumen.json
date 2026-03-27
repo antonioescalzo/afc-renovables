@@ -1,0 +1,10 @@
+{
+  "fecha": "2026-03-27T07:29:34.671225",
+  "total_proveedores": 2,
+  "total_productos": 0,
+  "proveedores": {
+    "ELECTROSTOCK": 0,
+    "PROINCO": 0
+  },
+  "archivo_config": "/home/user/afc-renovables/costes_general/Pdf_proveedor/analisis/comparacion.json"
+}

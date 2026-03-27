@@ -1,0 +1,55 @@
+{
+  "fecha_comparacion": "2026-03-27T07:30:44.166641",
+  "proveedor": "ELECTROSTOCK",
+  "total_comparaciones": 5,
+  "subidas": 2,
+  "bajadas": 3,
+  "iguales": 0,
+  "detalles": [
+    {
+      "ref": "403588",
+      "descripcion": "*MAGNET TX3 6KA C P+N 25A",
+      "precio_anterior": 0.2,
+      "precio_nuevo": 25.0,
+      "cambio": 24.8,
+      "pct_cambio": 12400.0,
+      "estado": "SUBIDA"
+    },
+    {
+      "ref": "403033",
+      "descripcion": "DIFERENCIAL TX3 2/40/30 AC",
+      "precio_anterior": 39.89,
+      "precio_nuevo": 29.78,
+      "cambio": -10.11,
+      "pct_cambio": -25.344697919278016,
+      "estado": "BAJADA"
+    },
+    {
+      "ref": "411525",
+      "descripcion": "DIFERENCIAL DX3 2/40/300 AC",
+      "precio_anterior": 39.89,
+      "precio_nuevo": 35.01,
+      "cambio": -4.880000000000003,
+      "pct_cambio": -12.23364251692154,
+      "estado": "BAJADA"
+    },
+    {
+      "ref": "403629",
+      "descripcion": "DIFERENCIAL DX3 4/40/300 AC",
+      "precio_anterior": 36.65,
+      "precio_nuevo": 13.7,
+      "cambio": -22.95,
+      "pct_cambio": -62.619372442019106,
+      "estado": "BAJADA"
+    },
+    {
+      "ref": "403630",
+      "descripcion": "DIFERENCIAL DX3 4/63/30 AC",
+      "precio_anterior": 0.82,
+      "precio_nuevo": 16.1,
+      "cambio": 15.280000000000001,
+      "pct_cambio": 1863.4146341463418,
+      "estado": "SUBIDA"
+    }
+  ]
+}
