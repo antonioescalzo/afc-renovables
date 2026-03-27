@@ -6,6 +6,7 @@ import {
   fetchProductosPorProveedor
 } from '../lib/supabase-compras'
 import ComparadorProveedorPDF from './ComparadorProveedorPDF'
+import AlmacenEntradasSalidas from './AlmacenEntradasSalidas'
 
 // Colores AFC
 const C={
@@ -225,6 +226,22 @@ export default function ProveedoresTab() {
           >
             📄 Comparador PDF
           </button>
+          <button
+            onClick={() => { setActiveTab('almacen'); }}
+            style={{
+              padding: '6px 12px',
+              background: activeTab === 'almacen' ? C.green3 : C.bg3,
+              color: activeTab === 'almacen' ? C.green2 : C.muted,
+              border: `1px solid ${activeTab === 'almacen' ? C.green3 : C.border}`,
+              borderRadius: 6,
+              cursor: 'pointer',
+              fontSize: '0.7rem',
+              fontWeight: 700,
+              transition: 'all 0.2s'
+            }}
+          >
+            📦 Entradas/Salidas
+          </button>
         </div>
       </div>
 
@@ -440,6 +457,11 @@ export default function ProveedoresTab() {
       {/* SECCIÓN COMPARADOR PDF */}
       {activeTab === 'comparador' && (
         <ComparadorProveedorPDF />
+      )}
+
+      {/* SECCIÓN ALMACÉN ENTRADAS/SALIDAS */}
+      {activeTab === 'almacen' && (
+        <AlmacenEntradasSalidas />
       )}
     </div>
   );
