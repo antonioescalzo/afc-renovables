@@ -1,0 +1,96 @@
+{
+  "fecha_generacion": "2026-03-27T07:42:26.236686",
+  "proveedores": {
+    "ELECTROSTOCK": {
+      "total_productos": 12,
+      "valor_total": 254.37,
+      "precio_promedio": 21.1975,
+      "productos": [
+        {
+          "ref": "403588",
+          "descripcion": "*MAGNET TX3 6KA C P+N 25A",
+          "precio": 25.0,
+          "proveedor": "ELECTROSTOCK",
+          "fecha": "2026-03-27"
+        },
+        {
+          "ref": "403589",
+          "descripcion": "*MAGNET TX3 6KA C P+N 32A",
+          "precio": 1.0,
+          "proveedor": "ELECTROSTOCK",
+          "fecha": "2026-03-27"
+        },
+        {
+          "ref": "403590",
+          "descripcion": "*MAGNET TX3 6KA C P+N 40A",
+          "precio": 1.0,
+          "proveedor": "ELECTROSTOCK",
+          "fecha": "2026-03-27"
+        },
+        {
+          "ref": "403612",
+          "descripcion": "*MAGNET TX3 6KA C 2P 63A",
+          "precio": 1.0,
+          "proveedor": "ELECTROSTOCK",
+          "fecha": "2026-03-27"
+        },
+        {
+          "ref": "403033",
+          "descripcion": "DIFERENCIAL TX3 2/40/30 AC",
+          "precio": 29.78,
+          "proveedor": "ELECTROSTOCK",
+          "fecha": "2026-03-27"
+        },
+        {
+          "ref": "411525",
+          "descripcion": "DIFERENCIAL DX3 2/40/300 AC",
+          "precio": 35.01,
+          "proveedor": "ELECTROSTOCK",
+          "fecha": "2026-03-27"
+        },
+        {
+          "ref": "411506",
+          "descripcion": "DIFERENCIAL DX3 2/63/30 AC",
+          "precio": 47.59,
+          "proveedor": "ELECTROSTOCK",
+          "fecha": "2026-03-27"
+        },
+        {
+          "ref": "411526",
+          "descripcion": "DIFERENCIAL DX3 2/63/300 AC",
+          "precio": 54.0,
+          "proveedor": "ELECTROSTOCK",
+          "fecha": "2026-03-27"
+        },
+        {
+          "ref": "403628",
+          "descripcion": "DIFERENCIAL TX3 4/40/30 AC",
+          "precio": 8.3,
+          "proveedor": "ELECTROSTOCK",
+          "fecha": "2026-03-27"
+        },
+        {
+          "ref": "403629",
+          "descripcion": "DIFERENCIAL DX3 4/40/300 AC",
+          "precio": 13.7,
+          "proveedor": "ELECTROSTOCK",
+          "fecha": "2026-03-27"
+        },
+        {
+          "ref": "403630",
+          "descripcion": "DIFERENCIAL DX3 4/63/30 AC",
+          "precio": 16.1,
+          "proveedor": "ELECTROSTOCK",
+          "fecha": "2026-03-27"
+        },
+        {
+          "ref": "403632",
+          "descripcion": "DIFERENCIAL DX3 4/63/300 AC",
+          "precio": 21.89,
+          "proveedor": "ELECTROSTOCK",
+          "fecha": "2026-03-27"
+        }
+      ]
+    }
+  }
+}
