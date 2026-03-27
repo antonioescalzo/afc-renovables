@@ -93,6 +93,12 @@ export default function ComparadorProveedorPDF() {
   }
 
   const realizarAnalisisExhaustivo = (productosSupabase) => {
+    console.log('🔍 DEBUG: Productos en Supabase:', productosSupabase.length)
+    if (productosSupabase.length > 0) {
+      console.log('🔍 Primeros 3 productos:', productosSupabase.slice(0, 3))
+      console.log('🔍 Campos disponibles:', Object.keys(productosSupabase[0]))
+    }
+
     const refsPDF = {}
     productosElectrostockPDF.forEach(p => {
       refsPDF[p.ref] = p
@@ -100,8 +106,16 @@ export default function ComparadorProveedorPDF() {
 
     const refsSupabase = {}
     productosSupabase.forEach(p => {
-      if (p.ref) refsSupabase[p.ref] = p
+      // Intentar encontrar la referencia en diferentes campos
+      const ref = p.ref || p.referencia || p.reference || p.codigo || p.sku || p.producto_ref
+      const refClean = ref ? String(ref).trim().toUpperCase() : null
+      if (refClean) {
+        refsSupabase[refClean] = { ...p, refOriginal: ref }
+      }
     })
+
+    console.log('🔍 Referencias en PDF:', Object.keys(refsPDF).slice(0, 5))
+    console.log('🔍 Referencias en Supabase:', Object.keys(refsSupabase).slice(0, 5))
 
     const productosComparados = []
     const soloPDF = []
@@ -109,11 +123,13 @@ export default function ComparadorProveedorPDF() {
 
     // Productos coincidentes con análisis de precios
     Object.keys(refsPDF).forEach(ref => {
-      if (refsSupabase[ref]) {
+      const refClean = ref.trim().toUpperCase()
+      if (refsSupabase[refClean]) {
         const pdfProd = refsPDF[ref]
-        const supaProd = refsSupabase[ref]
+        const supaProd = refsSupabase[refClean]
         const pdfPrecio = pdfProd.importe
-        const supaPrecio = supaProd.precio || 0
+        // Intentar diferentes campos de precio
+        const supaPrecio = supaProd.precio || supaProd.importe_total || supaProd.valor || supaProd.precio_unitario || 0
         const diferencia = supaPrecio - pdfPrecio
         const pctDiferencia = pdfPrecio > 0 ? (diferencia / pdfPrecio * 100) : 0
         const ahorro = pdfPrecio > supaPrecio ? diferencia * -1 : 0
@@ -138,7 +154,8 @@ export default function ComparadorProveedorPDF() {
     })
 
     Object.keys(refsSupabase).forEach(ref => {
-      if (!refsPDF[ref]) {
+      const refBuscada = Object.keys(refsPDF).find(k => k.trim().toUpperCase() === ref)
+      if (!refBuscada) {
         soloSupabase.push({
           ref,
           desc: refsSupabase[ref].descripcion || '',
@@ -146,6 +163,8 @@ export default function ComparadorProveedorPDF() {
         })
       }
     })
+
+    console.log('✅ Coincidencias encontradas:', productosComparados.length)
 
     // Cálculos de análisis
     const totalPDF = productosElectrostockPDF.reduce((sum, p) => sum + p.importe, 0)
