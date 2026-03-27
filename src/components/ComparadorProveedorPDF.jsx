@@ -75,9 +75,10 @@ export default function ComparadorProveedorPDF() {
 
       // Buscar productos del proveedor
       const { data: productosData, error: prodError } = await supabase
-        .from('articulos')
+        .from('v_productos_por_proveedor')
         .select('*')
         .eq('proveedor_id', prov.id)
+        .limit(1000)
 
       if (prodError) throw prodError
 
@@ -85,8 +86,8 @@ export default function ComparadorProveedorPDF() {
       realizarComparacion(productosData || [])
       setLoading(false)
     } catch (err) {
-      console.error(err)
-      setError('Error al cargar datos de Supabase')
+      console.error('Error en ComparadorProveedorPDF:', err)
+      setError(`Error al cargar datos de Supabase: ${err.message || JSON.stringify(err)}`)
       setLoading(false)
     }
   }
@@ -99,7 +100,7 @@ export default function ComparadorProveedorPDF() {
 
     const refsSupabase = {}
     productosSupabase.forEach(p => {
-      const ref = p.referencia || p.ref
+      const ref = p.ref
       if (ref) refsSupabase[ref] = p
     })
 
