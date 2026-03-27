@@ -18,12 +18,15 @@ const C={
   card:"#0a1c0b",white:"#f0faf1",
 };
 
+const fmt = n => new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n || 0);
+
 export default function ComparadorProveedorPDF() {
   const [productosSupabase, setProductosSupabase] = useState([])
   const [proveedor, setProveedor] = useState(null)
-  const [comparacion, setComparacion] = useState(null)
+  const [analisis, setAnalisis] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [expandedSection, setExpandedSection] = useState('resumenes')
 
   // Datos de prueba del presupuesto PDF
   const productosElectrostockPDF = [
@@ -55,7 +58,6 @@ export default function ComparadorProveedorPDF() {
 
   const cargarDatos = async () => {
     try {
-      // Buscar proveedor GRUPO ELECTRO STOCK
       const { data: proveedoresData, error: provError } = await supabase
         .from('proveedores')
         .select('id, nombre')
@@ -63,7 +65,6 @@ export default function ComparadorProveedorPDF() {
         .limit(1)
 
       if (provError) throw provError
-
       if (!proveedoresData || proveedoresData.length === 0) {
         setError('Proveedor GRUPO ELECTRO STOCK no encontrado')
         setLoading(false)
@@ -73,7 +74,6 @@ export default function ComparadorProveedorPDF() {
       const prov = proveedoresData[0]
       setProveedor(prov)
 
-      // Buscar productos del proveedor
       const { data: productosData, error: prodError } = await supabase
         .from('v_productos_por_proveedor')
         .select('*')
@@ -83,16 +83,16 @@ export default function ComparadorProveedorPDF() {
       if (prodError) throw prodError
 
       setProductosSupabase(productosData || [])
-      realizarComparacion(productosData || [])
+      realizarAnalisisExhaustivo(productosData || [])
       setLoading(false)
     } catch (err) {
       console.error('Error en ComparadorProveedorPDF:', err)
-      setError(`Error al cargar datos de Supabase: ${err.message || JSON.stringify(err)}`)
+      setError(`Error: ${err.message || JSON.stringify(err)}`)
       setLoading(false)
     }
   }
 
-  const realizarComparacion = (productosSupabase) => {
+  const realizarAnalisisExhaustivo = (productosSupabase) => {
     const refsPDF = {}
     productosElectrostockPDF.forEach(p => {
       refsPDF[p.ref] = p
@@ -100,145 +100,277 @@ export default function ComparadorProveedorPDF() {
 
     const refsSupabase = {}
     productosSupabase.forEach(p => {
-      const ref = p.ref
-      if (ref) refsSupabase[ref] = p
+      if (p.ref) refsSupabase[p.ref] = p
     })
 
-    const coincidencias = []
+    const productosComparados = []
     const soloPDF = []
     const soloSupabase = []
-    const conDiferencias = []
 
+    // Productos coincidentes con análisis de precios
     Object.keys(refsPDF).forEach(ref => {
       if (refsSupabase[ref]) {
         const pdfProd = refsPDF[ref]
         const supaProd = refsSupabase[ref]
+        const pdfPrecio = pdfProd.importe
+        const supaPrecio = supaProd.precio || 0
+        const diferencia = supaPrecio - pdfPrecio
+        const pctDiferencia = pdfPrecio > 0 ? (diferencia / pdfPrecio * 100) : 0
+        const ahorro = pdfPrecio > supaPrecio ? diferencia * -1 : 0
 
-        if (supaProd.precio && pdfProd.importe && supaProd.precio !== pdfProd.importe) {
-          conDiferencias.push({
-            ref,
-            pdfPrecio: pdfProd.importe,
-            supaPrecio: supaProd.precio,
-            pctDiferencia: ((supaProd.precio - pdfProd.importe) / pdfProd.importe * 100).toFixed(2)
-          })
-        } else {
-          coincidencias.push(ref)
-        }
+        productosComparados.push({
+          ref,
+          desc: pdfProd.desc,
+          pdfPrecio,
+          supaPrecio,
+          diferencia: diferencia.toFixed(2),
+          pctDiferencia: pctDiferencia.toFixed(2),
+          ahorro: ahorro > 0 ? ahorro.toFixed(2) : 0,
+          esAhorro: pdfPrecio > supaPrecio
+        })
       } else {
-        soloPDF.push({ ref, ...refsPDF[ref] })
+        soloPDF.push({
+          ref,
+          desc: productosElectrostockPDF.find(p => p.ref === ref)?.desc || '',
+          importe: refsPDF[ref].importe
+        })
       }
     })
 
     Object.keys(refsSupabase).forEach(ref => {
       if (!refsPDF[ref]) {
-        soloSupabase.push({ ref, ...refsSupabase[ref] })
+        soloSupabase.push({
+          ref,
+          desc: refsSupabase[ref].descripcion || '',
+          precio: refsSupabase[ref].precio || 0
+        })
       }
     })
 
-    setComparacion({
-      totalPDF: Object.keys(refsPDF).length,
-      totalSupabase: productosSupabase.length,
-      coincidenciasExactas: coincidencias.length,
-      conDiferencias: conDiferencias.length,
-      soloPDF: soloPDF.length,
-      soloSupabase: soloSupabase.length,
-      detalles: {
-        coincidencias,
-        conDiferencias,
-        soloPDF,
-        soloSupabase
+    // Cálculos de análisis
+    const totalPDF = productosElectrostockPDF.reduce((sum, p) => sum + p.importe, 0)
+    const totalSupabase = productosComparados.reduce((sum, p) => sum + p.supaPrecio, 0)
+    const ahorroTotal = Math.max(0, totalPDF - totalSupabase)
+    const incrementoTotal = totalSupabase > totalPDF ? totalSupabase - totalPDF : 0
+    const pctAhorro = totalPDF > 0 ? (ahorroTotal / totalPDF * 100) : 0
+    const pctIncremento = totalPDF > 0 ? (incrementoTotal / totalPDF * 100) : 0
+
+    const productosMasBaratos = productosComparados
+      .filter(p => p.esAhorro)
+      .sort((a, b) => parseFloat(b.ahorro) - parseFloat(a.ahorro))
+      .slice(0, 5)
+
+    const productosConIncremento = productosComparados
+      .filter(p => !p.esAhorro)
+      .sort((a, b) => parseFloat(b.diferencia) - parseFloat(a.diferencia))
+      .slice(0, 5)
+
+    setAnalisis({
+      productosComparados,
+      soloPDF,
+      soloSupabase,
+      estadisticas: {
+        totalPDF,
+        totalSupabase,
+        ahorroTotal,
+        incrementoTotal,
+        pctAhorro: pctAhorro.toFixed(2),
+        pctIncremento: pctIncremento.toFixed(2),
+        productosEnPDF: refsPDF.length,
+        productosEnDashboard: productosSupabase.length,
+        coincidencias: productosComparados.length,
+        conAhorro: productosComparados.filter(p => p.esAhorro).length,
+        conIncremento: productosComparados.filter(p => !p.esAhorro).length
+      },
+      top5: {
+        masBaratos: productosMasBaratos,
+        conIncremento: productosConIncremento
       }
     })
   }
 
   if (loading) {
-    return (
-      <div style={{padding: '20px', textAlign: 'center', color: C.muted}}>
-        <p>⏳ Cargando comparación...</p>
-      </div>
-    )
+    return <div style={{padding: '20px', textAlign: 'center', color: C.muted}}>⏳ Cargando análisis...</div>
   }
 
   if (error) {
-    return (
-      <div style={{padding: '20px', background: C.red + '20', borderRadius: '8px', color: C.red}}>
-        <strong>❌ {error}</strong>
-      </div>
-    )
+    return <div style={{padding: '20px', background: C.red + '20', borderRadius: '8px', color: C.red}}><strong>❌ {error}</strong></div>
   }
+
+  if (!analisis) return null
+
+  const { estadisticas, productosComparados, top5, soloPDF, soloSupabase } = analisis
 
   return (
     <div style={{padding: '16px'}}>
-      <h3 style={{color: C.green2, marginBottom: 16}}>📊 Comparación: PDF ELECTROSTOCK vs Dashboard</h3>
+      <h3 style={{color: C.green2, marginBottom: 16}}>📊 Análisis Exhaustivo: ELECTROSTOCK PDF vs Dashboard</h3>
 
       {proveedor && (
-        <div style={{background: C.bg3, padding: '12px', borderRadius: '8px', marginBottom: '16px', fontSize: '0.75rem'}}>
+        <div style={{background: C.bg3, padding: '12px', borderRadius: '8px', marginBottom: '20px', fontSize: '0.75rem'}}>
           <strong style={{color: C.teal2}}>Proveedor:</strong> {proveedor.nombre}
         </div>
       )}
 
-      {comparacion && (
-        <div>
-          <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px', marginBottom: '20px'}}>
-            <div style={{background: C.green3, padding: '12px', borderRadius: '8px', border: `1px solid ${C.green3}`}}>
-              <div style={{fontSize: '1.6em', fontWeight: 'bold', color: C.green2}}>{comparacion.totalPDF}</div>
-              <div style={{color: C.muted, fontSize: '0.7em'}}>Productos en PDF</div>
-            </div>
-
-            <div style={{background: C.teal3, padding: '12px', borderRadius: '8px', border: `1px solid ${C.teal3}`}}>
-              <div style={{fontSize: '1.6em', fontWeight: 'bold', color: C.teal2}}>{comparacion.totalSupabase}</div>
-              <div style={{color: C.muted, fontSize: '0.7em'}}>En Dashboard</div>
-            </div>
-
-            <div style={{background: C.bg3, padding: '12px', borderRadius: '8px', border: `1px solid ${C.border}`}}>
-              <div style={{fontSize: '1.6em', fontWeight: 'bold', color: C.green2}}>{comparacion.coincidenciasExactas}</div>
-              <div style={{color: C.muted, fontSize: '0.7em'}}>Coincidencias</div>
-            </div>
-
-            <div style={{background: C.bg3, padding: '12px', borderRadius: '8px', border: `1px solid ${C.border}`}}>
-              <div style={{fontSize: '1.6em', fontWeight: 'bold', color: C.yellow}}>{comparacion.conDiferencias}</div>
-              <div style={{color: C.muted, fontSize: '0.7em'}}>Diferencias</div>
-            </div>
+      {/* RESUMEN FINANCIERO */}
+      <div style={{marginBottom: '20px'}}>
+        <h4 style={{color: C.accent, fontSize: '0.8rem', marginBottom: '12px', fontFamily: 'monospace', textTransform: 'uppercase'}}>💰 Resumen Financiero</h4>
+        <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '10px'}}>
+          <div style={{background: C.card, border: `1px solid ${C.border}`, borderRadius: '8px', padding: '12px'}}>
+            <div style={{color: C.muted, fontSize: '0.6rem', textTransform: 'uppercase', marginBottom: '4px', fontFamily: 'monospace'}}>PDF Total</div>
+            <div style={{color: C.green2, fontSize: '1.4rem', fontWeight: 'bold'}}>{fmt(estadisticas.totalPDF)}</div>
           </div>
+          <div style={{background: C.card, border: `1px solid ${C.border}`, borderRadius: '8px', padding: '12px'}}>
+            <div style={{color: C.muted, fontSize: '0.6rem', textTransform: 'uppercase', marginBottom: '4px', fontFamily: 'monospace'}}>Dashboard Total</div>
+            <div style={{color: C.teal2, fontSize: '1.4rem', fontWeight: 'bold'}}>{fmt(estadisticas.totalSupabase)}</div>
+          </div>
+          <div style={{background: estadisticas.ahorroTotal > 0 ? C.green3 : C.bg3, border: `1px solid ${estadisticas.ahorroTotal > 0 ? C.green3 : C.border}`, borderRadius: '8px', padding: '12px'}}>
+            <div style={{color: C.muted, fontSize: '0.6rem', textTransform: 'uppercase', marginBottom: '4px', fontFamily: 'monospace'}}>Ahorro Potencial</div>
+            <div style={{color: C.green2, fontSize: '1.4rem', fontWeight: 'bold'}}>{fmt(estadisticas.ahorroTotal)}</div>
+            <div style={{color: C.green2, fontSize: '0.65rem'}}>(-{estadisticas.pctAhorro}%)</div>
+          </div>
+          <div style={{background: estadisticas.incrementoTotal > 0 ? C.bg3 : C.bg3, border: `1px solid ${C.border}`, borderRadius: '8px', padding: '12px'}}>
+            <div style={{color: C.muted, fontSize: '0.6rem', textTransform: 'uppercase', marginBottom: '4px', fontFamily: 'monospace'}}>Incremento</div>
+            <div style={{color: estadisticas.incrementoTotal > 0 ? C.orange : C.muted, fontSize: '1.4rem', fontWeight: 'bold'}}>{fmt(estadisticas.incrementoTotal)}</div>
+            <div style={{color: C.orange, fontSize: '0.65rem'}}>({estadisticas.pctIncremento > 0 ? '+' : ''}{estadisticas.pctIncremento}%)</div>
+          </div>
+        </div>
+      </div>
 
-          {comparacion.soloPDF > 0 && (
-            <div style={{background: C.bg3, padding: '12px', borderRadius: '8px', marginBottom: '12px', border: `1px solid ${C.border}`}}>
-              <h4 style={{color: C.green2, margin: '0 0 8px 0', fontSize: '0.8rem'}}>📄 Productos nuevos (solo en PDF): {comparacion.soloPDF}</h4>
-              <ul style={{paddingLeft: '20px', fontSize: '0.7rem', margin: 0}}>
-                {comparacion.detalles.soloPDF.slice(0, 5).map(item => (
-                  <li key={item.ref}>{item.ref}: {item.desc.substring(0, 40)}</li>
-                ))}
-              </ul>
-            </div>
-          )}
+      {/* ESTADÍSTICAS PRODUCTOS */}
+      <div style={{marginBottom: '20px'}}>
+        <h4 style={{color: C.accent, fontSize: '0.8rem', marginBottom: '12px', fontFamily: 'monospace', textTransform: 'uppercase'}}>📦 Estadísticas de Productos</h4>
+        <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '10px'}}>
+          <div style={{background: C.card, border: `1px solid ${C.border}`, borderRadius: '8px', padding: '10px', textAlign: 'center'}}>
+            <div style={{color: C.muted, fontSize: '0.6rem', marginBottom: '4px'}}>Coincidentes</div>
+            <div style={{color: C.teal2, fontSize: '1.6rem', fontWeight: 'bold'}}>{estadisticas.coincidencias}</div>
+          </div>
+          <div style={{background: C.card, border: `1px solid ${C.border}`, borderRadius: '8px', padding: '10px', textAlign: 'center'}}>
+            <div style={{color: C.muted, fontSize: '0.6rem', marginBottom: '4px'}}>Con Ahorro</div>
+            <div style={{color: C.green2, fontSize: '1.6rem', fontWeight: 'bold'}}>{estadisticas.conAhorro}</div>
+          </div>
+          <div style={{background: C.card, border: `1px solid ${C.border}`, borderRadius: '8px', padding: '10px', textAlign: 'center'}}>
+            <div style={{color: C.muted, fontSize: '0.6rem', marginBottom: '4px'}}>Con Incremento</div>
+            <div style={{color: C.orange, fontSize: '1.6rem', fontWeight: 'bold'}}>{estadisticas.conIncremento}</div>
+          </div>
+          <div style={{background: C.card, border: `1px solid ${C.border}`, borderRadius: '8px', padding: '10px', textAlign: 'center'}}>
+            <div style={{color: C.muted, fontSize: '0.6rem', marginBottom: '4px'}}>Solo PDF</div>
+            <div style={{color: C.yellow, fontSize: '1.6rem', fontWeight: 'bold'}}>{soloPDF.length}</div>
+          </div>
+        </div>
+      </div>
 
-          {comparacion.conDiferencias > 0 && (
-            <div style={{background: C.bg3, padding: '12px', borderRadius: '8px', marginBottom: '12px', border: `1px solid ${C.border}`}}>
-              <h4 style={{color: C.yellow, margin: '0 0 8px 0', fontSize: '0.8rem'}}>⚠️ Con diferencias de precio: {comparacion.conDiferencias}</h4>
-              <table style={{width: '100%', fontSize: '0.65rem', borderCollapse: 'collapse'}}>
-                <thead>
-                  <tr style={{borderBottom: `1px solid ${C.border}`}}>
-                    <th style={{padding: '4px', textAlign: 'left', color: C.teal2}}>REF</th>
-                    <th style={{padding: '4px', textAlign: 'right', color: C.teal2}}>PDF €</th>
-                    <th style={{padding: '4px', textAlign: 'right', color: C.teal2}}>Dashboard €</th>
-                    <th style={{padding: '4px', textAlign: 'right', color: C.teal2}}>%</th>
+      {/* TOP 5 MÁS BARATOS */}
+      {top5.masBaratos.length > 0 && (
+        <div style={{marginBottom: '20px', background: C.bg3, padding: '12px', borderRadius: '8px', border: `1px solid ${C.green3}`}}>
+          <h4 style={{color: C.green2, margin: '0 0 12px 0', fontSize: '0.75rem'}}>🎯 TOP 5 Mejores Ahorros</h4>
+          <div style={{overflowX: 'auto'}}>
+            <table style={{width: '100%', fontSize: '0.65rem', borderCollapse: 'collapse'}}>
+              <thead>
+                <tr style={{borderBottom: `1px solid ${C.border}`}}>
+                  <th style={{padding: '6px', textAlign: 'left', color: C.teal2}}>REF</th>
+                  <th style={{padding: '6px', textAlign: 'left', color: C.teal2}}>PRODUCTO</th>
+                  <th style={{padding: '6px', textAlign: 'right', color: C.teal2}}>PDF</th>
+                  <th style={{padding: '6px', textAlign: 'right', color: C.teal2}}>DASHBOARD</th>
+                  <th style={{padding: '6px', textAlign: 'right', color: C.teal2}}>AHORRO €</th>
+                  <th style={{padding: '6px', textAlign: 'right', color: C.teal2}}>%</th>
+                </tr>
+              </thead>
+              <tbody>
+                {top5.masBaratos.map(p => (
+                  <tr key={p.ref} style={{borderBottom: `1px solid ${C.border}`}}>
+                    <td style={{padding: '6px', color: C.teal2, fontWeight: 'bold'}}>{p.ref}</td>
+                    <td style={{padding: '6px', color: C.text, fontSize: '0.6rem'}}>{p.desc.substring(0, 25)}...</td>
+                    <td style={{padding: '6px', textAlign: 'right', color: C.yellow}}>{fmt(parseFloat(p.pdfPrecio))}</td>
+                    <td style={{padding: '6px', textAlign: 'right', color: C.green2}}>{fmt(parseFloat(p.supaPrecio))}</td>
+                    <td style={{padding: '6px', textAlign: 'right', color: C.green2, fontWeight: 'bold'}}-{fmt(parseFloat(p.ahorro))}</td>
+                    <td style={{padding: '6px', textAlign: 'right', color: C.green2, fontWeight: 'bold'}}>-{p.pctDiferencia}%</td>
                   </tr>
-                </thead>
-                <tbody>
-                  {comparacion.detalles.conDiferencias.slice(0, 3).map(item => (
-                    <tr key={item.ref} style={{borderBottom: `1px solid ${C.border}`}}>
-                      <td style={{padding: '4px', color: C.teal2}}>{item.ref}</td>
-                      <td style={{padding: '4px', textAlign: 'right', color: C.green2}}>{item.pdfPrecio.toFixed(2)}</td>
-                      <td style={{padding: '4px', textAlign: 'right', color: C.green2}}>{item.supaPrecio.toFixed(2)}</td>
-                      <td style={{padding: '4px', textAlign: 'right', color: item.pctDiferencia > 0 ? C.red : C.green2}}>
-                        {item.pctDiferencia}%
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* PRODUCTOS CON INCREMENTO */}
+      {top5.conIncremento.length > 0 && (
+        <div style={{marginBottom: '20px', background: C.bg3, padding: '12px', borderRadius: '8px', border: `1px solid ${C.orange}`}}>
+          <h4 style={{color: C.orange, margin: '0 0 12px 0', fontSize: '0.75rem'}}>⚠️ TOP 5 Mayor Incremento</h4>
+          <div style={{overflowX: 'auto'}}>
+            <table style={{width: '100%', fontSize: '0.65rem', borderCollapse: 'collapse'}}>
+              <thead>
+                <tr style={{borderBottom: `1px solid ${C.border}`}}>
+                  <th style={{padding: '6px', textAlign: 'left', color: C.teal2}}>REF</th>
+                  <th style={{padding: '6px', textAlign: 'left', color: C.teal2}}>PRODUCTO</th>
+                  <th style={{padding: '6px', textAlign: 'right', color: C.teal2}}>PDF</th>
+                  <th style={{padding: '6px', textAlign: 'right', color: C.teal2}}>DASHBOARD</th>
+                  <th style={{padding: '6px', textAlign: 'right', color: C.teal2}}>INCREMENTO €</th>
+                  <th style={{padding: '6px', textAlign: 'right', color: C.teal2}}>%</th>
+                </tr>
+              </thead>
+              <tbody>
+                {top5.conIncremento.map(p => (
+                  <tr key={p.ref} style={{borderBottom: `1px solid ${C.border}`}}>
+                    <td style={{padding: '6px', color: C.teal2, fontWeight: 'bold'}}>{p.ref}</td>
+                    <td style={{padding: '6px', color: C.text, fontSize: '0.6rem'}}>{p.desc.substring(0, 25)}...</td>
+                    <td style={{padding: '6px', textAlign: 'right', color: C.yellow}}>{fmt(parseFloat(p.pdfPrecio))}</td>
+                    <td style={{padding: '6px', textAlign: 'right', color: C.orange}}>{fmt(parseFloat(p.supaPrecio))}</td>
+                    <td style={{padding: '6px', textAlign: 'right', color: C.red, fontWeight: 'bold'}}>+{fmt(parseFloat(p.diferencia))}</td>
+                    <td style={{padding: '6px', textAlign: 'right', color: C.red, fontWeight: 'bold'}}>+{p.pctDiferencia}%</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* TABLA COMPARATIVA COMPLETA */}
+      <div style={{marginBottom: '20px', background: C.bg3, padding: '12px', borderRadius: '8px', border: `1px solid ${C.border}`}}>
+        <h4 style={{color: C.accent, margin: '0 0 12px 0', fontSize: '0.75rem'}}>📋 Tabla Comparativa Completa ({productosComparados.length} productos)</h4>
+        <div style={{overflowX: 'auto', maxHeight: '400px', overflowY: 'auto'}}>
+          <table style={{width: '100%', fontSize: '0.6rem', borderCollapse: 'collapse'}}>
+            <thead style={{position: 'sticky', top: 0, background: C.bg3}}>
+              <tr style={{borderBottom: `2px solid ${C.border}`}}>
+                <th style={{padding: '6px', textAlign: 'left', color: C.teal2}}>REF</th>
+                <th style={{padding: '6px', textAlign: 'left', color: C.teal2}}>DESCRIPCIÓN</th>
+                <th style={{padding: '6px', textAlign: 'right', color: C.teal2}}>PDF €</th>
+                <th style={{padding: '6px', textAlign: 'right', color: C.teal2}}>DB €</th>
+                <th style={{padding: '6px', textAlign: 'right', color: C.teal2}}>DIFER. €</th>
+                <th style={{padding: '6px', textAlign: 'right', color: C.teal2}}>%</th>
+              </tr>
+            </thead>
+            <tbody>
+              {productosComparados.map(p => (
+                <tr key={p.ref} style={{borderBottom: `1px solid ${C.border}`, background: p.esAhorro ? C.green3 + '10' : C.bg3}}>
+                  <td style={{padding: '4px', color: C.teal2, fontWeight: 'bold'}}>{p.ref}</td>
+                  <td style={{padding: '4px', color: C.text, fontSize: '0.55rem'}}>{p.desc.substring(0, 30)}</td>
+                  <td style={{padding: '4px', textAlign: 'right', color: C.yellow}}>{fmt(p.pdfPrecio)}</td>
+                  <td style={{padding: '4px', textAlign: 'right', color: C.green2}}>{fmt(p.supaPrecio)}</td>
+                  <td style={{padding: '4px', textAlign: 'right', color: p.esAhorro ? C.green2 : C.orange, fontWeight: 'bold'}}>
+                    {p.esAhorro ? '-' : '+'}{fmt(Math.abs(parseFloat(p.diferencia)))}
+                  </td>
+                  <td style={{padding: '4px', textAlign: 'right', color: p.esAhorro ? C.green2 : C.orange, fontWeight: 'bold'}}>
+                    {p.esAhorro ? '-' : '+'}{p.pctDiferencia}%
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* PRODUCTOS SOLO EN PDF */}
+      {soloPDF.length > 0 && (
+        <div style={{marginBottom: '20px', background: C.bg3, padding: '12px', borderRadius: '8px', border: `1px solid ${C.yellow}`}}>
+          <h4 style={{color: C.yellow, margin: '0 0 12px 0', fontSize: '0.75rem'}}>📄 Solo en PDF ({soloPDF.length} productos)</h4>
+          <div style={{fontSize: '0.65rem', maxHeight: '200px', overflowY: 'auto'}}>
+            {soloPDF.map(p => (
+              <div key={p.ref} style={{padding: '4px', borderBottom: `1px solid ${C.border}`, color: C.text}}>
+                <span style={{color: C.teal2, fontWeight: 'bold'}}>{p.ref}</span> - {p.desc.substring(0, 40)} <span style={{color: C.yellow, float: 'right'}}>{fmt(p.importe)}</span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
