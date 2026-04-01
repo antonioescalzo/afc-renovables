@@ -7,6 +7,7 @@ import {
 } from '../lib/supabase-compras'
 import ComparadorProveedorPDF from './ComparadorProveedorPDF'
 import AlmacenEntradasSalidas from './AlmacenEntradasSalidas'
+import AnalizerPreciosPDF from './AnalizerPreciosPDF'
 
 // Colores AFC
 const C={
@@ -242,6 +243,22 @@ export default function ProveedoresTab() {
           >
             📦 Entradas/Salidas
           </button>
+          <button
+            onClick={() => { setActiveTab('precios_pdf'); }}
+            style={{
+              padding: '6px 12px',
+              background: activeTab === 'precios_pdf' ? C.green3 : C.bg3,
+              color: activeTab === 'precios_pdf' ? C.green2 : C.muted,
+              border: `1px solid ${activeTab === 'precios_pdf' ? C.green3 : C.border}`,
+              borderRadius: 6,
+              cursor: 'pointer',
+              fontSize: '0.7rem',
+              fontWeight: 700,
+              transition: 'all 0.2s'
+            }}
+          >
+            💰 Análisis Precios PDF
+          </button>
         </div>
       </div>
 
@@ -462,6 +479,11 @@ export default function ProveedoresTab() {
       {/* SECCIÓN ALMACÉN ENTRADAS/SALIDAS */}
       {activeTab === 'almacen' && (
         <AlmacenEntradasSalidas />
+      )}
+
+      {/* SECCIÓN ANÁLISIS PRECIOS PDF */}
+      {activeTab === 'precios_pdf' && (
+        <AnalizerPreciosPDF />
       )}
     </div>
   );
