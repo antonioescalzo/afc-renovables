@@ -11,6 +11,7 @@ import AnalizerPreciosPDF from './AnalizerPreciosPDF'
 import ExportadorPreciosProveedores from './ExportadorPreciosProveedores'
 import ComparadorPreciosProveedores from './ComparadorPreciosProveedores'
 import BuscadorProductos from './BuscadorProductos'
+import productosEclimen from '../data/CLIMEN_PRODUCTOS.json'
 
 // Colores AFC
 const C={
@@ -93,7 +94,24 @@ export default function ProveedoresTab() {
     setProductosLoading(true)
     try {
       const res = await fetchProductosPorProveedor(proveedorId)
-      if (res.data) setProductos(res.data)
+      let productosFinales = res.data || []
+
+      // Si es ECLIMEN, agregar productos locales
+      const proveedorSeleccionadoNombre = proveedores.find(p => p.proveedor_id === proveedorId)?.proveedor || ''
+      if (proveedorSeleccionadoNombre.toUpperCase().includes('ECLIMEN')) {
+        const productosLocalesEclimen = productosEclimen.map(p => ({
+          ref: p.ref,
+          descripcion: p.desc,
+          precio: p.precio,
+          cantidad: 1,
+          importe_total: p.precio,
+          descuento: 0,
+          fecha: new Date().toISOString()
+        }))
+        productosFinales = [...productosFinales, ...productosLocalesEclimen]
+      }
+
+      setProductos(productosFinales)
     } catch (error) {
       console.error('Error loading productos:', error)
     } finally {
