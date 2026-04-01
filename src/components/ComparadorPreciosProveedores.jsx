@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import * as XLSX from 'xlsx'
 import productosElectrostockPDF from '../data/ELECTROSTOCK_PRESUPUESTO_FINAL.json'
+import productosClimen from '../data/CLIMEN_PRODUCTOS.json'
 
 const supabase = createClient(
   "https://xhzzfpsszsdqoiavqgis.supabase.co",
@@ -53,6 +54,14 @@ const electrostockData = productosElectrostockPDF.map(p => ({
   proveedor_nombre: 'ELECTROSTOCK'
 }))
 
+const climenDataMapped = productosClimen.map(p => ({
+  ref: p.ref,
+  desc: p.desc,
+  descripcion: p.desc,
+  precio: p.precio,
+  proveedor_nombre: 'CLIMEN'
+}))
+
 export default function ComparadorPreciosProveedores() {
   const [datos, setDatos] = useState({})
   const [loading, setLoading] = useState(true)
@@ -72,7 +81,7 @@ export default function ComparadorPreciosProveedores() {
       datosProveedores['PROINCO'] = proincoData
       datosProveedores['COTO'] = cotoData
       datosProveedores['RECA'] = recaData
-      datosProveedores['CLIMEN'] = climenData
+      datosProveedores['CLIMEN'] = [...climenData, ...climenDataMapped]
 
       // Log de carga
       PROVEEDORES_OBJETIVO.forEach(prov => {

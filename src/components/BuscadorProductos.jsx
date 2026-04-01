@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react'
 import productosElectrostockPDF from '../data/ELECTROSTOCK_PRESUPUESTO_FINAL.json'
+import productosClimen from '../data/CLIMEN_PRODUCTOS.json'
 
 const C = {
   bg: "#050f0a", bg2: "#081508", bg3: "#0d1f10",
@@ -48,7 +49,13 @@ const todosLosProductos = [
   ...proincoData,
   ...cotoData,
   ...recaData,
-  ...climenData
+  ...climenData,
+  ...productosClimen.map(p => ({
+    ref: p.ref || '',
+    desc: p.desc,
+    precio: p.precio,
+    proveedor: 'CLIMEN'
+  }))
 ]
 
 const fmt = n => new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n || 0)
