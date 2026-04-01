@@ -94,11 +94,11 @@ export default function ProveedoresTab() {
 
       // Encontrar el nombre del proveedor seleccionado
       const proveedorObj = proveedores.find(p => p.proveedor_id === proveedorId)
-      const proveedorNombre = proveedorObj?.proveedor || ''
+      const proveedorNombre = (proveedorObj?.proveedor || '').toLowerCase()
 
-      // Si es ECLIMEN (detectar por nombre o ID), agregar productos locales
-      if (proveedorNombre.toUpperCase().includes('ECLIMEN') ||
-          proveedorNombre.toUpperCase().includes('ELECT Y CLIMAT')) {
+      // Detectar ECLIMEN por múltiples variaciones de nombre
+      if (proveedorNombre.includes('eclimen') ||
+          proveedorNombre.includes('elect y climat')) {
         const productosLocalesEclimen = productosEclimen.map(p => ({
           ref: p.ref,
           descripcion: p.desc,
