@@ -48,6 +48,7 @@ function StatCard({ icon, label, value, subtitle, color = C.green2 }) {
 }
 
 // Componente Tab Principal
+// VERSION 3.0 - ECLIMEN LOCAL PRODUCTS ONLY
 export default function ProveedoresTab() {
   const [proveedores, setProveedores] = useState([])
   const [top5, setTop5] = useState([])
