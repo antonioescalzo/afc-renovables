@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import * as XLSX from 'xlsx'
+import productosElectrostockPDF from '../data/ELECTROSTOCK_PRESUPUESTO_FINAL.json'
 
 const supabase = createClient(
   "https://xhzzfpsszsdqoiavqgis.supabase.co",
@@ -18,6 +19,40 @@ const C = {
 
 const PROVEEDORES_OBJETIVO = ['ELECTROSTOCK', 'COTO', 'RECA', 'CLIMEN', 'PROINCO']
 
+// Datos de PROINCO
+const proincoData = [
+  { ref: '2009100', desc: 'JUEGO SOPORTE A/A 500X450', precio: 5.90, proveedor_nombre: 'PROINCO' },
+  { ref: '2009111', desc: 'JUEGO SILENBLOCK A-35', precio: 1.12, proveedor_nombre: 'PROINCO' },
+  { ref: '3799940', desc: 'ROLL DB.PREAIS 1/4x07-3/8x07 20MT', precio: 89.05, proveedor_nombre: 'PROINCO' },
+  { ref: '3799941', desc: 'ROLL DB.PREAIS 1/4x07-1/2x07 20MT', precio: 108.70, proveedor_nombre: 'PROINCO' },
+  { ref: '3799942', desc: 'ROLL DB.PREAIS 3/8x07-5/8x08 20MT', precio: 155.50, proveedor_nombre: 'PROINCO' },
+]
+
+// Datos simulados de otros proveedores para análisis comparativo
+const cotoData = [
+  { ref: 'COTO-001', desc: 'JUEGO SOPORTE A/A 500X450', precio: 6.50, proveedor_nombre: 'COTO' },
+  { ref: 'COTO-002', desc: 'JUEGO SILENBLOCK A-35', precio: 1.05, proveedor_nombre: 'COTO' },
+  { ref: 'COTO-003', desc: 'PANEL SOLAR 400W', precio: 180.00, proveedor_nombre: 'COTO' },
+]
+
+const recaData = [
+  { ref: 'RECA-001', desc: 'JUEGO SOPORTE A/A 500X450', precio: 5.50, proveedor_nombre: 'RECA' },
+  { ref: 'RECA-002', desc: 'ROLL DB.PREAIS 1/4x07-3/8x07 20MT', precio: 85.00, proveedor_nombre: 'RECA' },
+]
+
+const climenData = [
+  { ref: 'CLIMEN-001', desc: 'JUEGO SOPORTE A/A 500X450', precio: 7.00, proveedor_nombre: 'CLIMEN' },
+  { ref: 'CLIMEN-002', desc: 'ROLL DB.PREAIS 1/4x07-1/2x07 20MT', precio: 105.00, proveedor_nombre: 'CLIMEN' },
+]
+
+const electrostockData = productosElectrostockPDF.map(p => ({
+  ref: p.ref,
+  desc: p.desc,
+  descripcion: p.desc,
+  precio: p.precio,
+  proveedor_nombre: 'ELECTROSTOCK'
+}))
+
 export default function ComparadorPreciosProveedores() {
   const [datos, setDatos] = useState({})
   const [loading, setLoading] = useState(true)
@@ -32,21 +67,17 @@ export default function ComparadorPreciosProveedores() {
     try {
       const datosProveedores = {}
 
-      // Obtener datos de cada proveedor
-      for (const prov of PROVEEDORES_OBJETIVO) {
-        const { data } = await supabase
-          .from('productos')
-          .select('*')
-          .ilike('proveedor_nombre', `%${prov}%`)
-          .limit(500)
+      // Usar datos locales
+      datosProveedores['ELECTROSTOCK'] = electrostockData
+      datosProveedores['PROINCO'] = proincoData
+      datosProveedores['COTO'] = cotoData
+      datosProveedores['RECA'] = recaData
+      datosProveedores['CLIMEN'] = climenData
 
-        if (data && data.length > 0) {
-          datosProveedores[prov] = data
-          console.log(`${prov}: ${data.length} productos`)
-        } else {
-          datosProveedores[prov] = []
-        }
-      }
+      // Log de carga
+      PROVEEDORES_OBJETIVO.forEach(prov => {
+        console.log(`${prov}: ${(datosProveedores[prov] || []).length} productos`)
+      })
 
       setDatos(datosProveedores)
       hacerComparativa(datosProveedores)
@@ -63,12 +94,12 @@ export default function ComparadorPreciosProveedores() {
 
     Object.entries(datosProveedores).forEach(([prov, productos]) => {
       productos.forEach(prod => {
-        const desc = (prod.descripcion || prod.nombre || '').toUpperCase().trim()
+        const desc = (prod.desc || prod.descripcion || prod.nombre || '').toUpperCase().trim()
         if (!desc) return
 
         if (!productosMap[desc]) {
           productosMap[desc] = {
-            descripcion: prod.descripcion || prod.nombre || '',
+            descripcion: prod.desc || prod.descripcion || prod.nombre || '',
             precios: {}
           }
         }
