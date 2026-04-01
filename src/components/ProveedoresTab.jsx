@@ -10,6 +10,7 @@ import AlmacenEntradasSalidas from './AlmacenEntradasSalidas'
 import AnalizerPreciosPDF from './AnalizerPreciosPDF'
 import ExportadorPreciosProveedores from './ExportadorPreciosProveedores'
 import ComparadorPreciosProveedores from './ComparadorPreciosProveedores'
+import BuscadorProductos from './BuscadorProductos'
 
 // Colores AFC
 const C={
@@ -198,6 +199,22 @@ export default function ProveedoresTab() {
         />
         <div style={{ display: 'flex', gap: 8 }}>
           <button
+            onClick={() => { setActiveTab('buscador'); }}
+            style={{
+              padding: '6px 12px',
+              background: activeTab === 'buscador' ? C.green3 : C.bg3,
+              color: activeTab === 'buscador' ? C.green2 : C.muted,
+              border: `1px solid ${activeTab === 'buscador' ? C.green3 : C.border}`,
+              borderRadius: 6,
+              cursor: 'pointer',
+              fontSize: '0.7rem',
+              fontWeight: 700,
+              transition: 'all 0.2s'
+            }}
+          >
+            🔍 Buscador Productos
+          </button>
+          <button
             onClick={() => { setActiveTab('ranking'); setPaginaActual(1); }}
             style={{
               padding: '6px 12px',
@@ -295,6 +312,11 @@ export default function ProveedoresTab() {
           </button>
         </div>
       </div>
+
+      {/* SECCIÓN BUSCADOR DE PRODUCTOS */}
+      {activeTab === 'buscador' && (
+        <BuscadorProductos />
+      )}
 
       {/* TABLA DE RANKING */}
       {activeTab === 'ranking' && (
