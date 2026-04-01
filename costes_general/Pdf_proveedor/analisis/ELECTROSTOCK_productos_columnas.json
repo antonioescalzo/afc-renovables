@@ -1,0 +1,692 @@
+[
+  {
+    "linea": 1,
+    "ref": "PROD1",
+    "descripcion": "Producto PROD1",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 1.0,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 2,
+    "ref": "PROD2",
+    "descripcion": "Producto PROD2",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 100.0,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 3,
+    "ref": "PROD3",
+    "descripcion": "Producto PROD3",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 50.0,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 4,
+    "ref": "PROD4",
+    "descripcion": "Producto PROD4",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 3.96,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 5,
+    "ref": "PROD5",
+    "descripcion": "Producto PROD5",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 8.76,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 6,
+    "ref": "PROD6",
+    "descripcion": "Producto PROD6",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 11.78,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 7,
+    "ref": "PROD7",
+    "descripcion": "Producto PROD7",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 19.89,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 8,
+    "ref": "PROD8",
+    "descripcion": "Producto PROD8",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 13.91,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 9,
+    "ref": "PROD9",
+    "descripcion": "Producto PROD9",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 31.5,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 10,
+    "ref": "PROD10",
+    "descripcion": "Producto PROD10",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 79.5,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 11,
+    "ref": "PROD11",
+    "descripcion": "Producto PROD11",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 55.91,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 12,
+    "ref": "PROD12",
+    "descripcion": "Producto PROD12",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 21.5,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 13,
+    "ref": "PROD13",
+    "descripcion": "Producto PROD13",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 22.42,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 14,
+    "ref": "PROD14",
+    "descripcion": "Producto PROD14",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 26.6,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 15,
+    "ref": "PROD15",
+    "descripcion": "Producto PROD15",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 39.82,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 16,
+    "ref": "PROD16",
+    "descripcion": "Producto PROD16",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 54.16,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 17,
+    "ref": "PROD17",
+    "descripcion": "Producto PROD17",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 50.54,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 18,
+    "ref": "PROD18",
+    "descripcion": "Producto PROD18",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 129.68,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 19,
+    "ref": "PROD19",
+    "descripcion": "Producto PROD19",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 66.65,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 20,
+    "ref": "PROD20",
+    "descripcion": "Producto PROD20",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 11.4,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 21,
+    "ref": "PROD21",
+    "descripcion": "Producto PROD21",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 2.36,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 22,
+    "ref": "PROD22",
+    "descripcion": "Producto PROD22",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 4.2,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 23,
+    "ref": "PROD23",
+    "descripcion": "Producto PROD23",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 4.37,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 24,
+    "ref": "PROD24",
+    "descripcion": "Producto PROD24",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 16.0,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 25,
+    "ref": "PROD25",
+    "descripcion": "Producto PROD25",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 39.0,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 26,
+    "ref": "PROD26",
+    "descripcion": "Producto PROD26",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 29.0,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 27,
+    "ref": "PROD27",
+    "descripcion": "Producto PROD27",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 130.0,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 28,
+    "ref": "PROD28",
+    "descripcion": "Producto PROD28",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 1.3,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 29,
+    "ref": "PROD29",
+    "descripcion": "Producto PROD29",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 16.0,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 30,
+    "ref": "PROD30",
+    "descripcion": "Producto PROD30",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 24.68,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 31,
+    "ref": "PROD31",
+    "descripcion": "Producto PROD31",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 3.96,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 32,
+    "ref": "PROD32",
+    "descripcion": "Producto PROD32",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 8.76,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 33,
+    "ref": "PROD33",
+    "descripcion": "Producto PROD33",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 11.78,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 34,
+    "ref": "PROD34",
+    "descripcion": "Producto PROD34",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 19.89,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 35,
+    "ref": "PROD35",
+    "descripcion": "Producto PROD35",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 13.91,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 36,
+    "ref": "PROD36",
+    "descripcion": "Producto PROD36",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 31.5,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 37,
+    "ref": "PROD37",
+    "descripcion": "Producto PROD37",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 79.5,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 38,
+    "ref": "PROD38",
+    "descripcion": "Producto PROD38",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 55.91,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 39,
+    "ref": "PROD39",
+    "descripcion": "Producto PROD39",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 21.5,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 40,
+    "ref": "PROD40",
+    "descripcion": "Producto PROD40",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 22.42,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 41,
+    "ref": "PROD41",
+    "descripcion": "Producto PROD41",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 26.6,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 42,
+    "ref": "PROD42",
+    "descripcion": "Producto PROD42",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 39.82,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 43,
+    "ref": "PROD43",
+    "descripcion": "Producto PROD43",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 54.16,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 44,
+    "ref": "PROD44",
+    "descripcion": "Producto PROD44",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 50.54,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 45,
+    "ref": "PROD45",
+    "descripcion": "Producto PROD45",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 129.68,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 46,
+    "ref": "PROD46",
+    "descripcion": "Producto PROD46",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 66.65,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 47,
+    "ref": "PROD47",
+    "descripcion": "Producto PROD47",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 11.4,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 48,
+    "ref": "PROD48",
+    "descripcion": "Producto PROD48",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 2.36,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 49,
+    "ref": "PROD49",
+    "descripcion": "Producto PROD49",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 4.2,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 50,
+    "ref": "PROD50",
+    "descripcion": "Producto PROD50",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 4.37,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 51,
+    "ref": "PROD51",
+    "descripcion": "Producto PROD51",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 16.0,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 52,
+    "ref": "PROD52",
+    "descripcion": "Producto PROD52",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 39.0,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 53,
+    "ref": "PROD53",
+    "descripcion": "Producto PROD53",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 29.0,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 54,
+    "ref": "PROD54",
+    "descripcion": "Producto PROD54",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 1.3,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 55,
+    "ref": "PROD55",
+    "descripcion": "Producto PROD55",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 16.0,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 56,
+    "ref": "PROD56",
+    "descripcion": "Producto PROD56",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 12.34,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 57,
+    "ref": "PROD57",
+    "descripcion": "Producto PROD57",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 25.0,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 58,
+    "ref": "PROD58",
+    "descripcion": "Producto PROD58",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 1.0,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 59,
+    "ref": "PROD59",
+    "descripcion": "Producto PROD59",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 33.2,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 60,
+    "ref": "PROD60",
+    "descripcion": "Producto PROD60",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 29.78,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 61,
+    "ref": "PROD61",
+    "descripcion": "Producto PROD61",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 35.01,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 62,
+    "ref": "PROD62",
+    "descripcion": "Producto PROD62",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 47.59,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 63,
+    "ref": "PROD63",
+    "descripcion": "Producto PROD63",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 0.77,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 64,
+    "ref": "PROD64",
+    "descripcion": "Producto PROD64",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 54.0,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 65,
+    "ref": "PROD65",
+    "descripcion": "Producto PROD65",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 8.3,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 66,
+    "ref": "PROD66",
+    "descripcion": "Producto PROD66",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 13.7,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 67,
+    "ref": "PROD67",
+    "descripcion": "Producto PROD67",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 16.1,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 68,
+    "ref": "PROD68",
+    "descripcion": "Producto PROD68",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 21.89,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  },
+  {
+    "linea": 69,
+    "ref": "PROD69",
+    "descripcion": "Producto PROD69",
+    "uds": 1,
+    "dto_pct": 0,
+    "importe": 0.77,
+    "proveedor": "ELECTROSTOCK",
+    "fecha": "2026-03-27"
+  }
+]

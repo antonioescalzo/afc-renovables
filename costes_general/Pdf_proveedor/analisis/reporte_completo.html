@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Precios - Proveedores</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a1108;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #0f1710;
+            border: 1px solid #1a3d1a;
+            border-radius: 8px;
+            padding: 30px;
+        }
+        h1 {
+            color: #4fb884;
+            border-bottom: 2px solid #4fb884;
+            padding-bottom: 15px;
+            margin-top: 0;
+        }
+        h2 {
+            color: #66c77d;
+            margin-top: 30px;
+            padding-left: 10px;
+            border-left: 4px solid #66c77d;
+        }
+        h3 {
+            color: #99d699;
+        }
+        .proveedor-section {
+            background: #0d1510;
+            border: 1px solid #2a4d2a;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: #1a2f1a;
+            border: 1px solid #3a6f3a;
+            border-radius: 4px;
+            padding: 15px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2.5em;
+            color: #66c77d;
+            font-weight: bold;
+        }
+        .stat-label {
+            color: #888;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: #0a0f0a;
+            border: 1px solid #2a4d2a;
+        }
+        th {
+            background: #1a3d1a;
+            color: #66c77d;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #4fb884;
+        }
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #1a3d1a;
+        }
+        tr:hover {
+            background: #1a251a;
+        }
+        .precio {
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+        }
+        .ref {
+            color: #66c77d;
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+        }
+        .warning {
+            background: #3d1f00;
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+            color: #ffb74d;
+        }
+        .success {
+            background: #0d3d0a;
+            border-left: 4px solid #4fb884;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+            color: #66c77d;
+        }
+        .footer {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #2a4d2a;
+            text-align: center;
+        }
+        ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        li {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Reporte Completo de Precios - Proveedores</h1>
+        <p style="color: #888; font-size: 0.95em;">Generado: 27/03/2026 07:42:26</p>
+        
+        
+            <div class="proveedor-section">
+                <h2>✅ ELECTROSTOCK</h2>
+                <div class="success">
+                    <strong>Status:</strong> Parser funcionando correctamente
+                </div>
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-number">12</div>
+                        <div class="stat-label">Productos Extraídos</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">$254.37</div>
+                        <div class="stat-label">Valor Total</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">$21.20</div>
+                        <div class="stat-label">Precio Promedio</div>
+                    </div>
+                </div>
+                <h3>Tabla de Productos</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>REF</th>
+                            <th>DESCRIPCIÓN</th>
+                            <th>PRECIO</th>
+                            <th>PROVEEDOR</th>
+                            <th>PÁGINA</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        <tr>
+                            <td class="ref">403588</td>
+                            <td>*MAGNET TX3 6KA C P+N 25A</td>
+                            <td class="precio">$25.00</td>
+                            <td>ELECTROSTOCK</td>
+                            <td>-</td>
+                        </tr>
+
+                        <tr>
+                            <td class="ref">403589</td>
+                            <td>*MAGNET TX3 6KA C P+N 32A</td>
+                            <td class="precio">$1.00</td>
+                            <td>ELECTROSTOCK</td>
+                            <td>-</td>
+                        </tr>
+
+                        <tr>
+                            <td class="ref">403590</td>
+                            <td>*MAGNET TX3 6KA C P+N 40A</td>
+                            <td class="precio">$1.00</td>
+                            <td>ELECTROSTOCK</td>
+                            <td>-</td>
+                        </tr>
+
+                        <tr>
+                            <td class="ref">403612</td>
+                            <td>*MAGNET TX3 6KA C 2P 63A</td>
+                            <td class="precio">$1.00</td>
+                            <td>ELECTROSTOCK</td>
+                            <td>-</td>
+                        </tr>
+
+                        <tr>
+                            <td class="ref">403033</td>
+                            <td>DIFERENCIAL TX3 2/40/30 AC</td>
+                            <td class="precio">$29.78</td>
+                            <td>ELECTROSTOCK</td>
+                            <td>-</td>
+                        </tr>
+
+                        <tr>
+                            <td class="ref">411525</td>
+                            <td>DIFERENCIAL DX3 2/40/300 AC</td>
+                            <td class="precio">$35.01</td>
+                            <td>ELECTROSTOCK</td>
+                            <td>-</td>
+                        </tr>
+
+                        <tr>
+                            <td class="ref">411506</td>
+                            <td>DIFERENCIAL DX3 2/63/30 AC</td>
+                            <td class="precio">$47.59</td>
+                            <td>ELECTROSTOCK</td>
+                            <td>-</td>
+                        </tr>
+
+                        <tr>
+                            <td class="ref">411526</td>
+                            <td>DIFERENCIAL DX3 2/63/300 AC</td>
+                            <td class="precio">$54.00</td>
+                            <td>ELECTROSTOCK</td>
+                            <td>-</td>
+                        </tr>
+
+                        <tr>
+                            <td class="ref">403628</td>
+                            <td>DIFERENCIAL TX3 4/40/30 AC</td>
+                            <td class="precio">$8.30</td>
+                            <td>ELECTROSTOCK</td>
+                            <td>-</td>
+                        </tr>
+
+                        <tr>
+                            <td class="ref">403629</td>
+                            <td>DIFERENCIAL DX3 4/40/300 AC</td>
+                            <td class="precio">$13.70</td>
+                            <td>ELECTROSTOCK</td>
+                            <td>-</td>
+                        </tr>
+
+                        <tr>
+                            <td class="ref">403630</td>
+                            <td>DIFERENCIAL DX3 4/63/30 AC</td>
+                            <td class="precio">$16.10</td>
+                            <td>ELECTROSTOCK</td>
+                            <td>-</td>
+                        </tr>
+
+                        <tr>
+                            <td class="ref">403632</td>
+                            <td>DIFERENCIAL DX3 4/63/300 AC</td>
+                            <td class="precio">$21.89</td>
+                            <td>ELECTROSTOCK</td>
+                            <td>-</td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+
+        
+            <div class="proveedor-section">
+                <h2>⚠️ PROINCO</h2>
+                <div class="warning">
+                    <strong>⚠️ Sin datos disponibles</strong><br>
+                    El PDF de PROINCO contiene la tabla como imágenes incrustadas (JPEG).<br>
+                    <br>
+                    <strong>Soluciones:</strong>
+                    <ul>
+                        <li>Solicitar PDF con contenido de texto extraíble</li>
+                        <li>Proporcionar datos en formato CSV o Excel</li>
+                        <li>Implementar OCR (requiere Tesseract-OCR)</li>
+                    </ul>
+                </div>
+            </div>
+
+        
+        <div class="footer">
+            <p>AFC Renovables - Sistema de Gestión de Precios | Confidencial</p>
+            <p>Para más información, consultar: scripts/README_PARSERS.md</p>
+        </div>
+    </div>
+</body>
+</html>
