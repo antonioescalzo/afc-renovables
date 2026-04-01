@@ -92,9 +92,13 @@ export default function ProveedoresTab() {
       const res = await fetchProductosPorProveedor(proveedorId)
       let productosFinales = res.data || []
 
-      // Si es ECLIMEN, agregar productos locales
-      const proveedorSeleccionadoNombre = proveedores.find(p => p.proveedor_id === proveedorId)?.proveedor || ''
-      if (proveedorSeleccionadoNombre.toUpperCase().includes('ECLIMEN')) {
+      // Encontrar el nombre del proveedor seleccionado
+      const proveedorObj = proveedores.find(p => p.proveedor_id === proveedorId)
+      const proveedorNombre = proveedorObj?.proveedor || ''
+
+      // Si es ECLIMEN (detectar por nombre o ID), agregar productos locales
+      if (proveedorNombre.toUpperCase().includes('ECLIMEN') ||
+          proveedorNombre.toUpperCase().includes('ELECT Y CLIMAT')) {
         const productosLocalesEclimen = productosEclimen.map(p => ({
           ref: p.ref,
           descripcion: p.desc,
@@ -104,7 +108,8 @@ export default function ProveedoresTab() {
           descuento: 0,
           fecha: new Date().toISOString()
         }))
-        productosFinales = [...productosFinales, ...productosLocalesEclimen]
+        // Agregar productos locales al inicio para que se vean primero
+        productosFinales = [...productosLocalesEclimen, ...productosFinales]
       }
 
       setProductos(productosFinales)
