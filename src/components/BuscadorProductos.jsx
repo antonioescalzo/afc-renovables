@@ -1,6 +1,10 @@
 import React, { useState, useMemo } from 'react'
 import productosElectrostockPDF from '../data/ELECTROSTOCK_PRESUPUESTO_FINAL.json'
 import productosClimen from '../data/CLIMEN_PRODUCTOS.json'
+import {
+  extraerCaracteristicas,
+  calcularSimilitud
+} from '../lib/productMatcher'
 
 const C = {
   bg: "#050f0a", bg2: "#081508", bg3: "#0d1f10",
@@ -67,17 +71,55 @@ export default function BuscadorProductos() {
   const [paginaActual, setPaginaActual] = useState(1)
   const itemsPorPagina = 100
 
-  // Filtrar
+  // Filtrar con búsqueda inteligente
   const productosFiltrados = useMemo(() => {
     if (!busqueda.trim()) return []
 
+    const texto = busqueda.toLowerCase().trim()
+    const palabras = texto.split(/\s+/)
+
+    // Detectar si busca por características (25A, 4P, etc.)
+    const busquedaTipo = palabras.find(p => /magnet|diferencial|cable|caja|conector|protector|fusible|soporte/i.test(p))
+    const busquedaAmperios = palabras.find(p => /(\d+)a/i.test(p))?.match(/(\d+)/)?.[0]
+    const busquedaPolos = palabras.find(p => /(\d)p/i.test(p))?.match(/(\d)/)?.[0]
+
     return todosLosProductos.filter(p => {
-      const texto = busqueda.toLowerCase()
+      // Si tiene características específicas, usar búsqueda inteligente
+      if (busquedaTipo || busquedaAmperios || busquedaPolos) {
+        const car = extraerCaracteristicas(p.desc)
+
+        if (busquedaTipo) {
+          const tipoMatch = car.tipo && car.tipo.toLowerCase().includes(busquedaTipo.toLowerCase())
+          if (!tipoMatch) return false
+        }
+
+        if (busquedaAmperios) {
+          const ampInt = parseInt(busquedaAmperios)
+          if (!car.amperios.includes(ampInt)) return false
+        }
+
+        if (busquedaPolos) {
+          if (!car.polos || !car.polos.startsWith(busquedaPolos)) return false
+        }
+
+        return true
+      }
+
+      // Búsqueda estándar con similitud
+      const similitud = calcularSimilitud(texto, p.desc.toLowerCase(), 0.5)
+      if (similitud >= 0.5) return true
+
+      // Búsqueda exacta parcial como fallback
       return (
         p.desc.toLowerCase().includes(texto) ||
         (p.ref && p.ref.toLowerCase().includes(texto)) ||
         p.proveedor.toLowerCase().includes(texto)
       )
+    }).sort((a, b) => {
+      // Ordenar por similitud
+      const simA = calcularSimilitud(texto, a.desc.toLowerCase(), 0)
+      const simB = calcularSimilitud(texto, b.desc.toLowerCase(), 0)
+      return simB - simA
     })
   }, [busqueda])
 
