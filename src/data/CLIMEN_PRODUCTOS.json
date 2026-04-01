@@ -1,13 +1,19 @@
 [
   {
-    "ref": "H07Z1-K16AZ",
-    "desc": "CABLE L. HALOGENOS H07Z1-K 16 MM AZUL",
+    "ref": "HO7Z1-K10GR",
+    "desc": "CABLE 10MM LIBRE HALÓGENOS H07Z1-K10 (GRIS)",
+    "precio": 1.271,
+    "proveedor": "CLIMEN"
+  },
+  {
+    "ref": "H07Z1-K16AV",
+    "desc": "CABLE L. HALOGENOS H07Z1-K 16 MM AMARILLO-VERDE",
     "precio": 1.84,
     "proveedor": "CLIMEN"
   },
   {
-    "ref": "...",
-    "desc": "CABLE L. HALOGENOS H07Z1-K 16 MM GRIS",
+    "ref": "H07Z1-K16AZ",
+    "desc": "CABLE L. HALOGENOS H07Z1-K 16 MM AZUL",
     "precio": 1.84,
     "proveedor": "CLIMEN"
   },
@@ -24,15 +30,81 @@
     "proveedor": "CLIMEN"
   },
   {
-    "ref": "CDN8PT",
-    "desc": "CAJA DISTRIBUCIÓN ESTANCA IP65 1X8 MOD P/TRANSP. NEW ECOLOGY",
-    "precio": 37.36,
+    "ref": "H07Z1-K10AV",
+    "desc": "CABLE L. HALÓGENOS H07Z1-K 10MM AMARILLO-VERDE",
+    "precio": 1.271,
     "proveedor": "CLIMEN"
   },
   {
-    "ref": "...",
-    "desc": "CAJA ESTANCA 160 X 110 MM",
-    "precio": 2.4289,
+    "ref": "H0721-K10AV",
+    "desc": "CABLE LIBRE HALOGENOS 10MM AV",
+    "precio": 1.271,
+    "proveedor": "CLIMEN"
+  },
+  {
+    "ref": "H07Z1- K10AZ",
+    "desc": "CABLE LIBRE HALOGENOS 10MM AZ",
+    "precio": 1.271,
+    "proveedor": "CLIMEN"
+  },
+  {
+    "ref": "H07Z1-K10MR-1",
+    "desc": "CABLE LIBRE HALOGENOS 10MM MR",
+    "precio": 1.271,
+    "proveedor": "CLIMEN"
+  },
+  {
+    "ref": "H0721-K10NG",
+    "desc": "CABLE LIBRE HALOGENOS 10MM NG",
+    "precio": 1.271,
+    "proveedor": "CLIMEN"
+  },
+  {
+    "ref": "H07Z1 - K6AV",
+    "desc": "CABLE LIBRE HALOGENOS 6MM AV AMARILLO VERDE",
+    "precio": 0.71,
+    "proveedor": "CLIMEN"
+  },
+  {
+    "ref": "H07Z1- K6GR",
+    "desc": "CABLE LIBRE HALOGENOS 6MM GR",
+    "precio": 0.71,
+    "proveedor": "CLIMEN"
+  },
+  {
+    "ref": "H07Z1- K6MR",
+    "desc": "CABLE LIBRE HALOGENOS 6MM MR",
+    "precio": 0.71,
+    "proveedor": "CLIMEN"
+  },
+  {
+    "ref": "H07Z1 - K6NG",
+    "desc": "CABLE LIBRE HALOGENOS 6MN NG",
+    "precio": 0.71,
+    "proveedor": "CLIMEN"
+  },
+  {
+    "ref": "RZ1-K5G25",
+    "desc": "CABLE LIBRE HALÓGENO 5G25MM",
+    "precio": 17.4,
+    "proveedor": "CLIMEN"
+  },
+  {
+    "ref": "H07Z1/K6AZ",
+    "desc": "CABLE LIBRE HALÓGENOS 6MM AZ",
+    "precio": 0.71,
+    "proveedor": "CLIMEN"
+  },
+  {
+    "ref": "5109",
+    "desc": "CAJA DIST. SUP. HASTA 8 ELEM. 247X250X104",
+    "precio": 12.6013,
+    "proveedor": "CLIMEN"
+  },
+  {
+    "ref": "CDN8PT",
+    "desc": "CAJA DISTRIBUCIÓN ESTANCA IP65 1X8 MOD P/TRANSP. NEW ECOLOGY",
+    "precio": 16.46,
     "proveedor": "CLIMEN"
   },
   {
@@ -54,21 +126,21 @@
     "proveedor": "CLIMEN"
   },
   {
+    "ref": "13030 CBR",
+    "desc": "CANALETA  60X40 S.13 BL",
+    "precio": 7.95,
+    "proveedor": "CLIMEN"
+  },
+  {
     "ref": "PVBM05",
     "desc": "CONECTOR SOLAR MC4 1000V AEREO PARA M/H",
     "precio": 1.2124,
     "proveedor": "CLIMEN"
   },
   {
-    "ref": "...",
-    "desc": "CONECTOR SOLAR MC4 1000V AEREO PARA M/H",
-    "precio": 1.2124,
-    "proveedor": "CLIMEN"
-  },
-  {
-    "ref": "...",
-    "desc": "DIFERENCIAL ALPHA+ RESIDENCIAL 2P 40A 30MA CLASE A SUPERINMUNIZADO 6KA",
-    "precio": 17.0,
+    "ref": "EPR4A040030",
+    "desc": "DIFERENCIAL ALPHA + INDUSTRIAL 4P 40A 30Ma CLASE A SUPERINMUNIZADO",
+    "precio": 41.0,
     "proveedor": "CLIMEN"
   },
   {
@@ -90,9 +162,81 @@
     "proveedor": "CLIMEN"
   },
   {
+    "ref": "EPR2CE040030",
+    "desc": "DIFERENCIAL ALPHA+RESID. 2P 40A 30mA CL.AC 6KA",
+    "precio": 9.98,
+    "proveedor": "CLIMEN"
+  },
+  {
+    "ref": "F10D25",
+    "desc": "FUSIBLE CILÍNDRICO 10X38MM 1000DC 25A",
+    "precio": 1.7629,
+    "proveedor": "CLIMEN"
+  },
+  {
+    "ref": "EPB125H4C080",
+    "desc": "INTERRUPTOR MAGNETOTÉRMICO EPB125H ALPHA+4P 80A CURVA C 10KA-",
+    "precio": 65.968,
+    "proveedor": "CLIMEN"
+  },
+  {
+    "ref": "EPS1C2-275-40",
+    "desc": "LIMITADOR SOBRETENSIONES TIPO 2 EPSC2-275-40",
+    "precio": 19.0,
+    "proveedor": "CLIMEN"
+  },
+  {
+    "ref": "EPB63M4C16",
+    "desc": "MAGNETOT ALPHA+INDUS. 4P 16A CV 6KA",
+    "precio": 17.0,
+    "proveedor": "CLIMEN"
+  },
+  {
+    "ref": "EPB63M4C25",
+    "desc": "MAGNETOT. ALPHA+INDUST. 4P 25A CV.C 6kA",
+    "precio": 17.0,
+    "proveedor": "CLIMEN"
+  },
+  {
+    "ref": "EPBE63M1NC25",
+    "desc": "MAGNETOT. ALPHA+RESID. 1P+N 25A CV.C 6KA",
+    "precio": 2.2,
+    "proveedor": "CLIMEN"
+  },
+  {
+    "ref": "EPBE63M1NC32",
+    "desc": "MAGNETOT. ALPHA+RESID. 1P+N 32A CV.C 6KA",
+    "precio": 2.2,
+    "proveedor": "CLIMEN"
+  },
+  {
+    "ref": "EPBE63M1NC40",
+    "desc": "MAGNETOT. ALPHA+RESID. 1P+N 40A CV.C 6KA",
+    "precio": 2.5,
+    "proveedor": "CLIMEN"
+  },
+  {
     "ref": "EPB63M4C63",
     "desc": "MAGNETOT.ALPHA+INDUST.4P 63A CV.C 6KA",
-    "precio": 31.0,
+    "precio": 0.0,
+    "proveedor": "CLIMEN"
+  },
+  {
+    "ref": "EPB63M4C20",
+    "desc": "MAGNETOTÉRMICO ALPHA + INDUST 4P 20A CV.C 6KA",
+    "precio": 17.0,
+    "proveedor": "CLIMEN"
+  },
+  {
+    "ref": "EPB63M4C40",
+    "desc": "MAGNETOTÉRMICO ALPHA + INDUSTR. 4P 40A CV.C 6KA",
+    "precio": 21.4,
+    "proveedor": "CLIMEN"
+  },
+  {
+    "ref": "EPBE63M1NC20",
+    "desc": "MAGNETOTÉRMICO ALPHA+RESID. 1P+N 20A CV.C 6KA",
+    "precio": 2.2,
     "proveedor": "CLIMEN"
   },
   {
@@ -102,21 +246,39 @@
     "proveedor": "CLIMEN"
   },
   {
+    "ref": "SGF32DC",
+    "desc": "PORTAFUSIBLE SECCIONABLE 1P HASTA 35A 1000V DC SIN INDICADOR DE FUSIÓN, MAXGE",
+    "precio": 1.624,
+    "proveedor": "CLIMEN"
+  },
+  {
+    "ref": "U130C1N/275",
+    "desc": "PROT. SOBRETENSIONES TRANS. TIPOII, 3SU1 1P+N C 15-30KA 275 VAC",
+    "precio": 19.0,
+    "proveedor": "CLIMEN"
+  },
+  {
+    "ref": "10009S2",
+    "desc": "PROTECTOR SOBRETENSIONES TRANS. 600VDC 20KA 2P",
+    "precio": 21.7,
+    "proveedor": "CLIMEN"
+  },
+  {
     "ref": "1000PS2",
     "desc": "PROTECTOR SOBRETENSIONES TRANS. 600VDC 20KA 2P",
     "precio": 21.7,
     "proveedor": "CLIMEN"
   },
   {
-    "ref": "...",
-    "desc": "RACOR A CAJA M25X1.5 PARA TUBO ENCHUFABLE ACERO GALVANIZADO",
-    "precio": 3.136,
+    "ref": "U140C4/400",
+    "desc": "PROTECTOR SOBRETENSIÓN TRANSITORIA 3SUI 4P C 15-40KA 400V",
+    "precio": 40.6,
     "proveedor": "CLIMEN"
   },
   {
-    "ref": "...",
-    "desc": "SEÑAL PLAST. AE5ADH RIESGO ELECT. 52MM",
-    "precio": 0.5697,
+    "ref": "BGE25",
+    "desc": "TUBO RÍGIDO PVC GRIS M25",
+    "precio": 2.95,
     "proveedor": "CLIMEN"
   }
 ]
