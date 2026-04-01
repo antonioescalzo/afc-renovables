@@ -1,0 +1,172 @@
+[
+  {
+    "ref": "8704",
+    "desc": "CAJA P/DIST. HASTA 18 ELEM. SUP",
+    "precio": 16.1813,
+    "cantidad_total": 12.0,
+    "fechas": [
+      "30/10/2025"
+    ],
+    "numeros_factura": [
+      "NMENG/OUT/27610"
+    ]
+  },
+  {
+    "ref": "CDN18PT",
+    "desc": "CAJA ESTANCA DISTRIBUCIÓN ABS 18 MOD PTA TRANSPARENTE",
+    "precio": 37.36,
+    "cantidad_total": 0.0,
+    "fechas": [
+      "30/10/2025"
+    ],
+    "numeros_factura": [
+      "NMENG/OUT/27610"
+    ]
+  },
+  {
+    "ref": "233.2500.0",
+    "desc": "MANGUITO CORRUGADO M-25",
+    "precio": 1.3425,
+    "cantidad_total": 400.0,
+    "fechas": [
+      "30/10/2025",
+      "15/11/2025"
+    ],
+    "numeros_factura": [
+      "NMENG/OUT/27610",
+      ""
+    ]
+  },
+  {
+    "ref": "CDN8PT",
+    "desc": "CAJA DISTRIBUCIÓN ESTANCA IP65 1X8 MOD P/TRANSP. NEW ECOLOGY",
+    "precio": 37.36,
+    "cantidad_total": 6.0,
+    "fechas": [
+      "13/11/2025"
+    ],
+    "numeros_factura": [
+      "NMENG/OUT/27875"
+    ]
+  },
+  {
+    "ref": "PVBM05",
+    "desc": "CONECTOR SOLAR MC4 1000V AEREO PARA M/H",
+    "precio": 1.2124,
+    "cantidad_total": 20.0,
+    "fechas": [
+      "11/11/2025"
+    ],
+    "numeros_factura": [
+      "NMNEG/OUT/27290"
+    ]
+  },
+  {
+    "ref": "H07Z1-K16AZ",
+    "desc": "CABLE L. HALOGENOS H07Z1-K 16 MM AZUL",
+    "precio": 1.84,
+    "cantidad_total": 200.0,
+    "fechas": [
+      "14/11/2025"
+    ],
+    "numeros_factura": [
+      "NMENG/OUT/28001"
+    ]
+  },
+  {
+    "ref": "EPB63M4C63",
+    "desc": "MAGNETOT.ALPHA+INDUST.4P 63A CV.C 6KA",
+    "precio": 31.0,
+    "cantidad_total": 2.0,
+    "fechas": [
+      "14/11/2025"
+    ],
+    "numeros_factura": [
+      "..."
+    ]
+  },
+  {
+    "ref": "EPR4A080300",
+    "desc": "DIFERENCIAL ALPHA+INDUSTRIAL 4P 80A 300MA CLASE A SUPERINMUNIZADO 10KA",
+    "precio": 111.0,
+    "cantidad_total": 2.0,
+    "fechas": [
+      "14/11/2025"
+    ],
+    "numeros_factura": [
+      "NMENG/OUT/28003"
+    ]
+  },
+  {
+    "ref": "H07Z1-K16NG",
+    "desc": "CABLE L. HALOGENOS H07Z1-K 16 MM NEGRO",
+    "precio": 1.84,
+    "cantidad_total": 200.0,
+    "fechas": [
+      "15/11/2025"
+    ],
+    "numeros_factura": [
+      ""
+    ]
+  },
+  {
+    "ref": "EPR2A063030/10KA",
+    "desc": "DIFERENCIAL ALPHA+INDUSTRIAL 2P 63A 30MA CLASE A SUPERINMUNIZADO 10KA",
+    "precio": 33.9115,
+    "cantidad_total": 4.0,
+    "fechas": [
+      "01/12/2025"
+    ],
+    "numeros_factura": [
+      "..."
+    ]
+  },
+  {
+    "ref": "1000PS2",
+    "desc": "PROTECTOR SOBRETENSIONES TRANS. 600VDC 20KA 2P",
+    "precio": 21.7,
+    "cantidad_total": 50.0,
+    "fechas": [
+      "30/11/2025"
+    ],
+    "numeros_factura": [
+      ""
+    ]
+  },
+  {
+    "ref": "H07Z1-K16GR",
+    "desc": "CABLE L. HALOGENOS H07Z1-K 16 MM GRIS",
+    "precio": 1.84,
+    "cantidad_total": 100.0,
+    "fechas": [
+      "14/11/2025"
+    ],
+    "numeros_factura": [
+      "NMENG/OUT/28001"
+    ]
+  },
+  {
+    "ref": "EV161",
+    "desc": "CAJA ESTANCA 160 X 110 MM",
+    "precio": 2.4289,
+    "cantidad_total": 15.0,
+    "fechas": [
+      "13/11/2025"
+    ],
+    "numeros_factura": [
+      "NMENG/OUT/28002"
+    ]
+  },
+  {
+    "ref": "EPRE2A040030",
+    "desc": "DIFERENCIAL ALPHA+ RESIDENCIAL 2P 40A 30MA CLASE A SUPERINMUNIZADO 6KA",
+    "precio": 17.0,
+    "cantidad_total": 15.0,
+    "fechas": [
+      "18/11/2025"
+    ],
+    "numeros_factura": [
+      "S/76297"
+    ]
+  }
+]

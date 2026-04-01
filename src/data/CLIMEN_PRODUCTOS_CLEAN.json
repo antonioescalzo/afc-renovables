@@ -1,0 +1,86 @@
+[
+  {
+    "ref": "8704",
+    "desc": "CAJA P/DIST. HASTA 18 ELEM. SUP",
+    "precio": 16.1813,
+    "proveedor": "ECLIMEN"
+  },
+  {
+    "ref": "CDN18PT",
+    "desc": "CAJA ESTANCA DISTRIBUCIÓN ABS 18 MOD PTA TRANSPARENTE",
+    "precio": 37.36,
+    "proveedor": "ECLIMEN"
+  },
+  {
+    "ref": "233.2500.0",
+    "desc": "MANGUITO CORRUGADO M-25",
+    "precio": 1.3425,
+    "proveedor": "ECLIMEN"
+  },
+  {
+    "ref": "CDN8PT",
+    "desc": "CAJA DISTRIBUCIÓN ESTANCA IP65 1X8 MOD P/TRANSP. NEW ECOLOGY",
+    "precio": 37.36,
+    "proveedor": "ECLIMEN"
+  },
+  {
+    "ref": "PVBM05",
+    "desc": "CONECTOR SOLAR MC4 1000V AEREO PARA M/H",
+    "precio": 1.2124,
+    "proveedor": "ECLIMEN"
+  },
+  {
+    "ref": "H07Z1-K16AZ",
+    "desc": "CABLE L. HALOGENOS H07Z1-K 16 MM AZUL",
+    "precio": 1.84,
+    "proveedor": "ECLIMEN"
+  },
+  {
+    "ref": "EPB63M4C63",
+    "desc": "MAGNETOT.ALPHA+INDUST.4P 63A CV.C 6KA",
+    "precio": 31.0,
+    "proveedor": "ECLIMEN"
+  },
+  {
+    "ref": "EPR4A080300",
+    "desc": "DIFERENCIAL ALPHA+INDUSTRIAL 4P 80A 300MA CLASE A SUPERINMUNIZADO 10KA",
+    "precio": 111.0,
+    "proveedor": "ECLIMEN"
+  },
+  {
+    "ref": "H07Z1-K16NG",
+    "desc": "CABLE L. HALOGENOS H07Z1-K 16 MM NEGRO",
+    "precio": 1.84,
+    "proveedor": "ECLIMEN"
+  },
+  {
+    "ref": "EPR2A063030/10KA",
+    "desc": "DIFERENCIAL ALPHA+INDUSTRIAL 2P 63A 30MA CLASE A SUPERINMUNIZADO 10KA",
+    "precio": 33.9115,
+    "proveedor": "ECLIMEN"
+  },
+  {
+    "ref": "1000PS2",
+    "desc": "PROTECTOR SOBRETENSIONES TRANS. 600VDC 20KA 2P",
+    "precio": 21.7,
+    "proveedor": "ECLIMEN"
+  },
+  {
+    "ref": "H07Z1-K16GR",
+    "desc": "CABLE L. HALOGENOS H07Z1-K 16 MM GRIS",
+    "precio": 1.84,
+    "proveedor": "ECLIMEN"
+  },
+  {
+    "ref": "EV161",
+    "desc": "CAJA ESTANCA 160 X 110 MM",
+    "precio": 2.4289,
+    "proveedor": "ECLIMEN"
+  },
+  {
+    "ref": "EPRE2A040030",
+    "desc": "DIFERENCIAL ALPHA+ RESIDENCIAL 2P 40A 30MA CLASE A SUPERINMUNIZADO 6KA",
+    "precio": 17.0,
+    "proveedor": "ECLIMEN"
+  }
+]
