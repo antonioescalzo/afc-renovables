@@ -65,7 +65,7 @@ const fmt = n => new Intl.NumberFormat("es-ES", { style: "currency", currency: "
 export default function BuscadorProductos() {
   const [busqueda, setBusqueda] = useState('')
   const [paginaActual, setPaginaActual] = useState(1)
-  const itemsPorPagina = 15
+  const itemsPorPagina = 20
 
   // Filtrar productos
   const productosFiltrados = useMemo(() => {
@@ -79,7 +79,7 @@ export default function BuscadorProductos() {
     })
   }, [busqueda])
 
-  // Agrupar por descripción para ver comparativas
+  // Agrupar por descripción
   const productosAgrupados = useMemo(() => {
     const grupos = {}
     productosFiltrados.forEach(p => {
@@ -91,11 +91,29 @@ export default function BuscadorProductos() {
         }
       }
       if (!grupos[desc_upper].proveedores[p.proveedor]) {
-        grupos[desc_upper].proveedores[p.proveedor] = []
+        grupos[desc_upper].proveedores[p.proveedor] = p
       }
-      grupos[desc_upper].proveedores[p.proveedor].push(p)
     })
-    return Object.values(grupos).sort((a, b) => a.nombre.localeCompare(b.nombre))
+
+    // Convertir a array y encontrar mejor precio
+    return Object.values(grupos).map(grupo => {
+      const precios = Object.values(grupo.proveedores).map(p => p.precio)
+      const minPrecio = Math.min(...precios)
+      const maxPrecio = Math.max(...precios)
+
+      // Ordenar proveedores por precio
+      const proveedoresOrdenados = Object.entries(grupo.proveedores)
+        .map(([prov, datos]) => ({ proveedor: prov, ...datos }))
+        .sort((a, b) => a.precio - b.precio)
+
+      return {
+        ...grupo,
+        minPrecio,
+        maxPrecio,
+        ahorro: maxPrecio - minPrecio,
+        proveedoresOrdenados
+      }
+    }).sort((a, b) => a.nombre.localeCompare(b.nombre))
   }, [productosFiltrados])
 
   // Paginar
@@ -120,7 +138,7 @@ export default function BuscadorProductos() {
       <div style={{ marginBottom: 24 }}>
         <input
           type="text"
-          placeholder="🔍 Buscar productos para comparar precios..."
+          placeholder="🔍 Buscar producto (ej: magnetotermico, cable, caja)..."
           value={busqueda}
           onChange={e => {
             setBusqueda(e.target.value)
@@ -139,111 +157,149 @@ export default function BuscadorProductos() {
         />
       </div>
 
-      {/* ESTADÍSTICAS */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, marginBottom: 24 }}>
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 8, padding: 12 }}>
-          <div style={{ fontSize: '0.6rem', color: C.muted, textTransform: 'uppercase', marginBottom: 4 }}>Productos</div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: C.green2 }}>{productosAgrupados.length}</div>
-        </div>
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 8, padding: 12 }}>
-          <div style={{ fontSize: '0.6rem', color: C.muted, textTransform: 'uppercase', marginBottom: 4 }}>Proveedores</div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: C.teal2 }}>5</div>
-        </div>
-      </div>
-
-      {/* TABLA COMPARATIVA */}
+      {/* RESULTADOS */}
       <div style={{ marginBottom: 24 }}>
         {productosActuales.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '30px', color: C.muted }}>
-            No hay productos que coincidan con tu búsqueda
+          <div style={{ textAlign: 'center', padding: '40px', color: C.muted, fontSize: '0.85rem' }}>
+            📭 No hay productos que coincidan con tu búsqueda
           </div>
         ) : (
-          productosActuales.map((grupo, idx) => {
-            const precios = []
-            Object.values(grupo.proveedores).forEach(items => {
-              items.forEach(item => precios.push(item.precio))
-            })
-            const minPrecio = Math.min(...precios)
-            const maxPrecio = Math.max(...precios)
-            const ahorro = maxPrecio - minPrecio
-
-            return (
-              <div key={idx} style={{ marginBottom: 16, border: `1px solid ${C.border}`, borderRadius: 8, overflow: 'hidden' }}>
-                {/* ENCABEZADO DEL PRODUCTO */}
-                <div style={{ background: C.bg3, padding: '12px 16px', borderBottom: `1px solid ${C.border}` }}>
-                  <div style={{ color: C.text, fontSize: '0.85rem', fontWeight: 600, marginBottom: 6 }}>
-                    {grupo.nombre}
-                  </div>
-                  {ahorro > 0 && (
-                    <div style={{ fontSize: '0.7rem', color: C.yellow }}>
-                      💰 Ahorro potencial: {fmt(ahorro)} | Min: {fmt(minPrecio)} - Max: {fmt(maxPrecio)}
-                    </div>
-                  )}
+          productosActuales.map((grupo, idx) => (
+            <div
+              key={idx}
+              style={{
+                background: C.card,
+                border: `1px solid ${C.border}`,
+                borderRadius: 8,
+                marginBottom: 16,
+                overflow: 'hidden'
+              }}
+            >
+              {/* NOMBRE DEL PRODUCTO */}
+              <div style={{
+                background: C.bg3,
+                padding: '12px 16px',
+                borderBottom: `1px solid ${C.border}`
+              }}>
+                <div style={{
+                  color: C.text,
+                  fontSize: '0.9rem',
+                  fontWeight: 600,
+                  lineHeight: 1.4
+                }}>
+                  {grupo.nombre}
                 </div>
+                {grupo.ahorro > 0 && (
+                  <div style={{
+                    fontSize: '0.7rem',
+                    color: C.yellow,
+                    marginTop: 6
+                  }}>
+                    💰 Diferencia: {fmt(grupo.ahorro)} | Rango: {fmt(grupo.minPrecio)} - {fmt(grupo.maxPrecio)}
+                  </div>
+                )}
+              </div>
 
-                {/* PROVEEDORES */}
-                <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Object.keys(grupo.proveedores).length}, 1fr)`, gap: 0 }}>
-                  {Object.entries(grupo.proveedores).map(([proveedor, items]) => {
-                    const precioProveedor = items[0].precio
-                    const esMasBarato = precioProveedor === minPrecio
-                    const background = esMasBarato ? C.bg3 : C.card
-                    const borderColor = colorProveedor(proveedor)
+              {/* PROVEEDORES */}
+              <div style={{ padding: '12px 16px' }}>
+                {grupo.proveedoresOrdenados.map((item, pidx) => {
+                  const esMasBarato = item.precio === grupo.minPrecio
+                  const color = colorProveedor(item.proveedor)
 
-                    return (
-                      <div
-                        key={proveedor}
-                        style={{
-                          background,
-                          borderLeft: `3px solid ${borderColor}`,
-                          padding: '12px',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: 8
-                        }}>
-                        {/* Proveedor */}
+                  return (
+                    <div
+                      key={pidx}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '8px 0',
+                        borderBottom: pidx < grupo.proveedoresOrdenados.length - 1 ? `1px solid ${C.border}30` : 'none'
+                      }}
+                    >
+                      {/* PROVEEDOR */}
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 10,
+                        flex: 1
+                      }}>
                         <div style={{
-                          display: 'inline-block',
-                          background: borderColor + '30',
-                          border: `1px solid ${borderColor}`,
-                          color: borderColor,
-                          padding: '3px 8px',
+                          background: color + '30',
+                          border: `1px solid ${color}`,
+                          color: color,
+                          padding: '4px 8px',
                           borderRadius: 4,
                           fontSize: '0.65rem',
                           fontWeight: 700,
-                          width: 'fit-content'
+                          minWidth: '100px',
+                          textAlign: 'center'
                         }}>
-                          {proveedor}
+                          {item.proveedor}
                         </div>
-
-                        {/* Precio */}
-                        <div>
-                          <div style={{ fontSize: '1.4rem', fontWeight: 800, color: esMasBarato ? C.yellow : C.text }}>
-                            {fmt(precioProveedor)}
-                          </div>
-                          {esMasBarato && (
-                            <div style={{ fontSize: '0.65rem', color: C.yellow, marginTop: 2 }}>✓ MÁS BARATO</div>
-                          )}
-                        </div>
-
-                        {/* Referencia */}
-                        {items[0].ref && (
-                          <div style={{ fontSize: '0.65rem', color: C.muted, fontFamily: 'monospace' }}>
-                            Ref: {items[0].ref}
+                        {item.ref && item.ref !== '...' && (
+                          <div style={{
+                            fontSize: '0.65rem',
+                            color: C.muted,
+                            fontFamily: 'monospace'
+                          }}>
+                            {item.ref}
                           </div>
                         )}
                       </div>
-                    )
-                  })}
-                </div>
+
+                      {/* PRECIO Y BADGE */}
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 12,
+                        justifyContent: 'flex-end'
+                      }}>
+                        <div style={{
+                          fontSize: '1.2rem',
+                          fontWeight: 800,
+                          color: esMasBarato ? C.yellow : C.text,
+                          minWidth: '80px',
+                          textAlign: 'right'
+                        }}>
+                          {fmt(item.precio)}
+                        </div>
+                        {esMasBarato && (
+                          <div style={{
+                            background: C.yellow + '30',
+                            border: `1px solid ${C.yellow}`,
+                            color: C.yellow,
+                            padding: '3px 8px',
+                            borderRadius: 4,
+                            fontSize: '0.65rem',
+                            fontWeight: 700,
+                            minWidth: '70px',
+                            textAlign: 'center'
+                          }}>
+                            ✓ MEJOR
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
-            )
-          })
+            </div>
+          ))
         )}
       </div>
 
       {/* PAGINACIÓN */}
       {totalPaginas > 1 && (
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: C.bg3, borderRadius: 8, gap: 10 }}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: '12px 16px',
+          background: C.bg3,
+          borderRadius: 8,
+          gap: 10
+        }}>
           <button
             onClick={() => setPaginaActual(Math.max(1, paginaActual - 1))}
             disabled={paginaActual === 1}
@@ -261,7 +317,7 @@ export default function BuscadorProductos() {
             ← Anterior
           </button>
           <div style={{ fontSize: '0.7rem', color: C.muted, fontFamily: 'monospace' }}>
-            Página <span style={{ color: C.text, fontWeight: 700 }}>{paginaActual}</span> de <span style={{ color: C.text, fontWeight: 700 }}>{totalPaginas}</span> ({productosActuales.length} productos)
+            Página <span style={{ color: C.text, fontWeight: 700 }}>{paginaActual}</span> de <span style={{ color: C.text, fontWeight: 700 }}>{totalPaginas}</span>
           </div>
           <button
             onClick={() => setPaginaActual(Math.min(totalPaginas, paginaActual + 1))}
