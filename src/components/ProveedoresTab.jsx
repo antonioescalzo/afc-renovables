@@ -8,6 +8,7 @@ import {
 import AlmacenEntradasSalidas from './AlmacenEntradasSalidas'
 import ComparadorPreciosProveedores from './ComparadorPreciosProveedores'
 import BuscadorProductos from './BuscadorProductos'
+import InformeAnalisisProductos from './InformeAnalisisProductos'
 
 // Colores AFC
 const C={
@@ -259,6 +260,22 @@ export default function ProveedoresTab() {
           >
             💰 Comparador 5 Proveedores
           </button>
+          <button
+            onClick={() => { setActiveTab('informe'); }}
+            style={{
+              padding: '6px 12px',
+              background: activeTab === 'informe' ? C.green3 : C.bg3,
+              color: activeTab === 'informe' ? C.green2 : C.muted,
+              border: `1px solid ${activeTab === 'informe' ? C.green3 : C.border}`,
+              borderRadius: 6,
+              cursor: 'pointer',
+              fontSize: '0.7rem',
+              fontWeight: 700,
+              transition: 'all 0.2s'
+            }}
+          >
+            📊 Informe Productos
+          </button>
         </div>
       </div>
 
@@ -484,6 +501,11 @@ export default function ProveedoresTab() {
       {/* SECCIÓN COMPARADOR 5 PROVEEDORES */}
       {activeTab === 'comparador_5_proveedores' && (
         <ComparadorPreciosProveedores />
+      )}
+
+      {/* SECCIÓN INFORME DE ANÁLISIS */}
+      {activeTab === 'informe' && (
+        <InformeAnalisisProductos />
       )}
     </div>
   );
