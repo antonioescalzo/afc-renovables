@@ -7,6 +7,7 @@ import {
   calcularDiferenciasPrecios
 } from '../lib/productMatcher'
 
+// VERSIÓN: 2.0 - FORMATO COMPARATIVO (TABLA)
 const C = {
   bg: "#050f0a", bg2: "#081508", bg3: "#0d1f10",
   teal: "#0e7fa3", teal2: "#0d9abf", teal3: "#0a4f65",
