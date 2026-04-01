@@ -9,6 +9,7 @@ import ComparadorProveedorPDF from './ComparadorProveedorPDF'
 import AlmacenEntradasSalidas from './AlmacenEntradasSalidas'
 import AnalizerPreciosPDF from './AnalizerPreciosPDF'
 import ExportadorPreciosProveedores from './ExportadorPreciosProveedores'
+import ComparadorPreciosProveedores from './ComparadorPreciosProveedores'
 
 // Colores AFC
 const C={
@@ -276,12 +277,28 @@ export default function ProveedoresTab() {
           >
             📊 Exportar Precios
           </button>
+          <button
+            onClick={() => { setActiveTab('comparador_5_proveedores'); }}
+            style={{
+              padding: '6px 12px',
+              background: activeTab === 'comparador_5_proveedores' ? C.green3 : C.bg3,
+              color: activeTab === 'comparador_5_proveedores' ? C.green2 : C.muted,
+              border: `1px solid ${activeTab === 'comparador_5_proveedores' ? C.green3 : C.border}`,
+              borderRadius: 6,
+              cursor: 'pointer',
+              fontSize: '0.7rem',
+              fontWeight: 700,
+              transition: 'all 0.2s'
+            }}
+          >
+            💰 Comparador 5 Proveedores
+          </button>
         </div>
       </div>
 
       {/* TABLA DE RANKING */}
       {activeTab === 'ranking' && (
-        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, overflowX: 'auto', marginBottom: 14 }}>
+      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, overflowX: 'auto', marginBottom: 14 }}>
         <table style={{ width: '100%', minWidth: 800, borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ background: C.bg3 }}>
@@ -326,7 +343,7 @@ export default function ProveedoresTab() {
             )}
           </tbody>
         </table>
-        </div>
+      </div>
       )}
 
       {/* PAGINACIÓN */}
@@ -374,7 +391,7 @@ export default function ProveedoresTab() {
 
       {/* SECCIÓN PRODUCTOS POR PROVEEDOR */}
       {activeTab === 'ranking' && (
-        <div style={{ marginTop: 32 }}>
+      <div style={{ marginTop: 32 }}>
         <h2 style={{ fontSize: '0.85rem', fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 16, fontFamily: 'monospace' }}>📦 PRODUCTOS POR PROVEEDOR</h2>
 
         <div style={{ marginBottom: 16 }}>
@@ -506,6 +523,11 @@ export default function ProveedoresTab() {
       {/* SECCIÓN EXPORTADOR DE PRECIOS */}
       {activeTab === 'exportador' && (
         <ExportadorPreciosProveedores />
+      )}
+
+      {/* SECCIÓN COMPARADOR 5 PROVEEDORES */}
+      {activeTab === 'comparador_5_proveedores' && (
+        <ComparadorPreciosProveedores />
       )}
     </div>
   );
