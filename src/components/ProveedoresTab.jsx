@@ -5,10 +5,6 @@ import {
   fetchKPIs,
   fetchProductosPorProveedor
 } from '../lib/supabase-compras'
-import ComparadorProveedorPDF from './ComparadorProveedorPDF'
-import AlmacenEntradasSalidas from './AlmacenEntradasSalidas'
-import AnalizerPreciosPDF from './AnalizerPreciosPDF'
-import ExportadorPreciosProveedores from './ExportadorPreciosProveedores'
 import ComparadorPreciosProveedores from './ComparadorPreciosProveedores'
 import BuscadorProductos from './BuscadorProductos'
 import productosEclimen from '../data/CLIMEN_PRODUCTOS.json'
@@ -249,70 +245,6 @@ export default function ProveedoresTab() {
             📊 Ranking ({proveedoresFiltrados.length})
           </button>
           <button
-            onClick={() => { setActiveTab('comparador'); }}
-            style={{
-              padding: '6px 12px',
-              background: activeTab === 'comparador' ? C.green3 : C.bg3,
-              color: activeTab === 'comparador' ? C.green2 : C.muted,
-              border: `1px solid ${activeTab === 'comparador' ? C.green3 : C.border}`,
-              borderRadius: 6,
-              cursor: 'pointer',
-              fontSize: '0.7rem',
-              fontWeight: 700,
-              transition: 'all 0.2s'
-            }}
-          >
-            📄 Comparador PDF
-          </button>
-          <button
-            onClick={() => { setActiveTab('almacen'); }}
-            style={{
-              padding: '6px 12px',
-              background: activeTab === 'almacen' ? C.green3 : C.bg3,
-              color: activeTab === 'almacen' ? C.green2 : C.muted,
-              border: `1px solid ${activeTab === 'almacen' ? C.green3 : C.border}`,
-              borderRadius: 6,
-              cursor: 'pointer',
-              fontSize: '0.7rem',
-              fontWeight: 700,
-              transition: 'all 0.2s'
-            }}
-          >
-            📦 Entradas/Salidas
-          </button>
-          <button
-            onClick={() => { setActiveTab('precios_pdf'); }}
-            style={{
-              padding: '6px 12px',
-              background: activeTab === 'precios_pdf' ? C.green3 : C.bg3,
-              color: activeTab === 'precios_pdf' ? C.green2 : C.muted,
-              border: `1px solid ${activeTab === 'precios_pdf' ? C.green3 : C.border}`,
-              borderRadius: 6,
-              cursor: 'pointer',
-              fontSize: '0.7rem',
-              fontWeight: 700,
-              transition: 'all 0.2s'
-            }}
-          >
-            💰 Análisis Precios PDF
-          </button>
-          <button
-            onClick={() => { setActiveTab('exportador'); }}
-            style={{
-              padding: '6px 12px',
-              background: activeTab === 'exportador' ? C.green3 : C.bg3,
-              color: activeTab === 'exportador' ? C.green2 : C.muted,
-              border: `1px solid ${activeTab === 'exportador' ? C.green3 : C.border}`,
-              borderRadius: 6,
-              cursor: 'pointer',
-              fontSize: '0.7rem',
-              fontWeight: 700,
-              transition: 'all 0.2s'
-            }}
-          >
-            📊 Exportar Precios
-          </button>
-          <button
             onClick={() => { setActiveTab('comparador_5_proveedores'); }}
             style={{
               padding: '6px 12px',
@@ -545,25 +477,6 @@ export default function ProveedoresTab() {
       </div>
       )}
 
-      {/* SECCIÓN COMPARADOR PDF */}
-      {activeTab === 'comparador' && (
-        <ComparadorProveedorPDF />
-      )}
-
-      {/* SECCIÓN ALMACÉN ENTRADAS/SALIDAS */}
-      {activeTab === 'almacen' && (
-        <AlmacenEntradasSalidas />
-      )}
-
-      {/* SECCIÓN ANÁLISIS PRECIOS PDF */}
-      {activeTab === 'precios_pdf' && (
-        <AnalizerPreciosPDF />
-      )}
-
-      {/* SECCIÓN EXPORTADOR DE PRECIOS */}
-      {activeTab === 'exportador' && (
-        <ExportadorPreciosProveedores />
-      )}
 
       {/* SECCIÓN COMPARADOR 5 PROVEEDORES */}
       {activeTab === 'comparador_5_proveedores' && (
