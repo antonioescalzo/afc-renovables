@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import csv
 import json
+import re
 from pathlib import Path
 
 # Rutas
@@ -13,84 +14,119 @@ archivos = [
     climen_folder / 'beltran3.csv',
 ]
 
-productos = {}
+# Palabras que indican que NO es un producto real
+PALABRAS_EXCLUIDAS = [
+    'ALMACÉN', 'ACADEMIA', 'GUARDIA', 'MÁQUINA', 'COMPRAS', 'OBRA',
+    'TODAVÍA', 'BAEZA', 'CIVIL', 'GREE', 'BAILÉN', 'ENTREGADO',
+    'DIFERENCIAL ALPHA', 'MAGNETOT', 'CABLE LIBRE',  # Estos sí incluyen, pero sin "..."
+]
+
+productos_dict = {}
+contador = 0
+lineas_saltadas = 0
+
+def es_producto_valido(desc):
+    """Verifica si la descripción parece ser un producto válido"""
+    if not desc or len(desc.strip()) < 3:
+        return False
+    if desc == '...' or desc.startswith('...'):
+        return False
+    if desc == 'ALMACÉN':
+        return False
+
+    # Excluir descripciones que parecen ser ubicaciones/proyectos
+    desc_upper = desc.upper()
+
+    # Excepciones: estos SÍ son productos válidos
+    si_son_validos = [
+        'CABLE', 'CAJA', 'MANGUITO', 'CONECTOR', 'CANALETA',
+        'DIFERENCIAL', 'MAGNETOT', 'PROTECTOR', 'LIMITADOR',
+        'RACOR', 'SEÑAL', 'TUBO', 'ENCHUFE', 'PARED'
+    ]
+
+    # Verificar si contiene alguna palabra de excluidos
+    for palabra in ['ACADEMIA', 'GUARDIA', 'MÁQUINA', 'COMPRAS', 'OBRA', 'BAEZA', 'BAILÉN']:
+        if palabra in desc_upper and not any(x in desc_upper for x in si_son_validos):
+            return False
+
+    if 'TODAVÍA' in desc_upper or 'ENTREGADO' in desc_upper:
+        return False
+
+    return True
 
 def procesar_archivo(filepath):
-    """Extrae productos únicos del archivo CSV"""
-    productos_locales = {}
+    global contador, lineas_saltadas
 
     with open(filepath, 'r', encoding='iso-8859-1') as f:
-        # Parsear el CSV
         reader = csv.reader(f, delimiter=';')
-        headers = next(reader)  # Saltar encabezado
+        headers = next(reader)
 
         for row in reader:
             if len(row) < 14:
                 continue
 
-            # Extraer campos
             ref = row[5].strip() if len(row) > 5 else ''
             desc = row[8].strip() if len(row) > 8 else ''
             precio_str = row[13].strip() if len(row) > 13 else '0'
 
-            # Saltar filas vacías o con ellipsis
-            if not desc or desc == '...' or desc.startswith('ALMAC'):
+            # Validar que sea un producto
+            if not es_producto_valido(desc):
+                lineas_saltadas += 1
                 continue
 
-            # Convertir precio
             try:
                 precio = float(precio_str.replace(',', '.'))
             except:
                 precio = 0
 
-            # Crear clave única por descripción
-            desc_upper = desc.upper()
+            # Clave única
+            clave = f"{desc.upper()}|{ref.upper()}"
 
-            if desc_upper not in productos_locales:
-                productos_locales[desc_upper] = {
+            if clave not in productos_dict:
+                productos_dict[clave] = {
                     'ref': ref,
                     'desc': desc,
                     'precio': precio
                 }
+                contador += 1
+            else:
+                # Usar el precio más bajo
+                if precio > 0 and precio < productos_dict[clave]['precio']:
+                    productos_dict[clave]['precio'] = precio
 
-    return productos_locales
+# Procesar
+print("🔍 Extrayendo productos de CLIMEN...")
+print("=" * 70)
 
-# Procesar todos los archivos
 for archivo in archivos:
-    nombre = archivo.name
-    print(f"Procesando {nombre}...")
-    productos.update(procesar_archivo(archivo))
-    print(f"  → Productos acumulados: {len(productos)}")
+    print(f"📄 {archivo.name}")
+    procesar_archivo(archivo)
 
-print(f"\n✅ Total de productos únicos: {len(productos)}")
+print(f"\n{'=' * 70}")
+print(f"✅ ANÁLISIS COMPLETADO")
+print(f"{'=' * 70}")
+print(f"✓ Productos válidos: {len(productos_dict)}")
+print(f"✓ Filas procesadas: {contador}")
+print(f"✓ Filas descartadas (basura): {lineas_saltadas}")
 
-# Generar lista final
-productos_finales = [
-    {
-        'ref': p['ref'],
-        'desc': p['desc'],
-        'precio': p['precio'],
-        'proveedor': 'CLIMEN'
-    }
-    for p in productos.values()
-]
-
-# Ordenar por descripción
+productos_finales = list(productos_dict.values())
 productos_finales.sort(key=lambda x: x['desc'])
 
-# Guardar como JSON
+# Agregar proveedor
+for p in productos_finales:
+    p['proveedor'] = 'CLIMEN'
+
+# Guardar
 output_path = Path('src/data/CLIMEN_PRODUCTOS.json')
 output_path.parent.mkdir(parents=True, exist_ok=True)
 
 with open(output_path, 'w', encoding='utf-8') as f:
     json.dump(productos_finales, f, indent=2, ensure_ascii=False)
 
-print(f"✅ Archivo guardado en {output_path}")
-print(f"Total de productos únicos: {len(productos_finales)}")
-print("\nPrimeros 10 productos:")
-for p in productos_finales[:10]:
-    print(f"  - {p['desc']}: {p['precio']}€ (Ref: {p['ref']})")
-print("\nÚltimos 5 productos:")
-for p in productos_finales[-5:]:
-    print(f"  - {p['desc']}: {p['precio']}€ (Ref: {p['ref']})")
+print(f"\n✅ Guardado: {output_path}")
+print(f"\n📊 LISTADO COMPLETO DE {len(productos_finales)} PRODUCTOS:")
+print("=" * 70)
 
+for i, p in enumerate(productos_finales, 1):
+    ref_display = p['ref'] if p['ref'] and p['ref'] != '...' else '(sin ref)'
+    print(f"{i:2}. {p['desc']:<50} | {p['precio']:>8.2f}€ | {ref_display}")
