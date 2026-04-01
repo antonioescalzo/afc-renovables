@@ -84,8 +84,8 @@ export default function BuscadorProductos() {
 
     if (productosCoincidentes.length === 0) return []
 
-    // Agrupar productos similares
-    const grupos = agruparProductosSimilares(productosCoincidentes, 0.70)
+    // Agrupar productos similares (umbral bajo para agrupar más agresivamente)
+    const grupos = agruparProductosSimilares(productosCoincidentes, 0.50)
       .filter(g => g.productos.length > 0)
       .map(g => ({
         ...g,

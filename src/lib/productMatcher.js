@@ -202,7 +202,7 @@ function compararCaracteristicas(car1, car2) {
 // 5. AGRUPACIÓN DE PRODUCTOS SIMILARES
 // ============================================================================
 
-export function agruparProductosSimilares(productos, umbralSimilitud = 0.80) {
+export function agruparProductosSimilares(productos, umbralSimilitud = 0.50) {
   if (!productos || productos.length === 0) return [];
 
   const grupos = [];
@@ -237,8 +237,9 @@ export function agruparProductosSimilares(productos, umbralSimilitud = 0.80) {
         0
       );
 
-      // Puntuación combinada: 60% características + 40% Levenshtein
-      const scoreTotal = scoreCaracteristicas * 0.6 + scoreLev * 0.4;
+      // Puntuación combinada: 85% características + 15% Levenshtein
+      // LAS CARACTERÍSTICAS PESAN MUCHO MÁS: 4P + 25A es lo importante
+      const scoreTotal = scoreCaracteristicas * 0.85 + scoreLev * 0.15;
 
       if (scoreTotal >= umbralSimilitud) {
         grupo.productos.push(productos[j]);

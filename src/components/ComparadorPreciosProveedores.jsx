@@ -81,8 +81,8 @@ export default function ComparadorPreciosProveedores() {
         const top = obtenerTop10Diferencias(todosLosProductos, 10)
         setTop10(top)
 
-        // Obtener todos los grupos para análisis completo
-        const grupos = agruparProductosSimilares(todosLosProductos, 0.75)
+        // Obtener todos los grupos para análisis completo (umbral bajo = agrupa más)
+        const grupos = agruparProductosSimilares(todosLosProductos, 0.50)
           .filter(g => g.productos.length >= 2)
           .map(g => ({
             ...g,
