@@ -1,17 +1,18 @@
 [
-  { "ref": "EPBE63M1NC32", "desc": "MAGNETOT. ALPHA+RESID. 1P+N 32A CV.C 6KA", "precio": 12.00, "proveedor": "CLIMEN" },
-  { "ref": "10009S2", "desc": "PROTECTOR SOBRETENSIONES TRANS. 600VDC 20KA 2P", "precio": 21.70, "proveedor": "CLIMEN" },
-  { "ref": "U130C1N/275", "desc": "PROT. SOBRETENSIONES TRANS. TIPOII, 3SU1 1P+N C 15-30KA 275 VAC", "precio": 19.00, "proveedor": "CLIMEN" },
-  { "ref": "EPS1C2-275-40", "desc": "LIMITADOR SOBRETENSIONES TIPO 2 EPSC2-275-40", "precio": 19.00, "proveedor": "CLIMEN" },
-  { "ref": "CDN8PT", "desc": "CAJA DISTRIBUCI­ON ESTANCA IP65 1X8 MOD P/TRANSP. NEW ECOLOGY", "precio": 16.46, "proveedor": "CLIMEN" },
-  { "ref": "5109", "desc": "CAJA DIST. SUP. HASTA 8 ELEM. 247X250X104", "precio": 12.60, "proveedor": "CLIMEN" },
-  { "ref": "8704", "desc": "CAJA P/DIST. HASTA 18 ELEM. SUP", "precio": 16.18, "proveedor": "CLIMEN" },
-  { "ref": "H07Z1/K6AZ", "desc": "CABLE LIBRE HAL­OGENOS 6MM AZ", "precio": 0.71, "proveedor": "CLIMEN" },
-  { "ref": "H07Z1-K6AV", "desc": "CABLE LIBRE HALOGENOS 6MM AV AMARILLO VERDE", "precio": 0.71, "proveedor": "CLIMEN" },
-  { "ref": "H07Z1-K10AV", "desc": "CABLE L. HALOGENOS H07Z1-K 10MM AMARILLO-VERDE", "precio": 1.27, "proveedor": "CLIMEN" },
-  { "ref": "H07Z1-K10AZ", "desc": "CABLE LIBRE HALOGENOS 10MM AZ", "precio": 1.27, "proveedor": "CLIMEN" },
-  { "ref": "H07Z1-K10MR-1", "desc": "CABLE LIBRE HALOGENOS 10MM MR", "precio": 1.27, "proveedor": "CLIMEN" },
-  { "ref": "H0721-K10NG", "desc": "CABLE LIBRE HALOGENOS 10MM NG", "precio": 1.27, "proveedor": "CLIMEN" },
-  { "ref": "EPR2A063030/10KA", "desc": "DIFERENCIAL ALPHA+INDUSTRIAL 2P 63A 30MA CLASE A SUPERINMUNIZADO 10KA", "precio": 33.91, "proveedor": "CLIMEN" },
-  { "ref": "1000PS2", "desc": "PROTECTOR SOBRETENSIONES TRANS. 600VDC 20KA 2P", "precio": 21.70, "proveedor": "CLIMEN" }
+  { "ref": "EPBE63M1NC32", "desc": "MAGNETOT. ALPHA+RESID. 1P+N 32A CV.C 6KA", "precio": 12.00, "proveedor": "ECLIMEN" },
+  { "ref": "10009S2", "desc": "PROTECTOR SOBRETENSIONES TRANS. 600VDC 20KA 2P", "precio": 21.70, "proveedor": "ECLIMEN" },
+  { "ref": "U130C1N/275", "desc": "PROT. SOBRETENSIONES TRANS. TIPOII, 3SU1 1P+N C 15-30KA 275 VAC", "precio": 19.00, "proveedor": "ECLIMEN" },
+  { "ref": "EPS1C2-275-40", "desc": "LIMITADOR SOBRETENSIONES TIPO 2 EPSC2-275-40", "precio": 19.00, "proveedor": "ECLIMEN" },
+  { "ref": "CDN8PT", "desc": "CAJA DISTRIBUCI­ON ESTANCA IP65 1X8 MOD P/TRANSP. NEW ECOLOGY", "precio": 16.46, "proveedor": "ECLIMEN" },
+  { "ref": "5109", "desc": "CAJA DIST. SUP. HASTA 8 ELEM. 247X250X104", "precio": 12.60, "proveedor": "ECLIMEN" },
+  { "ref": "8704", "desc": "CAJA P/DIST. HASTA 18 ELEM. SUP", "precio": 16.18, "proveedor": "ECLIMEN" },
+  { "ref": "H07Z1/K6AZ", "desc": "CABLE LIBRE HAL­OGENOS 6MM AZ", "precio": 0.71, "proveedor": "ECLIMEN" },
+  { "ref": "H07Z1-K6AV", "desc": "CABLE LIBRE HALOGENOS 6MM AV AMARILLO VERDE", "precio": 0.71, "proveedor": "ECLIMEN" },
+  { "ref": "H07Z1-K10AV", "desc": "CABLE L. HALOGENOS H07Z1-K 10MM AMARILLO-VERDE", "precio": 1.27, "proveedor": "ECLIMEN" },
+  { "ref": "H07Z1-K10AZ", "desc": "CABLE LIBRE HALOGENOS 10MM AZ", "precio": 1.27, "proveedor": "ECLIMEN" },
+  { "ref": "H07Z1-K10MR-1", "desc": "CABLE LIBRE HALOGENOS 10MM MR", "precio": 1.27, "proveedor": "ECLIMEN" },
+  { "ref": "H0721-K10NG", "desc": "CABLE LIBRE HALOGENOS 10MM NG", "precio": 1.27, "proveedor": "ECLIMEN" },
+  { "ref": "EPR2A063030/10KA", "desc": "DIFERENCIAL ALPHA+INDUSTRIAL 2P 63A 30MA CLASE A SUPERINMUNIZADO 10KA", "precio": 33.91, "proveedor": "ECLIMEN" },
+  { "ref": "1000PS2", "desc": "PROTECTOR SOBRETENSIONES TRANS. 600VDC 20KA 2P", "precio": 21.70, "proveedor": "ECLIMEN" }
 ]
+

@@ -46,12 +46,12 @@ const electrostockData = productosElectrostockPDF.map(p => ({
   proveedor: 'ELECTROSTOCK'
 }))
 
-// Preparar datos de CLIMEN
+// Preparar datos de ECLIMEN
 const climenDataMapped = productosClimen.map(p => ({
   ref: p.ref,
   desc: p.desc,
   precio: p.precio,
-  proveedor: 'CLIMEN'
+  proveedor: 'ECLIMEN'
 }))
 
 // Combinar todos los productos
@@ -151,7 +151,7 @@ export default function ComparadorPreciosProveedores() {
         }
 
         // Añadir precio de cada proveedor
-        const proveedores = ['ELECTROSTOCK', 'COTO', 'RECA', 'CLIMEN', 'PROINCO']
+        const proveedores = ['ELECTROSTOCK', 'COTO', 'RECA', 'ECLIMEN', 'PROINCO']
         proveedores.forEach(prov => {
           const det = detalles.find(d => d.proveedor === prov)
           fila[prov] = det ? det.precio : '-'

@@ -48,7 +48,7 @@ const climenDataMapped = productosClimen.map(p => ({
   ref: p.ref,
   desc: p.desc,
   precio: p.precio,
-  proveedor: 'CLIMEN'
+  proveedor: 'ECLIMEN'
 }))
 
 // Combinar todos
@@ -106,7 +106,7 @@ export default function BuscadorProductos() {
       'ELECTROSTOCK': '#0e7fa3',
       'COTO': '#3da83c',
       'RECA': '#f5c518',
-      'CLIMEN': '#f97316',
+      'ECLIMEN': '#f97316',
       'PROINCO': '#e85050'
     }
     return colores[proveedor] || C.teal2
@@ -117,7 +117,7 @@ export default function BuscadorProductos() {
     return producto ? producto.precio : null
   }
 
-  const proveedores = ['ELECTROSTOCK', 'COTO', 'RECA', 'CLIMEN', 'PROINCO']
+  const proveedores = ['ELECTROSTOCK', 'COTO', 'RECA', 'ECLIMEN', 'PROINCO']
 
   return (
     <div>
