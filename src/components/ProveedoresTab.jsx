@@ -68,6 +68,14 @@ export default function ProveedoresTab() {
     loadData()
   }, [])
 
+  // Monitor productos state changes
+  useEffect(() => {
+    console.log('📊 PRODUCTOS STATE UPDATED:', productos.length, 'productos')
+    if (productos.length > 0) {
+      console.log('Primeros 3:', productos.slice(0, 3))
+    }
+  }, [productos])
+
   const loadData = async () => {
     setLoading(true)
     try {
@@ -92,15 +100,23 @@ export default function ProveedoresTab() {
     try {
       // Encontrar el nombre del proveedor seleccionado
       const proveedorObj = proveedores.find(p => p.proveedor_id === proveedorId)
-      const proveedorNombre = (proveedorObj?.proveedor || '').toLowerCase()
+      const proveedorNombre = (proveedorObj?.proveedor || '').toLowerCase().trim()
 
-      console.log('DEBUG: Proveedor seleccionado:', proveedorNombre)
-      console.log('DEBUG: ¿Es ECLIMEN?', proveedorNombre.includes('eclimen') || proveedorNombre.includes('elect'))
-      console.log('DEBUG: Productos locales disponibles:', productosEclimen.length)
+      console.log('===== DEBUG ECLIMEN LOADING =====')
+      console.log('Proveedor ID:', proveedorId)
+      console.log('Proveedor encontrado:', !!proveedorObj)
+      console.log('Nombre proveedor:', proveedorNombre)
+      console.log('¿Contiene "eclimen"?', proveedorNombre.includes('eclimen'))
+      console.log('¿Contiene "elect"?', proveedorNombre.includes('elect'))
+      console.log('¿Contiene "climat"?', proveedorNombre.includes('climat'))
+      console.log('Productos ECLIMEN disponibles:', productosEclimen.length)
+      console.log('Primero 3 productos:', productosEclimen.slice(0, 3))
 
       // Si es ECLIMEN, mostrar SOLO los productos locales (ignorar Supabase)
-      if (proveedorNombre.includes('eclimen') || proveedorNombre.includes('elect')) {
-        console.log('DEBUG: Cargando productos ECLIMEN locales...')
+      const esEclimen = proveedorNombre.includes('eclimen') || proveedorNombre.includes('elect') || proveedorNombre.includes('climat')
+
+      if (esEclimen) {
+        console.log('✓ DETECTADO COMO ECLIMEN - Cargando productos locales...')
         const productosLocalesEclimen = productosEclimen.map(p => ({
           ref: p.ref,
           descripcion: p.desc,
@@ -110,22 +126,27 @@ export default function ProveedoresTab() {
           descuento: 0,
           fecha: new Date().toISOString()
         }))
-        console.log('DEBUG: Total productos a cargar:', productosLocalesEclimen.length)
+        console.log('✓ Total productos a cargar:', productosLocalesEclimen.length)
+        console.log('Primero 3 productos mapeados:', productosLocalesEclimen.slice(0, 3))
         setProductos(productosLocalesEclimen)
+        console.log('✓ setProductos llamado')
       } else {
-        // Para otros proveedores, cargar desde Supabase normalmente
+        console.log('✗ NO es ECLIMEN - Cargando desde Supabase...')
         const res = await fetchProductosPorProveedor(proveedorId)
         if (res.data) {
+          console.log('✓ Productos cargados desde Supabase:', res.data.length)
           setProductos(res.data)
         } else {
+          console.log('✗ No hay datos de Supabase')
           setProductos([])
         }
       }
     } catch (error) {
-      console.error('Error loading productos:', error)
+      console.error('✗ Error loading productos:', error)
       setProductos([])
     } finally {
       setProductosLoading(false)
+      console.log('===== FIN DEBUG =====')
     }
   }
 
