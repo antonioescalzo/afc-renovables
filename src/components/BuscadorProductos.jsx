@@ -50,14 +50,13 @@ const climenDataMapped = productosClimen.map(p => ({
   proveedor: 'CLIMEN'
 }))
 
-// Combinar todos los productos
+// Combinar todos los productos (SIN duplicados de CLIMEN)
 const todosLosProductos = [
   ...electrostockData,
   ...proincoData,
   ...cotoData,
   ...recaData,
-  ...climenData,
-  ...climenDataMapped
+  ...climenDataMapped  // Solo datos reales de CLIMEN_PRODUCTOS.json
 ]
 
 const fmt = n => new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n || 0)
@@ -200,66 +199,45 @@ export default function BuscadorProductos() {
                 )}
               </div>
 
-              {/* PROVEEDORES */}
-              <div style={{ padding: '12px 16px' }}>
+              {/* PROVEEDORES CON GRÁFICO DE BARRAS */}
+              <div style={{ padding: '16px' }}>
+                <div style={{ marginBottom: 12, fontSize: '0.75rem', color: C.muted, textTransform: 'uppercase', fontWeight: 600 }}>
+                  Comparativa de Precios
+                </div>
                 {grupo.proveedoresOrdenados.map((item, pidx) => {
                   const esMasBarato = item.precio === grupo.minPrecio
                   const color = colorProveedor(item.proveedor)
+                  const porcentajeBarra = (item.precio / grupo.maxPrecio) * 100
 
                   return (
-                    <div
-                      key={pidx}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        padding: '8px 0',
-                        borderBottom: pidx < grupo.proveedoresOrdenados.length - 1 ? `1px solid ${C.border}30` : 'none'
-                      }}
-                    >
-                      {/* PROVEEDOR */}
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 10,
-                        flex: 1
-                      }}>
-                        <div style={{
-                          background: color + '30',
-                          border: `1px solid ${color}`,
-                          color: color,
-                          padding: '4px 8px',
-                          borderRadius: 4,
-                          fontSize: '0.65rem',
-                          fontWeight: 700,
-                          minWidth: '100px',
-                          textAlign: 'center'
-                        }}>
-                          {item.proveedor}
-                        </div>
-                        {item.ref && item.ref !== '...' && (
+                    <div key={pidx} style={{ marginBottom: pidx < grupo.proveedoresOrdenados.length - 1 ? 12 : 0 }}>
+                      {/* Nombre proveedor y precio */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
                           <div style={{
+                            background: color + '30',
+                            border: `1px solid ${color}`,
+                            color: color,
+                            padding: '3px 8px',
+                            borderRadius: 4,
                             fontSize: '0.65rem',
-                            color: C.muted,
-                            fontFamily: 'monospace'
+                            fontWeight: 700,
+                            minWidth: '95px',
+                            textAlign: 'center'
                           }}>
-                            {item.ref}
+                            {item.proveedor}
                           </div>
-                        )}
-                      </div>
-
-                      {/* PRECIO Y BADGE */}
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 12,
-                        justifyContent: 'flex-end'
-                      }}>
+                          {item.ref && item.ref !== '...' && (
+                            <div style={{ fontSize: '0.65rem', color: C.muted, fontFamily: 'monospace' }}>
+                              Ref: {item.ref}
+                            </div>
+                          )}
+                        </div>
                         <div style={{
-                          fontSize: '1.2rem',
+                          fontSize: '1rem',
                           fontWeight: 800,
                           color: esMasBarato ? C.yellow : C.text,
-                          minWidth: '80px',
+                          minWidth: '70px',
                           textAlign: 'right'
                         }}>
                           {fmt(item.precio)}
@@ -269,16 +247,44 @@ export default function BuscadorProductos() {
                             background: C.yellow + '30',
                             border: `1px solid ${C.yellow}`,
                             color: C.yellow,
-                            padding: '3px 8px',
-                            borderRadius: 4,
-                            fontSize: '0.65rem',
+                            padding: '2px 6px',
+                            borderRadius: 3,
+                            fontSize: '0.6rem',
                             fontWeight: 700,
-                            minWidth: '70px',
-                            textAlign: 'center'
+                            marginLeft: 8
                           }}>
                             ✓ MEJOR
                           </div>
                         )}
+                      </div>
+
+                      {/* Barra visual */}
+                      <div style={{
+                        height: 20,
+                        background: C.bg3,
+                        borderRadius: 4,
+                        overflow: 'hidden',
+                        position: 'relative'
+                      }}>
+                        <div
+                          style={{
+                            height: '100%',
+                            background: color,
+                            width: `${porcentajeBarra}%`,
+                            transition: 'width 0.3s',
+                            borderRadius: 4,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'flex-end',
+                            paddingRight: 6
+                          }}
+                        >
+                          {porcentajeBarra > 30 && (
+                            <span style={{ fontSize: '0.65rem', color: 'white', fontWeight: 600 }}>
+                              {porcentajeBarra.toFixed(0)}%
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   )
