@@ -8,6 +8,7 @@ import {
 import ComparadorProveedorPDF from './ComparadorProveedorPDF'
 import AlmacenEntradasSalidas from './AlmacenEntradasSalidas'
 import AnalizerPreciosPDF from './AnalizerPreciosPDF'
+import ExportadorPreciosProveedores from './ExportadorPreciosProveedores'
 
 // Colores AFC
 const C={
@@ -259,6 +260,22 @@ export default function ProveedoresTab() {
           >
             💰 Análisis Precios PDF
           </button>
+          <button
+            onClick={() => { setActiveTab('exportador'); }}
+            style={{
+              padding: '6px 12px',
+              background: activeTab === 'exportador' ? C.green3 : C.bg3,
+              color: activeTab === 'exportador' ? C.green2 : C.muted,
+              border: `1px solid ${activeTab === 'exportador' ? C.green3 : C.border}`,
+              borderRadius: 6,
+              cursor: 'pointer',
+              fontSize: '0.7rem',
+              fontWeight: 700,
+              transition: 'all 0.2s'
+            }}
+          >
+            📊 Exportar Precios
+          </button>
         </div>
       </div>
 
@@ -484,6 +501,11 @@ export default function ProveedoresTab() {
       {/* SECCIÓN ANÁLISIS PRECIOS PDF */}
       {activeTab === 'precios_pdf' && (
         <AnalizerPreciosPDF />
+      )}
+
+      {/* SECCIÓN EXPORTADOR DE PRECIOS */}
+      {activeTab === 'exportador' && (
+        <ExportadorPreciosProveedores />
       )}
     </div>
   );
