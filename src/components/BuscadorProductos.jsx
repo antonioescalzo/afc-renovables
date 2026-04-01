@@ -43,6 +43,13 @@ const electrostockData = productosElectrostockPDF.map(p => ({
   proveedor: 'ELECTROSTOCK'
 }))
 
+const climenDataMapped = productosClimen.map(p => ({
+  ref: p.ref,
+  desc: p.desc,
+  precio: p.precio,
+  proveedor: 'CLIMEN'
+}))
+
 // Combinar todos los productos
 const todosLosProductos = [
   ...electrostockData,
@@ -50,21 +57,15 @@ const todosLosProductos = [
   ...cotoData,
   ...recaData,
   ...climenData,
-  ...productosClimen.map(p => ({
-    ref: p.ref || '',
-    desc: p.desc,
-    precio: p.precio,
-    proveedor: 'CLIMEN'
-  }))
+  ...climenDataMapped
 ]
 
 const fmt = n => new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n || 0)
 
 export default function BuscadorProductos() {
   const [busqueda, setBusqueda] = useState('')
-  const [ordenar, setOrdenar] = useState('proveedor')
   const [paginaActual, setPaginaActual] = useState(1)
-  const itemsPorPagina = 50
+  const itemsPorPagina = 15
 
   // Filtrar productos
   const productosFiltrados = useMemo(() => {
@@ -78,39 +79,29 @@ export default function BuscadorProductos() {
     })
   }, [busqueda])
 
-  // Ordenar productos
-  const productosOrdenados = useMemo(() => {
-    const sorted = [...productosFiltrados]
-    switch (ordenar) {
-      case 'proveedor':
-        return sorted.sort((a, b) => a.proveedor.localeCompare(b.proveedor))
-      case 'precio_asc':
-        return sorted.sort((a, b) => a.precio - b.precio)
-      case 'precio_desc':
-        return sorted.sort((a, b) => b.precio - a.precio)
-      case 'nombre':
-        return sorted.sort((a, b) => a.desc.localeCompare(b.desc))
-      default:
-        return sorted
-    }
-  }, [productosFiltrados, ordenar])
+  // Agrupar por descripción para ver comparativas
+  const productosAgrupados = useMemo(() => {
+    const grupos = {}
+    productosFiltrados.forEach(p => {
+      const desc_upper = p.desc.toUpperCase()
+      if (!grupos[desc_upper]) {
+        grupos[desc_upper] = {
+          nombre: p.desc,
+          proveedores: {}
+        }
+      }
+      if (!grupos[desc_upper].proveedores[p.proveedor]) {
+        grupos[desc_upper].proveedores[p.proveedor] = []
+      }
+      grupos[desc_upper].proveedores[p.proveedor].push(p)
+    })
+    return Object.values(grupos).sort((a, b) => a.nombre.localeCompare(b.nombre))
+  }, [productosFiltrados])
 
   // Paginar
-  const totalPaginas = Math.ceil(productosOrdenados.length / itemsPorPagina)
+  const totalPaginas = Math.ceil(productosAgrupados.length / itemsPorPagina)
   const inicio = (paginaActual - 1) * itemsPorPagina
-  const productosActuales = productosOrdenados.slice(inicio, inicio + itemsPorPagina)
-
-  // Estadísticas
-  const proveedoresUnicos = new Set(productosFiltrados.map(p => p.proveedor))
-  const precioPromedio = productosFiltrados.length > 0
-    ? productosFiltrados.reduce((sum, p) => sum + p.precio, 0) / productosFiltrados.length
-    : 0
-  const precioMin = productosFiltrados.length > 0
-    ? Math.min(...productosFiltrados.map(p => p.precio))
-    : 0
-  const precioMax = productosFiltrados.length > 0
-    ? Math.max(...productosFiltrados.map(p => p.precio))
-    : 0
+  const productosActuales = productosAgrupados.slice(inicio, inicio + itemsPorPagina)
 
   const colorProveedor = (proveedor) => {
     const colores = {
@@ -125,165 +116,134 @@ export default function BuscadorProductos() {
 
   return (
     <div>
-      {/* CARDS DE ESTADÍSTICAS */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12, marginBottom: 24 }}>
-        <div style={{
-          background: C.card,
-          border: `1px solid ${C.border}`,
-          borderRadius: 12,
-          padding: 16,
-        }}>
-          <div style={{ fontSize: '0.65rem', color: C.muted, textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 8 }}>Total Productos</div>
-          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: C.green2, lineHeight: 1 }}>{productosOrdenados.length}</div>
-          <div style={{ fontSize: '0.65rem', color: C.muted, marginTop: 6 }}>de {todosLosProductos.length} totales</div>
-        </div>
-
-        <div style={{
-          background: C.card,
-          border: `1px solid ${C.border}`,
-          borderRadius: 12,
-          padding: 16,
-        }}>
-          <div style={{ fontSize: '0.65rem', color: C.muted, textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 8 }}>Proveedores</div>
-          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: C.teal2, lineHeight: 1 }}>{proveedoresUnicos.size}</div>
-          <div style={{ fontSize: '0.65rem', color: C.muted, marginTop: 6 }}>en resultados</div>
-        </div>
-
-        <div style={{
-          background: C.card,
-          border: `1px solid ${C.border}`,
-          borderRadius: 12,
-          padding: 16,
-        }}>
-          <div style={{ fontSize: '0.65rem', color: C.muted, textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 8 }}>Precio Mín</div>
-          <div style={{ fontSize: '1.3rem', fontWeight: 800, color: C.yellow, lineHeight: 1 }}>{fmt(precioMin)}</div>
-          <div style={{ fontSize: '0.65rem', color: C.muted, marginTop: 6 }}>más económico</div>
-        </div>
-
-        <div style={{
-          background: C.card,
-          border: `1px solid ${C.border}`,
-          borderRadius: 12,
-          padding: 16,
-        }}>
-          <div style={{ fontSize: '0.65rem', color: C.muted, textTransform: 'uppercase', fontFamily: 'monospace', marginBottom: 8 }}>Precio Máx</div>
-          <div style={{ fontSize: '1.3rem', fontWeight: 800, color: C.red, lineHeight: 1 }}>{fmt(precioMax)}</div>
-          <div style={{ fontSize: '0.65rem', color: C.muted, marginTop: 6 }}>más caro</div>
-        </div>
-      </div>
-
-      {/* BÚSQUEDA Y FILTROS */}
-      <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+      {/* BÚSQUEDA */}
+      <div style={{ marginBottom: 24 }}>
         <input
           type="text"
-          placeholder="🔍 Buscar por nombre, referencia o proveedor..."
+          placeholder="🔍 Buscar productos para comparar precios..."
           value={busqueda}
           onChange={e => {
             setBusqueda(e.target.value)
             setPaginaActual(1)
           }}
           style={{
-            flex: 1,
-            minWidth: 250,
-            padding: '8px 12px',
+            width: '100%',
+            padding: '12px 16px',
             background: C.bg2,
-            border: `1px solid ${C.border}`,
-            borderRadius: 6,
+            border: `2px solid ${C.border}`,
+            borderRadius: 8,
             color: C.text,
-            fontSize: '0.75rem',
+            fontSize: '0.85rem',
             fontFamily: 'monospace'
           }}
         />
-
-        <select
-          value={ordenar}
-          onChange={e => {
-            setOrdenar(e.target.value)
-            setPaginaActual(1)
-          }}
-          style={{
-            padding: '8px 12px',
-            background: C.bg2,
-            border: `1px solid ${C.border}`,
-            borderRadius: 6,
-            color: C.text,
-            fontSize: '0.75rem',
-            fontFamily: 'monospace',
-            cursor: 'pointer'
-          }}
-        >
-          <option value="proveedor">Ordenar por: Proveedor</option>
-          <option value="nombre">Ordenar por: Nombre</option>
-          <option value="precio_asc">Ordenar por: Precio ↑</option>
-          <option value="precio_desc">Ordenar por: Precio ↓</option>
-        </select>
       </div>
 
-      {/* TABLA DE PRODUCTOS */}
-      <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, overflowX: 'auto', marginBottom: 14 }}>
-        <table style={{ width: '100%', minWidth: 1000, borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ background: C.bg3 }}>
-              {['Ref', 'Descripción', 'Proveedor', 'Precio'].map(h => (
-                <th key={h} style={{
-                  fontFamily: 'monospace',
-                  fontSize: '0.55rem',
-                  color: C.muted,
-                  textTransform: 'uppercase',
-                  padding: '9px',
-                  textAlign: h === 'Precio' ? 'right' : 'left',
-                  borderBottom: `1px solid ${C.border}`
-                }}>
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {productosActuales.length === 0 ? (
-              <tr>
-                <td colSpan="4" style={{ padding: '20px', textAlign: 'center', color: C.muted, fontSize: '0.75rem' }}>
-                  No hay productos que coincidan con tu búsqueda
-                </td>
-              </tr>
-            ) : (
-              productosActuales.map((prod, idx) => (
-                <tr key={idx}
-                  onMouseEnter={e => e.currentTarget.style.background = `${C.green3}14`}
-                  onMouseLeave={e => e.currentTarget.style.background = ''}>
-                  <td style={{ padding: '9px', fontFamily: 'monospace', fontSize: '0.65rem', color: C.teal2, fontWeight: 600 }}>
-                    {prod.ref || '-'}
-                  </td>
-                  <td style={{ padding: '9px', fontSize: '0.72rem', color: C.text }}>
-                    {prod.desc}
-                  </td>
-                  <td style={{ padding: '9px', fontSize: '0.7rem' }}>
-                    <span style={{
-                      display: 'inline-block',
-                      padding: '4px 8px',
-                      background: colorProveedor(prod.proveedor) + '30',
-                      border: `1px solid ${colorProveedor(prod.proveedor)}`,
-                      borderRadius: 4,
-                      color: colorProveedor(prod.proveedor),
-                      fontWeight: 600,
-                      fontFamily: 'monospace'
-                    }}>
-                      {prod.proveedor}
-                    </span>
-                  </td>
-                  <td style={{ padding: '9px', fontFamily: 'monospace', fontSize: '0.75rem', color: C.green2, textAlign: 'right', fontWeight: 700 }}>
-                    {fmt(prod.precio)}
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+      {/* ESTADÍSTICAS */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12, marginBottom: 24 }}>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 8, padding: 12 }}>
+          <div style={{ fontSize: '0.6rem', color: C.muted, textTransform: 'uppercase', marginBottom: 4 }}>Productos</div>
+          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: C.green2 }}>{productosAgrupados.length}</div>
+        </div>
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 8, padding: 12 }}>
+          <div style={{ fontSize: '0.6rem', color: C.muted, textTransform: 'uppercase', marginBottom: 4 }}>Proveedores</div>
+          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: C.teal2 }}>5</div>
+        </div>
+      </div>
+
+      {/* TABLA COMPARATIVA */}
+      <div style={{ marginBottom: 24 }}>
+        {productosActuales.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '30px', color: C.muted }}>
+            No hay productos que coincidan con tu búsqueda
+          </div>
+        ) : (
+          productosActuales.map((grupo, idx) => {
+            const precios = []
+            Object.values(grupo.proveedores).forEach(items => {
+              items.forEach(item => precios.push(item.precio))
+            })
+            const minPrecio = Math.min(...precios)
+            const maxPrecio = Math.max(...precios)
+            const ahorro = maxPrecio - minPrecio
+
+            return (
+              <div key={idx} style={{ marginBottom: 16, border: `1px solid ${C.border}`, borderRadius: 8, overflow: 'hidden' }}>
+                {/* ENCABEZADO DEL PRODUCTO */}
+                <div style={{ background: C.bg3, padding: '12px 16px', borderBottom: `1px solid ${C.border}` }}>
+                  <div style={{ color: C.text, fontSize: '0.85rem', fontWeight: 600, marginBottom: 6 }}>
+                    {grupo.nombre}
+                  </div>
+                  {ahorro > 0 && (
+                    <div style={{ fontSize: '0.7rem', color: C.yellow }}>
+                      💰 Ahorro potencial: {fmt(ahorro)} | Min: {fmt(minPrecio)} - Max: {fmt(maxPrecio)}
+                    </div>
+                  )}
+                </div>
+
+                {/* PROVEEDORES */}
+                <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Object.keys(grupo.proveedores).length}, 1fr)`, gap: 0 }}>
+                  {Object.entries(grupo.proveedores).map(([proveedor, items]) => {
+                    const precioProveedor = items[0].precio
+                    const esMasBarato = precioProveedor === minPrecio
+                    const background = esMasBarato ? C.bg3 : C.card
+                    const borderColor = colorProveedor(proveedor)
+
+                    return (
+                      <div
+                        key={proveedor}
+                        style={{
+                          background,
+                          borderLeft: `3px solid ${borderColor}`,
+                          padding: '12px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: 8
+                        }}>
+                        {/* Proveedor */}
+                        <div style={{
+                          display: 'inline-block',
+                          background: borderColor + '30',
+                          border: `1px solid ${borderColor}`,
+                          color: borderColor,
+                          padding: '3px 8px',
+                          borderRadius: 4,
+                          fontSize: '0.65rem',
+                          fontWeight: 700,
+                          width: 'fit-content'
+                        }}>
+                          {proveedor}
+                        </div>
+
+                        {/* Precio */}
+                        <div>
+                          <div style={{ fontSize: '1.4rem', fontWeight: 800, color: esMasBarato ? C.yellow : C.text }}>
+                            {fmt(precioProveedor)}
+                          </div>
+                          {esMasBarato && (
+                            <div style={{ fontSize: '0.65rem', color: C.yellow, marginTop: 2 }}>✓ MÁS BARATO</div>
+                          )}
+                        </div>
+
+                        {/* Referencia */}
+                        {items[0].ref && (
+                          <div style={{ fontSize: '0.65rem', color: C.muted, fontFamily: 'monospace' }}>
+                            Ref: {items[0].ref}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          })
+        )}
       </div>
 
       {/* PAGINACIÓN */}
       {totalPaginas > 1 && (
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: C.bg3, borderRadius: 8, flexWrap: 'wrap', gap: 10 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: C.bg3, borderRadius: 8, gap: 10 }}>
           <button
             onClick={() => setPaginaActual(Math.max(1, paginaActual - 1))}
             disabled={paginaActual === 1}
@@ -295,14 +255,13 @@ export default function BuscadorProductos() {
               borderRadius: 6,
               cursor: paginaActual === 1 ? 'not-allowed' : 'pointer',
               fontSize: '0.7rem',
-              fontWeight: 700,
-              transition: 'all 0.2s'
+              fontWeight: 700
             }}
           >
             ← Anterior
           </button>
           <div style={{ fontSize: '0.7rem', color: C.muted, fontFamily: 'monospace' }}>
-            Página <span style={{ color: C.text, fontWeight: 700 }}>{paginaActual}</span> de <span style={{ color: C.text, fontWeight: 700 }}>{totalPaginas}</span> · ({inicio + 1}-{Math.min(inicio + itemsPorPagina, productosOrdenados.length)} de {productosOrdenados.length})
+            Página <span style={{ color: C.text, fontWeight: 700 }}>{paginaActual}</span> de <span style={{ color: C.text, fontWeight: 700 }}>{totalPaginas}</span> ({productosActuales.length} productos)
           </div>
           <button
             onClick={() => setPaginaActual(Math.min(totalPaginas, paginaActual + 1))}
@@ -315,8 +274,7 @@ export default function BuscadorProductos() {
               borderRadius: 6,
               cursor: paginaActual === totalPaginas ? 'not-allowed' : 'pointer',
               fontSize: '0.7rem',
-              fontWeight: 700,
-              transition: 'all 0.2s'
+              fontWeight: 700
             }}
           >
             Siguiente →
