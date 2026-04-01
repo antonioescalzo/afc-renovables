@@ -94,8 +94,13 @@ export default function ProveedoresTab() {
       const proveedorObj = proveedores.find(p => p.proveedor_id === proveedorId)
       const proveedorNombre = (proveedorObj?.proveedor || '').toLowerCase()
 
+      console.log('DEBUG: Proveedor seleccionado:', proveedorNombre)
+      console.log('DEBUG: ¿Es ECLIMEN?', proveedorNombre.includes('eclimen') || proveedorNombre.includes('elect'))
+      console.log('DEBUG: Productos locales disponibles:', productosEclimen.length)
+
       // Si es ECLIMEN, mostrar SOLO los productos locales (ignorar Supabase)
       if (proveedorNombre.includes('eclimen') || proveedorNombre.includes('elect')) {
+        console.log('DEBUG: Cargando productos ECLIMEN locales...')
         const productosLocalesEclimen = productosEclimen.map(p => ({
           ref: p.ref,
           descripcion: p.desc,
@@ -105,6 +110,7 @@ export default function ProveedoresTab() {
           descuento: 0,
           fecha: new Date().toISOString()
         }))
+        console.log('DEBUG: Total productos a cargar:', productosLocalesEclimen.length)
         setProductos(productosLocalesEclimen)
       } else {
         // Para otros proveedores, cargar desde Supabase normalmente
