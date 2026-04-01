@@ -7,6 +7,7 @@ import {
 } from '../lib/supabase-compras'
 import AlmacenEntradasSalidas from './AlmacenEntradasSalidas'
 import ComparadorPreciosProveedores from './ComparadorPreciosProveedores'
+import BuscadorProductos from './BuscadorProductos'
 
 // Colores AFC
 const C={
@@ -209,6 +210,22 @@ export default function ProveedoresTab() {
             }}
           >
             📊 Ranking ({proveedoresFiltrados.length})
+          </button>
+          <button
+            onClick={() => { setActiveTab('buscador'); setPaginaActual(1); }}
+            style={{
+              padding: '6px 12px',
+              background: activeTab === 'buscador' ? C.green3 : C.bg3,
+              color: activeTab === 'buscador' ? C.green2 : C.muted,
+              border: `1px solid ${activeTab === 'buscador' ? C.green3 : C.border}`,
+              borderRadius: 6,
+              cursor: 'pointer',
+              fontSize: '0.7rem',
+              fontWeight: 700,
+              transition: 'all 0.2s'
+            }}
+          >
+            🔍 Buscador Productos
           </button>
           <button
             onClick={() => { setActiveTab('almacen'); }}
@@ -452,6 +469,11 @@ export default function ProveedoresTab() {
           </div>
         )}
       </div>
+      )}
+
+      {/* SECCIÓN BUSCADOR DE PRODUCTOS */}
+      {activeTab === 'buscador' && (
+        <BuscadorProductos />
       )}
 
       {/* SECCIÓN ALMACÉN ENTRADAS/SALIDAS */}
