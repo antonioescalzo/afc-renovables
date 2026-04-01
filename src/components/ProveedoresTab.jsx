@@ -89,16 +89,12 @@ export default function ProveedoresTab() {
   const loadProductos = async (proveedorId) => {
     setProductosLoading(true)
     try {
-      const res = await fetchProductosPorProveedor(proveedorId)
-      let productosFinales = res.data || []
-
       // Encontrar el nombre del proveedor seleccionado
       const proveedorObj = proveedores.find(p => p.proveedor_id === proveedorId)
       const proveedorNombre = (proveedorObj?.proveedor || '').toLowerCase()
 
-      // Detectar ECLIMEN por múltiples variaciones de nombre
-      if (proveedorNombre.includes('eclimen') ||
-          proveedorNombre.includes('elect y climat')) {
+      // Si es ECLIMEN, mostrar SOLO los productos locales (ignorar Supabase)
+      if (proveedorNombre.includes('eclimen') || proveedorNombre.includes('elect')) {
         const productosLocalesEclimen = productosEclimen.map(p => ({
           ref: p.ref,
           descripcion: p.desc,
@@ -108,13 +104,19 @@ export default function ProveedoresTab() {
           descuento: 0,
           fecha: new Date().toISOString()
         }))
-        // Agregar productos locales al inicio para que se vean primero
-        productosFinales = [...productosLocalesEclimen, ...productosFinales]
+        setProductos(productosLocalesEclimen)
+      } else {
+        // Para otros proveedores, cargar desde Supabase normalmente
+        const res = await fetchProductosPorProveedor(proveedorId)
+        if (res.data) {
+          setProductos(res.data)
+        } else {
+          setProductos([])
+        }
       }
-
-      setProductos(productosFinales)
     } catch (error) {
       console.error('Error loading productos:', error)
+      setProductos([])
     } finally {
       setProductosLoading(false)
     }
