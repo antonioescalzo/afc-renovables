@@ -5,8 +5,13 @@ from pathlib import Path
 
 # Rutas
 climen_folder = Path('costes_general/CLIMEN')
-file1 = climen_folder / '2.csv'
-file2 = climen_folder / 'Lista.csv'
+archivos = [
+    climen_folder / '2.csv',
+    climen_folder / 'Lista.csv',
+    climen_folder / 'beltran.csv',
+    climen_folder / 'beltran2.csv',
+    climen_folder / 'beltran3.csv',
+]
 
 productos = {}
 
@@ -50,14 +55,14 @@ def procesar_archivo(filepath):
 
     return productos_locales
 
-# Procesar ambos archivos
-print("Procesando 2.csv...")
-productos.update(procesar_archivo(file1))
-print(f"Productos extraídos: {len(productos)}")
+# Procesar todos los archivos
+for archivo in archivos:
+    nombre = archivo.name
+    print(f"Procesando {nombre}...")
+    productos.update(procesar_archivo(archivo))
+    print(f"  → Productos acumulados: {len(productos)}")
 
-print("Procesando Lista.csv...")
-productos.update(procesar_archivo(file2))
-print(f"Productos totales después de Lista.csv: {len(productos)}")
+print(f"\n✅ Total de productos únicos: {len(productos)}")
 
 # Generar lista final
 productos_finales = [
@@ -80,8 +85,12 @@ output_path.parent.mkdir(parents=True, exist_ok=True)
 with open(output_path, 'w', encoding='utf-8') as f:
     json.dump(productos_finales, f, indent=2, ensure_ascii=False)
 
-print(f"\n✅ Archivo guardado en {output_path}")
+print(f"✅ Archivo guardado en {output_path}")
 print(f"Total de productos únicos: {len(productos_finales)}")
-print("\nPrimeros 5 productos:")
-for p in productos_finales[:5]:
+print("\nPrimeros 10 productos:")
+for p in productos_finales[:10]:
     print(f"  - {p['desc']}: {p['precio']}€ (Ref: {p['ref']})")
+print("\nÚltimos 5 productos:")
+for p in productos_finales[-5:]:
+    print(f"  - {p['desc']}: {p['precio']}€ (Ref: {p['ref']})")
+

@@ -6,13 +6,19 @@
     "proveedor": "CLIMEN"
   },
   {
+    "ref": "...",
+    "desc": "ACADEMIA GUARDIA CIVIL, AIRES ACONDICIONADOS, AEROTERMIAS",
+    "precio": 0.92,
+    "proveedor": "CLIMEN"
+  },
+  {
     "ref": "H07Z1-K16AZ",
     "desc": "CABLE L. HALOGENOS H07Z1-K 16 MM AZUL",
     "precio": 1.84,
     "proveedor": "CLIMEN"
   },
   {
-    "ref": "...",
+    "ref": "H07Z1-K16GR",
     "desc": "CABLE L. HALOGENOS H07Z1-K 16 MM GRIS",
     "precio": 1.84,
     "proveedor": "CLIMEN"
@@ -30,7 +36,7 @@
     "proveedor": "CLIMEN"
   },
   {
-    "ref": "...",
+    "ref": "EV161",
     "desc": "CAJA ESTANCA 160 X 110 MM",
     "precio": 2.4289,
     "proveedor": "CLIMEN"
@@ -48,13 +54,19 @@
     "proveedor": "CLIMEN"
   },
   {
+    "ref": "...",
+    "desc": "COMPRAS",
+    "precio": 0,
+    "proveedor": "CLIMEN"
+  },
+  {
     "ref": "PVBM05",
     "desc": "CONECTOR SOLAR MC4 1000V AEREO PARA M/H",
     "precio": 1.2124,
     "proveedor": "CLIMEN"
   },
   {
-    "ref": "...",
+    "ref": "EPRE2A040030",
     "desc": "DIFERENCIAL ALPHA+ RESIDENCIAL 2P 40A 30MA CLASE A SUPERINMUNIZADO 6KA",
     "precio": 17.0,
     "proveedor": "CLIMEN"
@@ -96,9 +108,33 @@
     "proveedor": "CLIMEN"
   },
   {
+    "ref": "...",
+    "desc": "OBRA B4B BAILÉN",
+    "precio": 9.28,
+    "proveedor": "CLIMEN"
+  },
+  {
     "ref": "1000PS2",
     "desc": "PROTECTOR SOBRETENSIONES TRANS. 600VDC 20KA 2P",
     "precio": 21.7,
+    "proveedor": "CLIMEN"
+  },
+  {
+    "ref": "...",
+    "desc": "RACOR A CAJA M25X1.5 PARA TUBO ENCHUFABLE ACERO GALVANIZADO",
+    "precio": 3.136,
+    "proveedor": "CLIMEN"
+  },
+  {
+    "ref": "...",
+    "desc": "SEÑAL PLAST. AE5ADH RIESGO ELECT. 52MM",
+    "precio": 0.5697,
+    "proveedor": "CLIMEN"
+  },
+  {
+    "ref": "...",
+    "desc": "TODAVÍA NO ENTREGADO.",
+    "precio": 1.7629,
     "proveedor": "CLIMEN"
   }
 ]
