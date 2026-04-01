@@ -44,6 +44,23 @@ for archivo in archivos_csv:
         df = df[df[primera_columna].astype(str).str.strip() != primera_columna.strip()]
         filas_eliminadas = filas_antes - len(df)
 
+        # Limpiar puntos suspensivos reemplazándolos con vacío
+        df = df.replace('\.\.\.', '', regex=True)
+        # Limpiar espacios extras
+        for col in df.columns:
+            if df[col].dtype == 'object':
+                df[col] = df[col].str.strip()
+
+        # Eliminar filas con datos corruptos donde la descripción es un nombre de persona
+        # (filas donde "Descripción Ampliada" contiene "JOSÉ" o similares patrones de nombres)
+        filas_antes_limpieza = len(df)
+        if 'Descripción Ampliada' in df.columns:
+            # Eliminar filas donde la descripción parece ser un nombre de persona (JOSÉ/Mía/María)
+            df = df[~df['Descripción Ampliada'].astype(str).str.contains(r'(JOSÉ|Mía|ía|María)', case=False, na=False)]
+        filas_eliminadas_corruptas = filas_antes_limpieza - len(df)
+        if filas_eliminadas_corruptas > 0:
+            print(f"   ⚠️ Filas con datos corruptos eliminadas: {filas_eliminadas_corruptas}")
+
         if len(df) == 0:
             print(f"   ⚠️ Archivo sin datos después de limpieza")
             continue
