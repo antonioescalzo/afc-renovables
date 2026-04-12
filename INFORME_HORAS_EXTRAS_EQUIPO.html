@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis Horas Extras - AFC Renovables</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8f9fa;
+            color: #1a1a1a;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* PORTADA */
+        .portada {
+            background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 60px 40px;
+            margin-bottom: 40px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(211, 47, 47, 0.3);
+        }
+
+        .portada h1 {
+            font-size: 2.8em;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .portada p {
+            font-size: 1.3em;
+            opacity: 0.95;
+            margin-bottom: 30px;
+        }
+
+        .numero-principal {
+            font-size: 3.5em;
+            font-weight: 700;
+            margin: 30px 0;
+            background: rgba(255,255,255,0.2);
+            padding: 30px;
+            border-radius: 10px;
+        }
+
+        /* TARJETAS */
+        .tarjeta {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 25px;
+            border-left: 5px solid #d32f2f;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .tarjeta h2 {
+            color: #d32f2f;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        /* COMPARATIVA */
+        .comparativa-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .card {
+            background: linear-gradient(135deg, #f5f5f5, #ffffff);
+            padding: 25px;
+            border-radius: 10px;
+            border: 2px solid #d32f2f;
+            text-align: center;
+        }
+
+        .card-titulo {
+            font-size: 1.1em;
+            color: #666;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .card-valor {
+            font-size: 2.8em;
+            font-weight: 700;
+            color: #d32f2f;
+            margin: 15px 0;
+        }
+
+        .card-descripcion {
+            font-size: 0.95em;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        /* TABLA */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        table th {
+            background: #d32f2f;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        table td {
+            padding: 15px;
+            border-bottom: 1px solid #e8e8e8;
+        }
+
+        table tr:hover {
+            background: #fff3e0;
+        }
+
+        /* ALERTA */
+        .alerta {
+            background: #ffebee;
+            border-left: 5px solid #d32f2f;
+            padding: 25px;
+            border-radius: 8px;
+            margin: 25px 0;
+        }
+
+        .alerta h3 {
+            color: #b71c1c;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .alerta p {
+            color: #c62828;
+            margin: 10px 0;
+            line-height: 1.8;
+        }
+
+        /* GRÁFICO BARRAS */
+        .barra-container {
+            margin: 30px 0;
+        }
+
+        .barra-item {
+            margin-bottom: 25px;
+        }
+
+        .barra-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .barra {
+            height: 45px;
+            background: #e8e8e8;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .barra-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #d32f2f, #f44336);
+            display: flex;
+            align-items: center;
+            padding-left: 15px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.1em;
+        }
+
+        /* IMPACTO ECONÓMICO */
+        .impacto {
+            background: linear-gradient(135deg, #ffebee, #ffcdd2);
+            border: 3px solid #d32f2f;
+            padding: 40px;
+            border-radius: 12px;
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .impacto h2 {
+            color: #b71c1c;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .impacto-valor {
+            font-size: 3.5em;
+            font-weight: 700;
+            color: #d32f2f;
+            margin: 25px 0;
+        }
+
+        .impacto p {
+            color: #c62828;
+            font-size: 1.1em;
+            margin: 10px 0;
+        }
+
+        /* RECOMENDACIONES */
+        .recomendaciones {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            border-left: 5px solid #2d9d5c;
+            margin-top: 30px;
+        }
+
+        .recomendaciones h2 {
+            color: #2d9d5c;
+            margin-bottom: 20px;
+        }
+
+        .recomendaciones ul {
+            margin-left: 30px;
+            color: #1a1a1a;
+        }
+
+        .recomendaciones li {
+            margin: 12px 0;
+            font-size: 1.05em;
+        }
+
+        /* FOOTER */
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 30px;
+            border-top: 2px solid #d32f2f;
+            color: #666;
+        }
+
+        .btn-print {
+            padding: 12px 25px;
+            background: #d32f2f;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1em;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+
+        .btn-print:hover {
+            background: #b71c1c;
+            box-shadow: 0 5px 15px rgba(211, 47, 47, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .comparativa-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .portada h1 {
+                font-size: 2em;
+            }
+
+            .numero-principal {
+                font-size: 2.5em;
+            }
+
+            .impacto-valor {
+                font-size: 2.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- PORTADA -->
+        <div class="portada">
+            <h1>⚠️ ANÁLISIS DE HORAS EXTRAS</h1>
+            <p>Equipo: Perete, Tomas y Manuel</p>
+            <div class="numero-principal">€6,648</div>
+            <p>Coste Total en Horas Extras (Enero-Marzo + Diciembre)</p>
+        </div>
+
+        <!-- RESUMEN RÁPIDO -->
+        <div class="tarjeta">
+            <h2>📊 RESUMEN RÁPIDO</h2>
+            <div class="comparativa-grid">
+                <div class="card">
+                    <div class="card-titulo">Horas Extras del Equipo</div>
+                    <div class="card-valor">554 h</div>
+                    <div class="card-descripcion">Enero-Marzo + Diciembre</div>
+                </div>
+                <div class="card">
+                    <div class="card-titulo">% del Total de Extras</div>
+                    <div class="card-valor">80%</div>
+                    <div class="card-descripcion">vs Otro equipo (20%)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DESGLOSE POR MES -->
+        <div class="tarjeta">
+            <h2>📅 HORAS EXTRAS POR MES</h2>
+            <table>
+                <tr>
+                    <th>Mes</th>
+                    <th>Horas Extras</th>
+                    <th>Coste (€12/h)</th>
+                    <th>% del Total</th>
+                </tr>
+                <tr>
+                    <td><strong>Enero</strong></td>
+                    <td style="text-align: center; font-weight: 600;">147.5 h</td>
+                    <td style="text-align: right; font-weight: 600; color: #d32f2f;">€1,770</td>
+                    <td style="text-align: center;">26.6%</td>
+                </tr>
+                <tr>
+                    <td><strong>Febrero</strong></td>
+                    <td style="text-align: center; font-weight: 600;">101 h</td>
+                    <td style="text-align: right; font-weight: 600; color: #d32f2f;">€1,212</td>
+                    <td style="text-align: center;">18.2%</td>
+                </tr>
+                <tr>
+                    <td><strong>Marzo</strong></td>
+                    <td style="text-align: center; font-weight: 600;">170 h</td>
+                    <td style="text-align: right; font-weight: 600; color: #d32f2f;">€2,040</td>
+                    <td style="text-align: center;">30.7%</td>
+                </tr>
+                <tr>
+                    <td><strong>Diciembre</strong></td>
+                    <td style="text-align: center; font-weight: 600;">135.5 h</td>
+                    <td style="text-align: right; font-weight: 600; color: #d32f2f;">€1,626</td>
+                    <td style="text-align: center;">24.4%</td>
+                </tr>
+                <tr style="background: #ffebee; font-weight: 700;">
+                    <td>TOTAL</td>
+                    <td style="text-align: center;">554 h</td>
+                    <td style="text-align: right; color: #d32f2f;">€6,648</td>
+                    <td style="text-align: center;">100%</td>
+                </tr>
+            </table>
+
+            <div class="barra-container">
+                <div class="barra-item">
+                    <div class="barra-label">
+                        <span>Marzo (Pico máximo)</span>
+                        <span>170 horas</span>
+                    </div>
+                    <div class="barra">
+                        <div class="barra-fill" style="width: 100%;">170 h</div>
+                    </div>
+                </div>
+                <div class="barra-item">
+                    <div class="barra-label">
+                        <span>Enero</span>
+                        <span>147.5 horas</span>
+                    </div>
+                    <div class="barra">
+                        <div class="barra-fill" style="width: 86.8%;">147.5 h</div>
+                    </div>
+                </div>
+                <div class="barra-item">
+                    <div class="barra-label">
+                        <span>Diciembre</span>
+                        <span>135.5 horas</span>
+                    </div>
+                    <div class="barra">
+                        <div class="barra-fill" style="width: 79.7%;">135.5 h</div>
+                    </div>
+                </div>
+                <div class="barra-item">
+                    <div class="barra-label">
+                        <span>Febrero</span>
+                        <span>101 horas</span>
+                    </div>
+                    <div class="barra">
+                        <div class="barra-fill" style="width: 59.4%;">101 h</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- COMPARATIVA CON OTRO EQUIPO -->
+        <div class="tarjeta">
+            <h2>⚖️ COMPARATIVA: EQUIPO 1 vs EQUIPO 2</h2>
+
+            <table>
+                <tr>
+                    <th>Métrica</th>
+                    <th style="background: #d32f2f;">Equipo 1 (Perete, Tomas, Manuel)</th>
+                    <th style="background: #2d9d5c;">Equipo 2 (Otros)</th>
+                    <th>Diferencia</th>
+                </tr>
+                <tr>
+                    <td><strong>Horas Extras</strong></td>
+                    <td style="color: #d32f2f; font-weight: 600;">554 h</td>
+                    <td style="color: #2d9d5c; font-weight: 600;">138.5 h</td>
+                    <td style="color: #d32f2f; font-weight: 700;">+415.5 h (+300%)</td>
+                </tr>
+                <tr>
+                    <td><strong>% del Total</strong></td>
+                    <td style="color: #d32f2f; font-weight: 600;">80%</td>
+                    <td style="color: #2d9d5c; font-weight: 600;">20%</td>
+                    <td style="color: #d32f2f; font-weight: 700;">+60 puntos</td>
+                </tr>
+                <tr>
+                    <td><strong>Coste Total</strong></td>
+                    <td style="color: #d32f2f; font-weight: 600;">€6,648</td>
+                    <td style="color: #2d9d5c; font-weight: 600;">€1,662</td>
+                    <td style="color: #d32f2f; font-weight: 700;">+€4,986 (+300%)</td>
+                </tr>
+                <tr>
+                    <td><strong>Coste por Persona</strong></td>
+                    <td style="color: #d32f2f; font-weight: 600;">€2,216/persona</td>
+                    <td style="color: #2d9d5c; font-weight: 600;">~€83/persona (estimado)</td>
+                    <td style="color: #d32f2f; font-weight: 700;">26x más caro</td>
+                </tr>
+                <tr>
+                    <td><strong>Promedio h/mes</strong></td>
+                    <td style="color: #d32f2f; font-weight: 600;">138.5 h/mes</td>
+                    <td style="color: #2d9d5c; font-weight: 600;">34.6 h/mes</td>
+                    <td style="color: #d32f2f; font-weight: 700;">4x más</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- IMPACTO ECONÓMICO -->
+        <div class="impacto">
+            <h2>💰 IMPACTO ECONÓMICO EN LA EMPRESA</h2>
+            <p>Coste de Horas Extras del Equipo 1:</p>
+            <div class="impacto-valor">€6,648</div>
+            <p>En solo 4 meses (Enero, Febrero, Marzo, Diciembre)</p>
+            <p style="font-size: 1.3em; margin-top: 20px;">
+                <strong>Proyectando a 12 meses: ~€20,000</strong>
+            </p>
+            <p>Si este ritmo continúa durante todo el año</p>
+        </div>
+
+        <!-- ANÁLISIS DE EFICIENCIA -->
+        <div class="alerta">
+            <h3>🚨 ANÁLISIS DE EFICIENCIA</h3>
+            <p>
+                <strong>El equipo 1 es 4 VECES MENOS EFICIENTE que el equipo 2</strong>
+            </p>
+            <p>
+                • Equipo 2 realiza el trabajo con 20% de las horas extras<br>
+                • Equipo 1 necesita 80% de las horas extras para realizar sus tareas<br>
+                • Diferencia: €4,986 en 4 meses = €1,246/mes de coste extra
+            </p>
+            <p style="margin-top: 20px; font-size: 1.05em;">
+                <strong>CONCLUSIÓN:</strong> El equipo 1 está generando un coste 300% superior en horas extras respecto al equipo 2, indicando ineficiencia operativa.
+            </p>
+        </div>
+
+        <!-- RECOMENDACIONES -->
+        <div class="recomendaciones">
+            <h2>💡 RECOMENDACIONES PARA REDUCIR COSTES</h2>
+            <ul>
+                <li><strong>Revisar procesos:</strong> Analizar qué tareas requieren tantas horas extras</li>
+                <li><strong>Redistribuir trabajo:</strong> El equipo 2 demuestra que es posible con menos horas</li>
+                <li><strong>Formación:</strong> Mejorar eficiencia mediante entrenamiento</li>
+                <li><strong>Herramientas:</strong> Evaluar si necesitan mejores herramientas/software</li>
+                <li><strong>Límite de horas:</strong> Establecer máximo de horas extras permitidas por mes</li>
+                <li><strong>Objetivo:</strong> Reducir a 100-120 horas/mes (como el equipo 2) = Ahorro de €4,000+ al mes</li>
+            </ul>
+        </div>
+
+        <!-- PROYECCIÓN -->
+        <div class="tarjeta">
+            <h2>📈 PROYECCIÓN DE AHORRO</h2>
+            <table>
+                <tr>
+                    <th>Escenario</th>
+                    <th>Horas/Mes</th>
+                    <th>Coste Anual</th>
+                    <th>Ahorro vs Actual</th>
+                </tr>
+                <tr>
+                    <td><strong>Situación Actual</strong></td>
+                    <td style="text-align: center;">138.5 h</td>
+                    <td style="color: #d32f2f; font-weight: 600;">€19,900</td>
+                    <td>—</td>
+                </tr>
+                <tr>
+                    <td><strong>Si se redujera a 100 h/mes</strong></td>
+                    <td style="text-align: center;">100 h</td>
+                    <td style="color: #2d9d5c; font-weight: 600;">€14,400</td>
+                    <td style="color: #2d9d5c; font-weight: 700;">-€5,500/año</td>
+                </tr>
+                <tr>
+                    <td><strong>Si se igualara a Equipo 2 (34.6h/mes)</strong></td>
+                    <td style="text-align: center;">34.6 h</td>
+                    <td style="color: #2d9d5c; font-weight: 600;">€4,973</td>
+                    <td style="color: #2d9d5c; font-weight: 700;">-€14,927/año</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            <p><strong>AFC Renovables - Análisis de Eficiencia de Horas Extras</strong></p>
+            <p style="margin-top: 15px; color: #999;">Documento preparado para concienciar sobre el impacto económico de la ineficiencia operativa</p>
+            <button class="btn-print" onclick="window.print()">🖨️ Imprimir / Exportar a PDF</button>
+        </div>
+    </div>
+</body>
+</html>
