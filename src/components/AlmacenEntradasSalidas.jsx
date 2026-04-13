@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
-import CLIMEN_PRODUCTOS from '../data/CLIMEN_PRODUCTOS.json'
-import ELECTROSTOCK_PRESUPUESTO from '../data/ELECTROSTOCK_PRESUPUESTO_FINAL.json'
 
 const supabase = createClient(
   "https://xhzzfpsszsdqoiavqgis.supabase.co",
@@ -42,40 +40,42 @@ export default function AlmacenEntradasSalidas() {
     cargarMovimientos()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const cargarProductos = () => {
+  const buscarArticulos = async (query = '') => {
     try {
       setCargandoProductos(true)
       setErrorProductos(null)
 
-      // Convertir CLIMEN productos
-      const climenProducts = CLIMEN_PRODUCTOS.map((p, idx) => ({
-        id: `climen_${idx}`,
-        codigo: p.ref || `CLIMEN_${idx}`,
-        descripcion: p.desc || '',
-        precio: p.precio || 0,
-        proveedor: 'CLIMEN'
-      }))
+      let q = supabase
+        .from('artículos')
+        .select('id, descripcion, codigo, precio')
+        .limit(100)
 
-      // Convertir ELECTROSTOCK productos
-      const electroProducts = ELECTROSTOCK_PRESUPUESTO.map((p, idx) => ({
-        id: `electro_${idx}`,
-        codigo: p.ref || `ELECTRO_${idx}`,
-        descripcion: p.desc || '',
-        precio: p.precio || 0,
-        proveedor: 'ELECTROSTOCK'
-      }))
+      // Si hay búsqueda, filtrar por descripción o código
+      if (query.trim()) {
+        q = q.or(`descripcion.ilike.%${query}%,codigo.ilike.%${query}%`)
+      }
 
-      // Combinar todos los productos
-      const allProducts = [...climenProducts, ...electroProducts]
+      const { data, error } = await q
 
-      console.log(`✅ Productos cargados: ${allProducts.length} (CLIMEN: ${climenProducts.length}, ELECTROSTOCK: ${electroProducts.length})`)
-      setProductos(allProducts)
-      setCargandoProductos(false)
+      if (error) {
+        console.error('Error Supabase:', error)
+        setErrorProductos(`Error: ${error.message}`)
+        setProductos([])
+      } else if (data) {
+        console.log(`✅ Artículos encontrados: ${data.length}`)
+        setProductos(data)
+      }
     } catch (err) {
-      console.error('Error cargando productos:', err)
+      console.error('Error buscando artículos:', err)
       setErrorProductos(err.message)
+      setProductos([])
+    } finally {
       setCargandoProductos(false)
     }
+  }
+
+  const cargarProductos = () => {
+    buscarArticulos('')
   }
 
   const cargarMovimientos = async () => {
@@ -195,7 +195,7 @@ export default function AlmacenEntradasSalidas() {
         {/* PRODUCTO */}
         <div style={{ marginBottom: 16, position: 'relative' }}>
           <label style={{ fontSize: '0.75rem', color: C.muted, textTransform: 'uppercase', display: 'block', marginBottom: 6, fontFamily: 'monospace' }}>
-            Producto * {cargandoProductos ? '⏳ Cargando...' : `(${productosFiltrados.length}/${productos.length})`}
+            Artículo * {cargandoProductos ? '⏳ Buscando...' : `(${productos.length} resultados)`}
           </label>
 
           {/* Mostrar error si hay */}
@@ -216,11 +216,18 @@ export default function AlmacenEntradasSalidas() {
           {/* Input de búsqueda */}
           <input
             type="text"
-            placeholder="Buscar por código o descripción... o haz clic en el botón ▼"
+            placeholder="Buscar artículos por código o descripción..."
             value={busquedaProducto}
             onChange={e => {
-              setBusquedaProducto(e.target.value)
+              const valor = e.target.value
+              setBusquedaProducto(valor)
               setAbiertaLista(true)
+              // Buscar en tiempo real
+              if (valor.length > 1) {
+                buscarArticulos(valor)
+              } else if (valor.length === 0) {
+                buscarArticulos('')
+              }
             }}
             onFocus={() => setAbiertaLista(true)}
             disabled={cargandoProductos}
@@ -262,7 +269,7 @@ export default function AlmacenEntradasSalidas() {
           </button>
 
           {/* Lista desplegable */}
-          {abiertaLista && !cargandoProductos && (
+          {abiertaLista && (
             <div style={{
               position: 'absolute',
               top: '100%',
@@ -272,21 +279,21 @@ export default function AlmacenEntradasSalidas() {
               border: `2px solid ${C.green2}`,
               borderTop: 'none',
               borderRadius: '0 0 6px 6px',
-              maxHeight: '200px',
+              maxHeight: '250px',
               overflowY: 'auto',
               zIndex: 1000,
               marginTop: '-8px'
             }}>
-              {productos.length === 0 ? (
-                <div style={{ padding: '12px', color: C.red, textAlign: 'center', fontSize: '0.8rem' }}>
-                  ❌ No hay productos disponibles en la base de datos
+              {cargandoProductos ? (
+                <div style={{ padding: '12px', color: C.muted, textAlign: 'center', fontSize: '0.8rem' }}>
+                  ⏳ Buscando artículos...
                 </div>
-              ) : productosFiltrados.length === 0 ? (
+              ) : productos.length === 0 ? (
                 <div style={{ padding: '12px', color: C.red, textAlign: 'center', fontSize: '0.8rem' }}>
-                  ❌ No se encontraron productos con "{busquedaProducto}"
+                  ❌ {busquedaProducto ? `No se encontraron artículos con "${busquedaProducto}"` : 'Empieza a escribir para buscar'}
                 </div>
               ) : (
-                productosFiltrados.map(p => (
+                productos.map(p => (
                   <div
                     key={p.id}
                     onClick={() => {
@@ -313,9 +320,9 @@ export default function AlmacenEntradasSalidas() {
                       e.currentTarget.style.color = producto === String(p.id) ? C.green2 : C.text
                     }}
                   >
-                    <div style={{ fontWeight: 'bold' }}>{p.codigo}</div>
-                    <div style={{ fontSize: '0.7rem', opacity: 0.8 }}>{p.descripcion}</div>
-                    <div style={{ fontSize: '0.7rem', color: C.yellow, marginTop: '2px' }}>💰 {fmt(p.precio)}</div>
+                    <div style={{ fontWeight: 'bold', fontSize: '0.75rem' }}>{p.codigo || p.id}</div>
+                    <div style={{ fontSize: '0.7rem', opacity: 0.8, maxHeight: '2.8em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'normal' }}>{p.descripcion}</div>
+                    <div style={{ fontSize: '0.7rem', color: C.yellow, marginTop: '2px' }}>💰 {fmt(p.precio || 0)}</div>
                   </div>
                 ))
               )}
