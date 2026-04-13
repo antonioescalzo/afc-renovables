@@ -53,7 +53,7 @@ export default function AlmacenEntradasSalidas() {
       // Si hay búsqueda, buscar por cualquier columna similar a descripción
       if (query.trim()) {
         // Intentar buscar en múltiples posibles nombres de columnas
-        q = q.or(`description.ilike.%${query}%,name.ilike.%${query}%,articulo.ilike.%${query}%,codigo.ilike.%${query}%,code.ilike.%${query}%`)
+        q = q.or(`nombre.ilike.%${query}%,description.ilike.%${query}%,name.ilike.%${query}%,codigo.ilike.%${query}%,code.ilike.%${query}%`)
       }
 
       const { data, error } = await q
@@ -333,7 +333,7 @@ export default function AlmacenEntradasSalidas() {
                     {p.codigo || p.code || p.ref || p.id}
                   </div>
                     <div style={{ fontSize: '0.7rem', opacity: 0.8, maxHeight: '2.8em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'normal' }}>
-                      {p.descripcion || p.description || p.name || p.articulo || 'Sin descripción'}
+                      {p.nombre || p.descripcion || p.description || p.name || p.articulo || 'Sin descripción'}
                     </div>
                     <div style={{ fontSize: '0.7rem', color: C.yellow, marginTop: '2px' }}>
                       💰 {fmt((p.precio || p.price || 0))}
