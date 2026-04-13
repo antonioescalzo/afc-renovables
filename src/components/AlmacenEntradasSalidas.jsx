@@ -32,6 +32,8 @@ export default function AlmacenEntradasSalidas() {
   const [loading, setLoading] = useState(false)
   const [busquedaProducto, setBusquedaProducto] = useState('')
   const [abiertaLista, setAbiertaLista] = useState(false)
+  const [cargandoProductos, setCargandoProductos] = useState(true)
+  const [errorProductos, setErrorProductos] = useState(null)
 
   useEffect(() => {
     cargarProductos()
@@ -40,14 +42,28 @@ export default function AlmacenEntradasSalidas() {
 
   const cargarProductos = async () => {
     try {
-      const { data } = await supabase
+      setCargandoProductos(true)
+      setErrorProductos(null)
+
+      const { data, error } = await supabase
         .from('productos')
         .select('id, codigo, descripcion, precio')
         .order('descripcion')
 
-      if (data) setProductos(data)
+      if (error) {
+        console.error('Error Supabase:', error)
+        setErrorProductos(`Error: ${error.message}`)
+      } else if (data) {
+        console.log(`✅ Productos cargados: ${data.length}`)
+        setProductos(data)
+      } else {
+        setErrorProductos('No se recibieron datos')
+      }
     } catch (err) {
       console.error('Error cargando productos:', err)
+      setErrorProductos(err.message)
+    } finally {
+      setCargandoProductos(false)
     }
   }
 
@@ -168,8 +184,23 @@ export default function AlmacenEntradasSalidas() {
         {/* PRODUCTO */}
         <div style={{ marginBottom: 16, position: 'relative' }}>
           <label style={{ fontSize: '0.75rem', color: C.muted, textTransform: 'uppercase', display: 'block', marginBottom: 6, fontFamily: 'monospace' }}>
-            Producto * ({productosFiltrados.length}/{productos.length})
+            Producto * {cargandoProductos ? '⏳ Cargando...' : `(${productosFiltrados.length}/${productos.length})`}
           </label>
+
+          {/* Mostrar error si hay */}
+          {errorProductos && (
+            <div style={{
+              background: C.red.replace('#', '#') + '20',
+              border: `1px solid ${C.red}`,
+              color: C.red,
+              padding: '8px',
+              borderRadius: 4,
+              marginBottom: 8,
+              fontSize: '0.75rem'
+            }}>
+              ⚠️ {errorProductos}
+            </div>
+          )}
 
           {/* Input de búsqueda */}
           <input
@@ -181,6 +212,7 @@ export default function AlmacenEntradasSalidas() {
               setAbiertaLista(true)
             }}
             onFocus={() => setAbiertaLista(true)}
+            disabled={cargandoProductos}
             style={{
               width: '100%',
               padding: '10px',
@@ -192,13 +224,16 @@ export default function AlmacenEntradasSalidas() {
               fontFamily: 'monospace',
               marginBottom: 8,
               boxSizing: 'border-box',
-              paddingRight: '30px'
+              paddingRight: '30px',
+              opacity: cargandoProductos ? 0.5 : 1,
+              cursor: cargandoProductos ? 'not-allowed' : 'text'
             }}
           />
 
           {/* Botón para abrir/cerrar */}
           <button
             onClick={() => setAbiertaLista(!abiertaLista)}
+            disabled={cargandoProductos}
             style={{
               position: 'absolute',
               right: '8px',
@@ -206,16 +241,17 @@ export default function AlmacenEntradasSalidas() {
               background: 'none',
               border: 'none',
               color: C.green2,
-              cursor: 'pointer',
+              cursor: cargandoProductos ? 'not-allowed' : 'pointer',
               fontSize: '0.9rem',
-              padding: '5px'
+              padding: '5px',
+              opacity: cargandoProductos ? 0.5 : 1
             }}
           >
-            {abiertaLista ? '▲' : '▼'}
+            {cargandoProductos ? '⏳' : abiertaLista ? '▲' : '▼'}
           </button>
 
           {/* Lista desplegable */}
-          {abiertaLista && (
+          {abiertaLista && !cargandoProductos && (
             <div style={{
               position: 'absolute',
               top: '100%',
@@ -230,9 +266,13 @@ export default function AlmacenEntradasSalidas() {
               zIndex: 1000,
               marginTop: '-8px'
             }}>
-              {productosFiltrados.length === 0 ? (
+              {productos.length === 0 ? (
                 <div style={{ padding: '12px', color: C.red, textAlign: 'center', fontSize: '0.8rem' }}>
-                  ❌ No se encontraron productos
+                  ❌ No hay productos disponibles en la base de datos
+                </div>
+              ) : productosFiltrados.length === 0 ? (
+                <div style={{ padding: '12px', color: C.red, textAlign: 'center', fontSize: '0.8rem' }}>
+                  ❌ No se encontraron productos con "{busquedaProducto}"
                 </div>
               ) : (
                 productosFiltrados.map(p => (
