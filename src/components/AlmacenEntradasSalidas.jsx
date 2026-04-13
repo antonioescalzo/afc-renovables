@@ -46,7 +46,7 @@ export default function AlmacenEntradasSalidas() {
       setErrorProductos(null)
 
       let q = supabase
-        .from('artículos')
+        .from('articulos')
         .select('*')
         .limit(100)
 
