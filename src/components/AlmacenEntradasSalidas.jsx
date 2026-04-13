@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
+import CLIMEN_PRODUCTOS from '../data/CLIMEN_PRODUCTOS.json'
+import ELECTROSTOCK_PRESUPUESTO from '../data/ELECTROSTOCK_PRESUPUESTO_FINAL.json'
 
 const supabase = createClient(
   "https://xhzzfpsszsdqoiavqgis.supabase.co",
@@ -38,31 +40,40 @@ export default function AlmacenEntradasSalidas() {
   useEffect(() => {
     cargarProductos()
     cargarMovimientos()
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const cargarProductos = async () => {
+  const cargarProductos = () => {
     try {
       setCargandoProductos(true)
       setErrorProductos(null)
 
-      const { data, error } = await supabase
-        .from('productos')
-        .select('id, codigo, descripcion, precio')
-        .order('descripcion')
+      // Convertir CLIMEN productos
+      const climenProducts = CLIMEN_PRODUCTOS.map((p, idx) => ({
+        id: `climen_${idx}`,
+        codigo: p.ref || `CLIMEN_${idx}`,
+        descripcion: p.desc || '',
+        precio: p.precio || 0,
+        proveedor: 'CLIMEN'
+      }))
 
-      if (error) {
-        console.error('Error Supabase:', error)
-        setErrorProductos(`Error: ${error.message}`)
-      } else if (data) {
-        console.log(`✅ Productos cargados: ${data.length}`)
-        setProductos(data)
-      } else {
-        setErrorProductos('No se recibieron datos')
-      }
+      // Convertir ELECTROSTOCK productos
+      const electroProducts = ELECTROSTOCK_PRESUPUESTO.map((p, idx) => ({
+        id: `electro_${idx}`,
+        codigo: p.ref || `ELECTRO_${idx}`,
+        descripcion: p.desc || '',
+        precio: p.precio || 0,
+        proveedor: 'ELECTROSTOCK'
+      }))
+
+      // Combinar todos los productos
+      const allProducts = [...climenProducts, ...electroProducts]
+
+      console.log(`✅ Productos cargados: ${allProducts.length} (CLIMEN: ${climenProducts.length}, ELECTROSTOCK: ${electroProducts.length})`)
+      setProductos(allProducts)
+      setCargandoProductos(false)
     } catch (err) {
       console.error('Error cargando productos:', err)
       setErrorProductos(err.message)
-    } finally {
       setCargandoProductos(false)
     }
   }
