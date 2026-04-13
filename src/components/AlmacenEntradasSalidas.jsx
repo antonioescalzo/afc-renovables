@@ -31,6 +31,7 @@ export default function AlmacenEntradasSalidas() {
   const [movimientos, setMovimientos] = useState([])
   const [loading, setLoading] = useState(false)
   const [busquedaProducto, setBusquedaProducto] = useState('')
+  const [abiertaLista, setAbiertaLista] = useState(false)
 
   useEffect(() => {
     cargarProductos()
@@ -165,15 +166,21 @@ export default function AlmacenEntradasSalidas() {
         <h4 style={{ color: C.accent, marginTop: 0, marginBottom: 16 }}>Registrar {tipo === 'entrada' ? 'ENTRADA' : 'SALIDA'}</h4>
 
         {/* PRODUCTO */}
-        <div style={{ marginBottom: 16 }}>
+        <div style={{ marginBottom: 16, position: 'relative' }}>
           <label style={{ fontSize: '0.75rem', color: C.muted, textTransform: 'uppercase', display: 'block', marginBottom: 6, fontFamily: 'monospace' }}>
             Producto * ({productosFiltrados.length}/{productos.length})
           </label>
+
+          {/* Input de búsqueda */}
           <input
             type="text"
-            placeholder="Buscar por código o descripción..."
+            placeholder="Buscar por código o descripción... o haz clic en el botón ▼"
             value={busquedaProducto}
-            onChange={e => setBusquedaProducto(e.target.value)}
+            onChange={e => {
+              setBusquedaProducto(e.target.value)
+              setAbiertaLista(true)
+            }}
+            onFocus={() => setAbiertaLista(true)}
             style={{
               width: '100%',
               padding: '10px',
@@ -184,42 +191,90 @@ export default function AlmacenEntradasSalidas() {
               fontSize: '0.85rem',
               fontFamily: 'monospace',
               marginBottom: 8,
-              boxSizing: 'border-box'
+              boxSizing: 'border-box',
+              paddingRight: '30px'
             }}
           />
-          <select
-            value={producto}
-            onChange={e => {
-              setProducto(e.target.value)
-              setBusquedaProducto('')
-            }}
+
+          {/* Botón para abrir/cerrar */}
+          <button
+            onClick={() => setAbiertaLista(!abiertaLista)}
             style={{
-              width: '100%',
-              padding: '10px',
-              background: C.bg2,
-              border: `1px solid ${C.border}`,
-              borderRadius: 6,
-              color: C.text,
-              fontSize: '0.85rem',
-              fontFamily: 'monospace',
-              maxHeight: '150px'
+              position: 'absolute',
+              right: '8px',
+              top: '26px',
+              background: 'none',
+              border: 'none',
+              color: C.green2,
+              cursor: 'pointer',
+              fontSize: '0.9rem',
+              padding: '5px'
             }}
           >
-            <option value="">-- Selecciona un producto --</option>
-            {productosFiltrados.map(p => (
-              <option key={p.id} value={p.id}>
-                {p.codigo} - {p.descripcion}
-              </option>
-            ))}
-          </select>
-          {productosFiltrados.length === 0 && busquedaProducto && (
-            <div style={{ fontSize: '0.7rem', color: C.red, marginTop: 4 }}>
-              ❌ No se encontraron productos
+            {abiertaLista ? '▲' : '▼'}
+          </button>
+
+          {/* Lista desplegable */}
+          {abiertaLista && (
+            <div style={{
+              position: 'absolute',
+              top: '100%',
+              left: 0,
+              right: 0,
+              background: C.bg2,
+              border: `2px solid ${C.green2}`,
+              borderTop: 'none',
+              borderRadius: '0 0 6px 6px',
+              maxHeight: '200px',
+              overflowY: 'auto',
+              zIndex: 1000,
+              marginTop: '-8px'
+            }}>
+              {productosFiltrados.length === 0 ? (
+                <div style={{ padding: '12px', color: C.red, textAlign: 'center', fontSize: '0.8rem' }}>
+                  ❌ No se encontraron productos
+                </div>
+              ) : (
+                productosFiltrados.map(p => (
+                  <div
+                    key={p.id}
+                    onClick={() => {
+                      setProducto(String(p.id))
+                      setAbiertaLista(false)
+                      setBusquedaProducto('')
+                    }}
+                    style={{
+                      padding: '10px 12px',
+                      borderBottom: `1px solid ${C.border}`,
+                      cursor: 'pointer',
+                      background: producto === String(p.id) ? C.green3 : 'transparent',
+                      color: producto === String(p.id) ? C.green2 : C.text,
+                      fontSize: '0.8rem',
+                      fontFamily: 'monospace',
+                      transition: 'all 0.1s'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = C.green3
+                      e.currentTarget.style.color = C.green2
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = producto === String(p.id) ? C.green3 : 'transparent'
+                      e.currentTarget.style.color = producto === String(p.id) ? C.green2 : C.text
+                    }}
+                  >
+                    <div style={{ fontWeight: 'bold' }}>{p.codigo}</div>
+                    <div style={{ fontSize: '0.7rem', opacity: 0.8 }}>{p.descripcion}</div>
+                    <div style={{ fontSize: '0.7rem', color: C.yellow, marginTop: '2px' }}>💰 {fmt(p.precio)}</div>
+                  </div>
+                ))
+              )}
             </div>
           )}
-          {prodSeleccionado && (
-            <div style={{ fontSize: '0.7rem', color: C.green2, marginTop: 4 }}>
-              ✅ {prodSeleccionado.codigo} - {prodSeleccionado.descripcion} | 💰 {fmt(prodSeleccionado.precio)}
+
+          {/* Producto seleccionado */}
+          {prodSeleccionado && !abiertaLista && (
+            <div style={{ fontSize: '0.8rem', color: C.green2, marginTop: 4, background: C.green3, padding: '8px', borderRadius: 4 }}>
+              ✅ {prodSeleccionado.codigo} | {prodSeleccionado.descripcion} | 💰 {fmt(prodSeleccionado.precio)}
             </div>
           )}
         </div>
