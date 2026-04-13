@@ -47,22 +47,31 @@ export default function AlmacenEntradasSalidas() {
 
       let q = supabase
         .from('artículos')
-        .select('id, descripcion, codigo, precio')
+        .select('*')
         .limit(100)
 
-      // Si hay búsqueda, filtrar por descripción o código
+      // Si hay búsqueda, buscar por cualquier columna similar a descripción
       if (query.trim()) {
-        q = q.or(`descripcion.ilike.%${query}%,codigo.ilike.%${query}%`)
+        // Intentar buscar en múltiples posibles nombres de columnas
+        q = q.or(`description.ilike.%${query}%,name.ilike.%${query}%,articulo.ilike.%${query}%,codigo.ilike.%${query}%,code.ilike.%${query}%`)
       }
 
       const { data, error } = await q
 
       if (error) {
-        console.error('Error Supabase:', error)
+        console.error('Error Supabase:', error.message)
         setErrorProductos(`Error: ${error.message}`)
         setProductos([])
+        // Log las columnas si la consulta funciona
+        if (data && data.length > 0) {
+          console.log('Columnas disponibles:', Object.keys(data[0]))
+        }
       } else if (data) {
         console.log(`✅ Artículos encontrados: ${data.length}`)
+        if (data.length > 0) {
+          console.log('Columnas:', Object.keys(data[0]))
+          console.log('Primer registro:', data[0])
+        }
         setProductos(data)
       }
     } catch (err) {
@@ -320,9 +329,15 @@ export default function AlmacenEntradasSalidas() {
                       e.currentTarget.style.color = producto === String(p.id) ? C.green2 : C.text
                     }}
                   >
-                    <div style={{ fontWeight: 'bold', fontSize: '0.75rem' }}>{p.codigo || p.id}</div>
-                    <div style={{ fontSize: '0.7rem', opacity: 0.8, maxHeight: '2.8em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'normal' }}>{p.descripcion}</div>
-                    <div style={{ fontSize: '0.7rem', color: C.yellow, marginTop: '2px' }}>💰 {fmt(p.precio || 0)}</div>
+                    <div style={{ fontWeight: 'bold', fontSize: '0.75rem' }}>
+                    {p.codigo || p.code || p.ref || p.id}
+                  </div>
+                    <div style={{ fontSize: '0.7rem', opacity: 0.8, maxHeight: '2.8em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'normal' }}>
+                      {p.descripcion || p.description || p.name || p.articulo || 'Sin descripción'}
+                    </div>
+                    <div style={{ fontSize: '0.7rem', color: C.yellow, marginTop: '2px' }}>
+                      💰 {fmt((p.precio || p.price || 0))}
+                    </div>
                   </div>
                 ))
               )}
