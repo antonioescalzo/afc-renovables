@@ -30,6 +30,7 @@ export default function AlmacenEntradasSalidas() {
   const [productos, setProductos] = useState([])
   const [movimientos, setMovimientos] = useState([])
   const [loading, setLoading] = useState(false)
+  const [busquedaProducto, setBusquedaProducto] = useState('')
 
   useEffect(() => {
     cargarProductos()
@@ -42,7 +43,6 @@ export default function AlmacenEntradasSalidas() {
         .from('productos')
         .select('id, codigo, descripcion, precio')
         .order('descripcion')
-        .limit(500)
 
       if (data) setProductos(data)
     } catch (err) {
@@ -111,6 +111,13 @@ export default function AlmacenEntradasSalidas() {
 
   const prodSeleccionado = productos.find(p => p.id === parseInt(producto))
 
+  // Filtrar productos según búsqueda
+  const productosFiltrados = productos.filter(p =>
+    busquedaProducto === '' ||
+    p.codigo?.toLowerCase().includes(busquedaProducto.toLowerCase()) ||
+    p.descripcion?.toLowerCase().includes(busquedaProducto.toLowerCase())
+  )
+
   return (
     <div style={{ padding: '16px' }}>
       <h3 style={{ color: C.green2, marginBottom: 20 }}>📦 Entradas y Salidas de Almacén</h3>
@@ -160,11 +167,13 @@ export default function AlmacenEntradasSalidas() {
         {/* PRODUCTO */}
         <div style={{ marginBottom: 16 }}>
           <label style={{ fontSize: '0.75rem', color: C.muted, textTransform: 'uppercase', display: 'block', marginBottom: 6, fontFamily: 'monospace' }}>
-            Producto *
+            Producto * ({productosFiltrados.length}/{productos.length})
           </label>
-          <select
-            value={producto}
-            onChange={e => setProducto(e.target.value)}
+          <input
+            type="text"
+            placeholder="Buscar por código o descripción..."
+            value={busquedaProducto}
+            onChange={e => setBusquedaProducto(e.target.value)}
             style={{
               width: '100%',
               padding: '10px',
@@ -173,19 +182,44 @@ export default function AlmacenEntradasSalidas() {
               borderRadius: 6,
               color: C.text,
               fontSize: '0.85rem',
-              fontFamily: 'monospace'
+              fontFamily: 'monospace',
+              marginBottom: 8,
+              boxSizing: 'border-box'
+            }}
+          />
+          <select
+            value={producto}
+            onChange={e => {
+              setProducto(e.target.value)
+              setBusquedaProducto('')
+            }}
+            style={{
+              width: '100%',
+              padding: '10px',
+              background: C.bg2,
+              border: `1px solid ${C.border}`,
+              borderRadius: 6,
+              color: C.text,
+              fontSize: '0.85rem',
+              fontFamily: 'monospace',
+              maxHeight: '150px'
             }}
           >
             <option value="">-- Selecciona un producto --</option>
-            {productos.map(p => (
+            {productosFiltrados.map(p => (
               <option key={p.id} value={p.id}>
                 {p.codigo} - {p.descripcion}
               </option>
             ))}
           </select>
+          {productosFiltrados.length === 0 && busquedaProducto && (
+            <div style={{ fontSize: '0.7rem', color: C.red, marginTop: 4 }}>
+              ❌ No se encontraron productos
+            </div>
+          )}
           {prodSeleccionado && (
             <div style={{ fontSize: '0.7rem', color: C.green2, marginTop: 4 }}>
-              💰 Precio: {fmt(prodSeleccionado.precio)}
+              ✅ {prodSeleccionado.codigo} - {prodSeleccionado.descripcion} | 💰 {fmt(prodSeleccionado.precio)}
             </div>
           )}
         </div>
