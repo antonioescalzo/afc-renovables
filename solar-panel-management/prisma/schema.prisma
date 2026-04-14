@@ -1,0 +1,177 @@
+// This is the database schema for Solar Panel Management System
+// It defines all tables and relationships for the app
+
+generator client {
+  provider = "prisma-client"
+  output   = "./.prisma/client"
+}
+
+datasource db {
+  provider = "sqlite"  // SQLite for local dev, can switch to PostgreSQL for production
+}
+
+// EQUIPOS DE TRABAJO - Teams that install solar panels
+model Team {
+  id              String    @id @default(cuid())
+  name            String    @unique  // e.g., "Equipo A", "Equipo B"
+  description     String?
+  hourlyRate      Float     @default(45.0)  // € per hour
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  projectAssignments  ProjectTeamAssignment[]
+  workHours          WorkHours[]
+}
+
+// CLIENTES - Customer information
+model Client {
+  id              String    @id @default(cuid())
+  name            String
+  email           String?
+  phone           String?
+  address         String?
+  city            String?
+  province        String?
+  postalCode      String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  projects        Project[]
+}
+
+// PROYECTOS - Installation projects
+model Project {
+  id              String    @id @default(cuid())
+  name            String
+  description     String?
+  clientId        String
+  status          String    @default("planificado")  // planificado, en_curso, completado, pausado
+  location        String?   // Installation address
+
+  // Budget and costs
+  estimatedHours  Float     // Hours we estimate to complete
+  actualHours     Float     @default(0)  // Real hours used
+  estimatedCost   Float     // Budget cost
+  actualCost      Float     @default(0)  // Real cost
+
+  // Schedule
+  startDate       DateTime?
+  endDate         DateTime?
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  client          Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  teamAssignments ProjectTeamAssignment[]
+  materialsUsed   MaterialsInProject[]
+  workHours       WorkHours[]
+}
+
+// MATERIALES - Products/Materials in inventory
+model Material {
+  id              String    @id @default(cuid())
+  name            String
+  code            String    @unique  // e.g., "PANEL-450W", "CABLE-4MM"
+  category        String    // e.g., "paneles_solares", "cables", "soportes"
+  description     String?
+  unitPrice       Float     // € per unit
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  inventoryItems  InventoryItem[]
+  projectUsage    MaterialsInProject[]
+  movements       InventoryMovement[]  @relation("MaterialMovements")
+}
+
+// INVENTARIO - Current stock levels
+model InventoryItem {
+  id              String    @id @default(cuid())
+  materialId      String
+  quantity        Int       @default(0)  // Units in stock
+  location        String?   // Physical location in warehouse (e.g., "A-12", "B-5")
+  minThreshold    Int       @default(5)  // Minimum quantity alert
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  material        Material  @relation(fields: [materialId], references: [id], onDelete: Cascade)
+
+  @@unique([materialId])
+}
+
+// MOVIMIENTOS DE ALMACEN - Inventory history (in/out)
+model InventoryMovement {
+  id              String    @id @default(cuid())
+  materialId      String
+  type            String    // "entrada" (in) or "salida" (out)
+  quantity        Int
+  reason          String?   // e.g., "Compra proveedor", "Proyecto 123", "Devolución"
+  reference       String?   // e.g., Project ID, Purchase order
+  date            DateTime  @default(now())
+  createdBy       String?   // User who created the movement
+  createdAt       DateTime  @default(now())
+
+  // Relations
+  material        Material  @relation("MaterialMovements", fields: [materialId], references: [id], onDelete: Cascade)
+
+  @@index([materialId])
+  @@index([date])
+}
+
+// ASIGNACIÓN DE EQUIPOS A PROYECTOS
+model ProjectTeamAssignment {
+  id              String    @id @default(cuid())
+  projectId       String
+  teamId          String
+  role            String?   // e.g., "principal", "soporte"
+  assignedDate    DateTime  @default(now())
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  project         Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  team            Team      @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, teamId])
+}
+
+// REGISTRO DE HORAS - Time tracking
+model WorkHours {
+  id              String    @id @default(cuid())
+  teamId          String
+  projectId       String
+  hoursWorked     Float     // e.g., 8.5 hours
+  date            DateTime  // Date of work
+  description     String?   // What was done
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  team            Team      @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  project         Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([teamId])
+  @@index([date])
+}
+
+// MATERIALES USADOS EN PROYECTO
+model MaterialsInProject {
+  id              String    @id @default(cuid())
+  projectId       String
+  materialId      String
+  quantityUsed    Int       // Units consumed
+  date            DateTime  @default(now())
+  createdAt       DateTime  @default(now())
+
+  // Relations
+  project         Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  material        Material  @relation(fields: [materialId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([materialId])
+}
