@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ☀️ Solar Panel Management System
 
-## Getting Started
+Un sistema integral de gestión empresarial para empresas de **instalación de paneles solares fotovoltaics**. 
 
-First, run the development server:
+## 🎯 Características
+
+### 📊 Dashboard Ejecutivo
+- KPIs en tiempo real (proyectos, clientes, equipos, ingresos)
+- Gráficos interactivos con Recharts
+- Alertas de inventario bajo
+- Inicialización automática con datos ficticios
+
+### 🏗️ Gestión Completa
+- **Proyectos**: Seguimiento estado, horas, costos, eficiencia
+- **Almacén**: 6 categorías de materiales, alertas de stock
+- **Clientes**: CRM con inversión total
+- **Equipos**: 4 equipos con registro de horas e ingresos
+
+## 🚀 Inicio Rápido
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abre [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📊 Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Next.js 16 + TypeScript
+- Prisma ORM + SQLite
+- Tailwind CSS + Recharts
+- 9 modelos de BD relacionados
 
-## Learn More
+## 📋 Rutas
 
-To learn more about Next.js, take a look at the following resources:
+| Ruta | Descripción |
+|------|------------|
+| `/` | Dashboard |
+| `/proyectos` | Gestión de proyectos |
+| `/almacen` | Inventario |
+| `/clientes` | CRM |
+| `/equipos` | Control de equipos |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📊 Demo Data
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- 4 Equipos
+- 5 Clientes  
+- 7 Proyectos
+- 6 Materiales
+- Presupuestos €8,500 - €60,000
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Diseñado para empresas de energía solar profesionales**
