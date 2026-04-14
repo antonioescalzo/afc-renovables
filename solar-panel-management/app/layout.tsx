@@ -1,6 +1,8 @@
-import type { Metadata } from "next";
+"use client";
+
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Navigation from "@/components/Navigation";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -12,11 +14,6 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Solar Panel Management System",
-  description: "Sistema de gestión integral para empresas de instalación de paneles solares fotovoltaicos",
-};
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -24,10 +21,17 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="es"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <head>
+        <title>Solar Panel Management System</title>
+        <meta name="description" content="Sistema de gestión integral para empresas de instalación de paneles solares fotovoltaicos" />
+      </head>
+      <body className="min-h-full flex flex-col">
+        <Navigation />
+        {children}
+      </body>
     </html>
   );
 }
